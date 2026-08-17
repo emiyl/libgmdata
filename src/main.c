@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     }
 
     printf("Loaded %zu bytes with %zu chunks\n", dw.file_size, dw.chunks.count);
-    Gen8_Print(dw.gen8);
+    GEN8_Print(dw.gen8);
     // Gen8_Bytedump(&dw);
 
     datawin_free(&dw);

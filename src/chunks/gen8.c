@@ -10,7 +10,7 @@
 #include "../reader.h"
 #include "../utils.h"
 
-static void Gen8_ParseRoomOrder(Reader *reader, Gen8 *g) {
+static void GEN8_ParseRoomOrder(Reader *reader, Gen8 *g) {
     reader_read_u32_le(reader, &g->roomOrderCount);
 
     if (g->roomOrderCount == 0) {
@@ -25,7 +25,7 @@ static void Gen8_ParseRoomOrder(Reader *reader, Gen8 *g) {
     }
 }
 
-Gen8 Gen8_Parse(DataWin *dw) {
+Gen8 GEN8_Parse(DataWin *dw) {
     Chunk chunk = {0};
     Gen8 g = {0};
 
@@ -92,7 +92,7 @@ Gen8 Gen8_Parse(DataWin *dw) {
         g.steamAppID = 0;
         g.debuggerPort = 0;
 
-        Gen8_ParseRoomOrder(&reader, &g);
+        GEN8_ParseRoomOrder(&reader, &g);
         return g;
     }
 
@@ -125,7 +125,7 @@ Gen8 Gen8_Parse(DataWin *dw) {
         g.steamAppID = 0;
         g.debuggerPort = 0;
 
-        Gen8_ParseRoomOrder(&reader, &g);
+        GEN8_ParseRoomOrder(&reader, &g);
         return g;
     }
 
@@ -142,7 +142,7 @@ Gen8 Gen8_Parse(DataWin *dw) {
         g.debuggerPort = 0;
     }
 
-    Gen8_ParseRoomOrder(&reader, &g);
+    GEN8_ParseRoomOrder(&reader, &g);
 
     // GMS2+ fields
     if (g.major >= 2) {
@@ -158,7 +158,7 @@ Gen8 Gen8_Parse(DataWin *dw) {
     return g;
 }
 
-void Gen8_Bytedump(DataWin *dw) {
+void GEN8_Bytedump(DataWin *dw) {
     Chunk chunk = {0};
 
     assert(find_chunk(dw, "GEN8", &chunk) == 0);
@@ -188,7 +188,7 @@ void Gen8_Bytedump(DataWin *dw) {
         printf("\n");
 }
 
-void Gen8_Print(Gen8 g) {
+void GEN8_Print(Gen8 g) {
     printf("Gen8 Output:\n");
     printf("  isDebuggerDisabled: %s\n", g.isDebuggerDisabled ? "Yes" : "No");
     printf("  wadVersion: %" PRIu8 "\n", g.wadVersion);

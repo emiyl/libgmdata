@@ -65,11 +65,36 @@ typedef struct {
 } Gen8;
 
 typedef struct {
+    const char* name;
+    const char* value;
+} OptnConstant;
+
+typedef struct {
+    uint64_t info;
+    int32_t scale;
+    uint32_t windowColor;
+    uint32_t colorDepth;
+    uint32_t resolution;
+    uint32_t frequency;
+    uint32_t vertexSync;
+    uint32_t priority;
+    uint32_t backImage;
+    uint32_t frontImage;
+    uint32_t loadImage;
+    uint32_t loadAlpha;
+    uint32_t constantCount;
+    OptnConstant* constants;
+} Optn;
+
+typedef struct {
     uint8_t *file_data;
     size_t file_size;
     StringTable strings;
-    Gen8 gen8;
     ChunkTable chunks;
+
+    Gen8 gen8;
+    Optn optn;
+
     bool initialized;
 } DataWin;
 

@@ -83,7 +83,7 @@ int parse(DataWin *dw) {
     assert(find_chunk(dw, "STRG", &strg) == 0);
     assert(parse_string_table(dw, strg.offset, strg.length) == 0);
 
-    dw->gen8 = Gen8_Parse(dw);
+    dw->gen8 = GEN8_Parse(dw);
 
     return 0;
 }
