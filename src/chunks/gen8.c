@@ -188,46 +188,46 @@ void GEN8_Bytedump(DataWin *dw) {
         printf("\n");
 }
 
-void GEN8_Print(const Gen8 g) {
-    printf("Gen8 Output:\n");
-    printf("  isDebuggerDisabled: %s\n", g.isDebuggerDisabled ? "Yes" : "No");
-    printf("  wadVersion: %" PRIu8 "\n", g.wadVersion);
+void GEN8_Print(const Gen8 *g) {
+    printf("GEN8:\n");
+    printf("  isDebuggerDisabled: %s\n", g->isDebuggerDisabled ? "Yes" : "No");
+    printf("  wadVersion: %" PRIu8 "\n", g->wadVersion);
 
-    printf("  fileName: %s\n", g.fileName);
-    printf("  config: %s\n", g.config);
-    printf("  lastObj: %" PRIu32 "\n", g.lastObj);
-    printf("  lastTile: %" PRIu32 "\n", g.lastTile);
-    printf("  gameID: %" PRIu32 "\n", g.gameID);
+    printf("  fileName: %s\n", g->fileName);
+    printf("  config: %s\n", g->config);
+    printf("  lastObj: %" PRIu32 "\n", g->lastObj);
+    printf("  lastTile: %" PRIu32 "\n", g->lastTile);
+    printf("  gameID: %" PRIu32 "\n", g->gameID);
 
     printf("  directPlayGuid: ");
     repeat(16, i) {
         if (i == 4 || i == 6 || i == 8 || i == 10) printf("-");
-        printf("%02" PRIX8, g.directPlayGuid[i]);
+        printf("%02" PRIX8, g->directPlayGuid[i]);
     }
     printf("\n");
 
-    printf("  name: %s\n", g.name);
-    printf("  major: %" PRIu32 "\n", g.major);
-    printf("  minor: %" PRIu32 "\n", g.minor);
-    printf("  release: %" PRIu32 "\n", g.release);
-    printf("  build: %" PRIu32 "\n", g.build);
+    printf("  name: %s\n", g->name);
+    printf("  major: %" PRIu32 "\n", g->major);
+    printf("  minor: %" PRIu32 "\n", g->minor);
+    printf("  release: %" PRIu32 "\n", g->release);
+    printf("  build: %" PRIu32 "\n", g->build);
 
-    printf("  defaultWindowWidth: %" PRIu32 "\n", g.defaultWindowWidth);
-    printf("  defaultWindowHeight: %" PRIu32 "\n", g.defaultWindowHeight);
+    printf("  defaultWindowWidth: %" PRIu32 "\n", g->defaultWindowWidth);
+    printf("  defaultWindowHeight: %" PRIu32 "\n", g->defaultWindowHeight);
 
-    printf("  info: %" PRIu32 "\n", g.info);
-    printf("  licenseCRC32: %" PRIx32 "\n", g.licenseCRC32);
+    printf("  info: %" PRIu32 "\n", g->info);
+    printf("  licenseCRC32: %" PRIx32 "\n", g->licenseCRC32);
     printf("  licenseMD5: ");
     repeat(16, i) {
-        printf("%02" PRIX8 " ", g.licenseMD5[i]);
+        printf("%02" PRIX8 " ", g->licenseMD5[i]);
     }
     printf("\n");
-    printf("  timestamp: %" PRIu64 "\n", g.timestamp);
-    printf("  displayName: %s\n", g.displayName);
-    printf("  activeTargets: %" PRIu64 "\n", g.activeTargets);
-    printf("  functionClassifications: %" PRIu64 "\n", g.functionClassifications);
-    printf("  steamAppID: %" PRIi32 "\n", g.steamAppID);
-    printf("  debuggerPort: %" PRIu32 "\n", g.debuggerPort);
-    printf("  roomOrderCount: %" PRIu32 "\n", g.roomOrderCount);
-    printf("  gms2FPS: %f\n", g.gms2FPS);
+    printf("  timestamp: %" PRIu64 "\n", g->timestamp);
+    printf("  displayName: %s\n", g->displayName);
+    printf("  activeTargets: %" PRIu64 "\n", g->activeTargets);
+    printf("  functionClassifications: %" PRIu64 "\n", g->functionClassifications);
+    printf("  steamAppID: %" PRIi32 "\n", g->steamAppID);
+    printf("  debuggerPort: %" PRIu32 "\n", g->debuggerPort);
+    printf("  roomOrderCount: %" PRIu32 "\n", g->roomOrderCount);
+    printf("  gms2FPS: %f\n", g->gms2FPS);
 }
