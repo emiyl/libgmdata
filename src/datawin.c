@@ -1,10 +1,12 @@
 #include "datawin.h"
 
 #include "chunks.h"
+#include "chunks/optn.h"
 #include "strings.h"
 #include "utils.h"
 
 #include "chunks/gen8.h"
+#include "chunks/optn.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,7 +85,8 @@ int parse(DataWin *dw) {
     assert(find_chunk(dw, "STRG", &strg) == 0);
     assert(parse_string_table(dw, strg.offset, strg.length) == 0);
 
-    dw->gen8 = GEN8_Parse(dw);
+    assert(GEN8_Parse(dw) == 0);
+    OPTN_Parse(dw);
 
     return 0;
 }

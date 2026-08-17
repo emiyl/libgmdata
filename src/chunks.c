@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 int chunk_table_init(ChunkTable *table) {
     if (table == NULL) {

@@ -40,7 +40,7 @@ int reader_seek(Reader *reader, size_t offset) {
     return 0;
 }
 
-int reader_skip(Reader* reader, size_t count) {
+int reader_skip(Reader* reader, int count) {
     int cursor = reader->cursor;
     int new_pos = cursor + count;
     return reader_seek(reader, new_pos);
@@ -98,6 +98,16 @@ int _read_u32(Reader *reader, uint32_t *out) {
     *out = value;
     reader->cursor += sizeof(uint32_t);
 
+    return 0;
+}
+
+int reader_read_b32_le(Reader *reader, bool *out) {
+    uint32_t value;
+    if (_read_u32(reader, &value) != 0) {
+        return -1;
+    }
+
+    *out = value != 0;
     return 0;
 }
 

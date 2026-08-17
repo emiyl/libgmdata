@@ -6,9 +6,10 @@
 void reader_init(Reader *reader, const uint8_t *data, size_t size);
 size_t reader_remaining(const Reader *reader);
 int reader_seek(Reader *reader, size_t offset);
-int reader_skip(Reader *reader, size_t count);
+int reader_skip(Reader *reader, int count);
 int reader_read_u8(Reader *reader, uint8_t *out);
 int reader_read_u16_le(Reader *reader, uint16_t *out);
+int reader_read_b32_le(Reader *reader, bool *out);
 int reader_read_u32_le(Reader *reader, uint32_t *out);
 int reader_read_i32_le(Reader *reader, int32_t *out);
 int reader_read_f32_le(Reader *reader, float *out);
