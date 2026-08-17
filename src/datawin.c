@@ -7,6 +7,7 @@
 #include "chunks/optn.h"
 #include "chunks/lang.h"
 #include "chunks/extn.h"
+#include "chunks/sond.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -89,6 +90,7 @@ int DataWin_parse(DataWin *dw) {
     assert(OPTN_Parse(dw) == 0);
     assert(LANG_Parse(dw) == 0);
     assert(EXTN_Parse(dw) == 0);
+    assert(SOND_Parse(dw) == 0);
 
     return 0;
 }

@@ -9,6 +9,7 @@
 #include "types/optn.h"
 #include "types/lang.h"
 #include "types/extn.h"
+#include "types/sond.h"
 
 typedef struct {
     uint8_t *data;
@@ -56,6 +57,7 @@ typedef struct {
     Optn optn;
     Lang lang;
     Extn extn;
+    Sond sond;
 
     DetectedFormat detected_format;
 

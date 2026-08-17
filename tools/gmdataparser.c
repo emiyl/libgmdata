@@ -9,6 +9,7 @@ void GEN8_Print(const Gen8 *g);
 void OPTN_Print(const Optn *o);
 void LANG_Print(const Lang *l);
 void EXTN_Print(const Extn *e);
+void SOND_Print(const Sond *s);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -17,7 +18,7 @@ int main(int argc, char **argv) {
             "\n"
             "options:\n"
             "  --print <name>    Print a section\n"
-            "                    gen8, optn, or *\n",
+            "                    gen8, optn, etc, or *\n",
             argv[0]);
         return 1;
     }
@@ -27,6 +28,7 @@ int main(int argc, char **argv) {
     bool printOptn = false;
     bool printLang = false;
     bool printExtn = false;
+    bool printSond = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -51,6 +53,8 @@ int main(int argc, char **argv) {
                 printLang = true;
             } else if (strcmp(name, "extn") == 0) {
                 printExtn = true;
+            } else if (strcmp(name, "sond") == 0) {
+                printSond = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -75,14 +79,14 @@ int main(int argc, char **argv) {
 
     DataWin dw = {0};
 
-    if (load_file(&dw, filename) != 0) {
+    if (DataWin_loadFile(&dw, filename) != 0) {
         fprintf(stderr, "failed to load file: %s\n", filename);
         return 1;
     }
 
-    if (parse(&dw) != 0) {
+    if (DataWin_parse(&dw) != 0) {
         fprintf(stderr, "failed to parse file: %s\n", filename);
-        datawin_free(&dw);
+        DataWin_free(&dw);
         return 1;
     }
 
@@ -93,8 +97,9 @@ int main(int argc, char **argv) {
     if (printOptn) OPTN_Print(&dw.optn);
     if (printLang) LANG_Print(&dw.lang);
     if (printExtn) EXTN_Print(&dw.extn);
+    if (printSond) SOND_Print(&dw.sond);
 
-    datawin_free(&dw);
+    DataWin_free(&dw);
     return 0;
 }
 
@@ -311,5 +316,42 @@ void EXTN_Print(const Extn *e) {
                 }
             }
         }
+    }
+}
+
+void SOND_Print(const Sond *s) {
+    printf("SOND:\n");
+    printf("  count: %" PRIu32 "\n", s->count);
+
+    for (uint32_t i = 0; i < s->count; i++) {
+        const Sound *snd = &s->sounds[i];
+
+        printf("  sound[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n", snd->present ? "true" : "false");
+
+        if (!snd->present) {
+            continue;
+        }
+
+        printf("    name: %s\n", snd->name ? snd->name : "(null)");
+        printf("    flags: 0x%" PRIx32 "\n", snd->flags);
+        printf("    type: %s\n", snd->type ? snd->type : "(null)");
+        printf("    file: %s\n", snd->file ? snd->file : "(null)");
+        printf("    effects: 0x%" PRIx32 "\n", snd->effects);
+        printf("    volume: %f\n", snd->volume);
+        printf("    pan: %f\n", snd->pan);
+        printf("    pitch: %f\n", snd->pitch);
+        printf("    audioGroup: %" PRId32 "\n", snd->audioGroup);
+        printf("    audioFile: %" PRId32 "\n", snd->audioFile);
+
+        printf("    isEmbedded: %s\n",
+               (snd->flags & AUDIO_ENTRY_FLAG_IS_EMBEDDED) != 0
+                   ? "true"
+                   : "false");
+
+        printf("    isRegular: %s\n",
+               (snd->flags & AUDIO_ENTRY_FLAG_REGULAR) != 0
+                   ? "true"
+                   : "false");
     }
 }

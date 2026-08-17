@@ -9,6 +9,7 @@
 #include "types/optn.h"
 #include "types/lang.h"
 #include "types/extn.h"
+#include "types/sond.h"
 
 typedef struct {
     uint8_t *data;
@@ -40,6 +41,13 @@ typedef struct {
 } ChunkTable;
 
 typedef struct {
+    uint32_t major;
+    uint32_t minor;
+    uint32_t release;
+    uint32_t build;
+} DetectedFormat;
+
+typedef struct {
     uint8_t *file_data;
     size_t file_size;
     StringTable strings;
@@ -49,6 +57,9 @@ typedef struct {
     Optn optn;
     Lang lang;
     Extn extn;
+    Sond sond;
+
+    DetectedFormat detected_format;
 
     bool initialized;
 } DataWin;
