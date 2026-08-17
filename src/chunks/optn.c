@@ -10,26 +10,26 @@ int OPTN_Parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    reader_init(&reader, base, chunk.length);
+    Reader_init(&reader, base, chunk.length);
 
-    reader_read_i32(&reader, &o->shaderExtensionFlag);
+    Reader_read_i32(&reader, &o->shaderExtensionFlag);
     bool newFormat = o->shaderExtensionFlag == (int32_t)0x80000000;
 
     if (newFormat) {
-        reader_read_i32(&reader, &o->shaderExtensionVersion);
-        reader_read_u64(&reader, &o->info);
-        reader_read_u32(&reader, &o->windowColor);
-        reader_read_u32(&reader, &o->colorDepth);
-        reader_read_u32(&reader, &o->resolution);
-        reader_read_u32(&reader, &o->frequency);
-        reader_read_u32(&reader, &o->vertexSync);
-        reader_read_u32(&reader, &o->priority);
-        reader_read_u32(&reader, &o->backImage);
-        reader_read_u32(&reader, &o->frontImage);
-        reader_read_u32(&reader, &o->loadImage);
-        reader_read_u32(&reader, &o->loadAlpha);
+        Reader_read_i32(&reader, &o->shaderExtensionVersion);
+        Reader_read_u64(&reader, &o->info);
+        Reader_read_u32(&reader, &o->windowColor);
+        Reader_read_u32(&reader, &o->colorDepth);
+        Reader_read_u32(&reader, &o->resolution);
+        Reader_read_u32(&reader, &o->frequency);
+        Reader_read_u32(&reader, &o->vertexSync);
+        Reader_read_u32(&reader, &o->priority);
+        Reader_read_u32(&reader, &o->backImage);
+        Reader_read_u32(&reader, &o->frontImage);
+        Reader_read_u32(&reader, &o->loadImage);
+        Reader_read_u32(&reader, &o->loadAlpha);
     } else {
-        reader_skip(&reader, -4);
+        Reader_skip(&reader, -4);
         o->info = 0;
 
         bool fullscreen;
@@ -57,41 +57,41 @@ int OPTN_Parse(DataWin *dw) {
         bool variable_errors;
         bool creation_event_order;
         
-        reader_read_b32(&reader, &fullscreen);
-        reader_read_b32(&reader, &interpolate_pixels);
-        reader_read_b32(&reader, &use_new_audio);
-        reader_read_b32(&reader, &no_border);
-        reader_read_b32(&reader, &show_cursor);
-        reader_read_i32(&reader, &o->scale);
-        reader_read_b32(&reader, &sizable);
-        reader_read_b32(&reader, &stay_on_top);
-        reader_read_u32(&reader, &o->windowColor);
-        reader_read_b32(&reader, &change_resolution);
-        reader_read_u32(&reader, &o->colorDepth);
-        reader_read_u32(&reader, &o->resolution);
-        reader_read_u32(&reader, &o->frequency);
-        reader_read_b32(&reader, &no_buttons);
-        reader_read_u32(&reader, &o->vertexSync);
-        reader_read_b32(&reader, &screen_key);
-        reader_read_b32(&reader, &help_key);
-        reader_read_b32(&reader, &quit_key);
-        reader_read_b32(&reader, &save_key);
-        reader_read_b32(&reader, &screenshot_key);
-        reader_read_b32(&reader, &close_sec);
-        reader_read_u32(&reader, &o->priority);
-        reader_read_b32(&reader, &freeze);
-        reader_read_b32(&reader, &show_progress);
-        reader_read_u32(&reader, &o->backImage);
-        reader_read_u32(&reader, &o->frontImage);
-        reader_read_u32(&reader, &o->loadImage);
-        reader_read_b32(&reader, &load_transparent);
-        reader_read_u32(&reader, &o->loadAlpha);
-        reader_read_b32(&reader, &scale_progress);
-        reader_read_b32(&reader, &display_errors);
-        reader_read_b32(&reader, &write_errors);
-        reader_read_b32(&reader, &abort_errors);
-        reader_read_b32(&reader, &variable_errors);
-        reader_read_b32(&reader, &creation_event_order);
+        Reader_read_b32(&reader, &fullscreen);
+        Reader_read_b32(&reader, &interpolate_pixels);
+        Reader_read_b32(&reader, &use_new_audio);
+        Reader_read_b32(&reader, &no_border);
+        Reader_read_b32(&reader, &show_cursor);
+        Reader_read_i32(&reader, &o->scale);
+        Reader_read_b32(&reader, &sizable);
+        Reader_read_b32(&reader, &stay_on_top);
+        Reader_read_u32(&reader, &o->windowColor);
+        Reader_read_b32(&reader, &change_resolution);
+        Reader_read_u32(&reader, &o->colorDepth);
+        Reader_read_u32(&reader, &o->resolution);
+        Reader_read_u32(&reader, &o->frequency);
+        Reader_read_b32(&reader, &no_buttons);
+        Reader_read_u32(&reader, &o->vertexSync);
+        Reader_read_b32(&reader, &screen_key);
+        Reader_read_b32(&reader, &help_key);
+        Reader_read_b32(&reader, &quit_key);
+        Reader_read_b32(&reader, &save_key);
+        Reader_read_b32(&reader, &screenshot_key);
+        Reader_read_b32(&reader, &close_sec);
+        Reader_read_u32(&reader, &o->priority);
+        Reader_read_b32(&reader, &freeze);
+        Reader_read_b32(&reader, &show_progress);
+        Reader_read_u32(&reader, &o->backImage);
+        Reader_read_u32(&reader, &o->frontImage);
+        Reader_read_u32(&reader, &o->loadImage);
+        Reader_read_b32(&reader, &load_transparent);
+        Reader_read_u32(&reader, &o->loadAlpha);
+        Reader_read_b32(&reader, &scale_progress);
+        Reader_read_b32(&reader, &display_errors);
+        Reader_read_b32(&reader, &write_errors);
+        Reader_read_b32(&reader, &abort_errors);
+        Reader_read_b32(&reader, &variable_errors);
+        Reader_read_b32(&reader, &creation_event_order);
 
         if (fullscreen)            o->info |= INFO_FULLSCREEN;
         if (interpolate_pixels)    o->info |= INFO_INTERPOLATE_PIXELS;
@@ -126,7 +126,7 @@ int OPTN_Parse(DataWin *dw) {
         return 0;
     }
 
-    reader_read_u32(&reader, &o->constantCount);
+    Reader_read_u32(&reader, &o->constantCount);
 
     if (o->constantCount == 0) {
         o->constants = NULL;
@@ -136,8 +136,8 @@ int OPTN_Parse(DataWin *dw) {
     o->constants = (OptnConstant *)malloc(o->constantCount * sizeof(OptnConstant));
 
     repeat(o->constantCount, i) {
-        reader_read_string(&reader, dw, &o->constants[i].name);
-        reader_read_string(&reader, dw, &o->constants[i].value);
+        Reader_read_string(&reader, dw, &o->constants[i].name);
+        Reader_read_string(&reader, dw, &o->constants[i].value);
     }
 
     return 0;

@@ -13,7 +13,7 @@
 #include <string.h>
 #include <assert.h>
 
-static void reset(DataWin *dw) {
+static void DataWin_reset(DataWin *dw) {
     if (dw == NULL) {
         return;
     }
@@ -25,7 +25,7 @@ static void reset(DataWin *dw) {
     dw->initialized = false;
 }
 
-int load_file(DataWin *dw, const char *path) {
+int DataWin_loadFile(DataWin *dw, const char *path) {
     if (dw == NULL || path == NULL) {
         return -1;
     }
@@ -65,14 +65,14 @@ int load_file(DataWin *dw, const char *path) {
 
     fclose(fp);
 
-    reset(dw);
+    DataWin_reset(dw);
     dw->file_data = buffer;
     dw->file_size = (size_t)size;
     dw->initialized = true;
     return 0;
 }
 
-int parse(DataWin *dw) {
+int DataWin_parse(DataWin *dw) {
     if (dw == NULL || dw->file_data == NULL || !dw->initialized) {
         return -1;
     }
@@ -93,7 +93,7 @@ int parse(DataWin *dw) {
     return 0;
 }
 
-void datawin_free(DataWin *dw) {
+void DataWin_free(DataWin *dw) {
     if (dw == NULL) {
         return;
     }
@@ -104,4 +104,20 @@ void datawin_free(DataWin *dw) {
     dw->file_data = NULL;
     dw->file_size = 0;
     dw->initialized = false;
+}
+
+bool DataWin_isVersionAtLeast(const DataWin* dw, uint32_t major, uint32_t minor, uint32_t release, uint32_t build) {
+    const DetectedFormat* f = &dw->detected_format;
+    if (f->major != major) return f->major > major;
+    if (f->minor != minor) return f->minor > minor;
+    if (f->release != release) return f->release > release;
+    return f->build >= build;
+}
+
+void DataWin_bumpVersionTo(DataWin* dw, uint32_t major, uint32_t minor, uint32_t release, uint32_t build) {
+    if (DataWin_isVersionAtLeast(dw, major, minor, release, build)) return;
+    dw->detected_format.major = major;
+    dw->detected_format.minor = minor;
+    dw->detected_format.release = release;
+    dw->detected_format.build = build;
 }

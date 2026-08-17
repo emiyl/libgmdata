@@ -3,8 +3,8 @@
 
 #include "types.h"
 
-int load_file(DataWin *dw, const char *path);
-int parse(DataWin *dw);
-void datawin_free(DataWin *dw);
+int DataWin_loadFile(DataWin *dw, const char *path);
+int DataWin_parse(DataWin *dw);
+void DataWin_free(DataWin *dw);
 
 #endif

@@ -40,6 +40,13 @@ typedef struct {
 } ChunkTable;
 
 typedef struct {
+    uint32_t major;
+    uint32_t minor;
+    uint32_t release;
+    uint32_t build;
+} DetectedFormat;
+
+typedef struct {
     uint8_t *file_data;
     size_t file_size;
     StringTable strings;
@@ -49,6 +56,8 @@ typedef struct {
     Optn optn;
     Lang lang;
     Extn extn;
+
+    DetectedFormat detected_format;
 
     bool initialized;
 } DataWin;

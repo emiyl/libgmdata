@@ -10,17 +10,17 @@ int LANG_Parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    reader_init(&reader, base, chunk.length);
+    Reader_init(&reader, base, chunk.length);
 
-    reader_read_u32(&reader, &l->unknown1);
-    reader_read_u32(&reader, &l->languageCount);
-    reader_read_u32(&reader, &l->entryCount);
+    Reader_read_u32(&reader, &l->unknown1);
+    Reader_read_u32(&reader, &l->languageCount);
+    Reader_read_u32(&reader, &l->entryCount);
 
     // Entry IDs
     if (l->entryCount > 0) {
         l->entryIds = (const char **)malloc(l->entryCount * sizeof(const char*));
         repeat(l->entryCount, i) {
-            reader_read_string(&reader, dw, &l->entryIds[i]);
+            Reader_read_string(&reader, dw, &l->entryIds[i]);
         }
     } else {
         l->entryIds = NULL;
@@ -30,13 +30,13 @@ int LANG_Parse(DataWin *dw) {
     if (l->languageCount > 0) {
         l->languages = (Language *)malloc(l->languageCount * sizeof(Language));
         repeat(l->languageCount, i) {
-            reader_read_string(&reader, dw, &l->languages[i].name);
-            reader_read_string(&reader, dw, &l->languages[i].region);
+            Reader_read_string(&reader, dw, &l->languages[i].name);
+            Reader_read_string(&reader, dw, &l->languages[i].region);
             l->languages[i].entryCount = l->entryCount;
             if (l->entryCount > 0) {
                 l->languages[i].entries = (const char **)malloc(l->entryCount * sizeof(const char*));
                 repeat(l->entryCount, j) {
-                    reader_read_string(&reader, dw, &l->languages[i].entries[j]);
+                    Reader_read_string(&reader, dw, &l->languages[i].entries[j]);
                 }
             } else {
                 l->languages[i].entries = NULL;
