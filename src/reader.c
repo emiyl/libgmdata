@@ -63,7 +63,7 @@ int reader_read_u8(Reader *reader, uint8_t *out) {
     return 0;
 }
 
-int reader_read_u16_le(Reader *reader, uint16_t *out) {
+int reader_read_u16(Reader *reader, uint16_t *out) {
     if (reader == NULL || reader->data == NULL || out == NULL) {
         return -1;
     }
@@ -101,7 +101,7 @@ int _read_u32(Reader *reader, uint32_t *out) {
     return 0;
 }
 
-int reader_read_b32_le(Reader *reader, bool *out) {
+int reader_read_b32(Reader *reader, bool *out) {
     uint32_t value;
     if (_read_u32(reader, &value) != 0) {
         return -1;
@@ -111,7 +111,7 @@ int reader_read_b32_le(Reader *reader, bool *out) {
     return 0;
 }
 
-int reader_read_u32_le(Reader *reader, uint32_t *out) {
+int reader_read_u32(Reader *reader, uint32_t *out) {
     uint32_t value;
     if (_read_u32(reader, &value) != 0) {
         return -1;
@@ -122,7 +122,7 @@ int reader_read_u32_le(Reader *reader, uint32_t *out) {
     return 0;
 }
 
-int reader_read_i32_le(Reader *reader, int32_t *out) {
+int reader_read_i32(Reader *reader, int32_t *out) {
     uint32_t value;
     if (_read_u32(reader, &value) != 0) {
         return -1;
@@ -133,7 +133,7 @@ int reader_read_i32_le(Reader *reader, int32_t *out) {
     return 0;
 }
 
-int reader_read_f32_le(Reader *reader, float *out) {
+int reader_read_f32(Reader *reader, float *out) {
     uint32_t value;
     if (_read_u32(reader, &value) != 0) {
         return -1;
@@ -144,7 +144,7 @@ int reader_read_f32_le(Reader *reader, float *out) {
     return 0;
 }
 
-int reader_read_u64_le(Reader *reader, uint64_t *out) {
+int reader_read_u64(Reader *reader, uint64_t *out) {
     if (reader == NULL || reader->data == NULL || out == NULL) {
         return -1;
     }

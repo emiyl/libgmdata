@@ -1,14 +1,5 @@
 #include "optn.h"
-
-#include "../reader.h"
-#include "../types.h"
-#include "../chunks.h"
-#include "../utils.h"
-
-#include <stdlib.h>
-#include <assert.h>
-#include <inttypes.h>
-#include <stdio.h>
+#include "common.h"
 
 int OPTN_Parse(DataWin *dw) {
     Chunk chunk = {0};
@@ -22,22 +13,22 @@ int OPTN_Parse(DataWin *dw) {
     Reader reader;
     reader_init(&reader, base, chunk.length);
 
-    reader_read_i32_le(&reader, &o->shaderExtensionFlag);
+    reader_read_i32(&reader, &o->shaderExtensionFlag);
     bool newFormat = o->shaderExtensionFlag == (int32_t)0x80000000;
 
     if (newFormat) {
-        reader_read_i32_le(&reader, &o->shaderExtensionVersion);
-        reader_read_u64_le(&reader, &o->info);
-        reader_read_u32_le(&reader, &o->windowColor);
-        reader_read_u32_le(&reader, &o->colorDepth);
-        reader_read_u32_le(&reader, &o->resolution);
-        reader_read_u32_le(&reader, &o->frequency);
-        reader_read_u32_le(&reader, &o->vertexSync);
-        reader_read_u32_le(&reader, &o->priority);
-        reader_read_u32_le(&reader, &o->backImage);
-        reader_read_u32_le(&reader, &o->frontImage);
-        reader_read_u32_le(&reader, &o->loadImage);
-        reader_read_u32_le(&reader, &o->loadAlpha);
+        reader_read_i32(&reader, &o->shaderExtensionVersion);
+        reader_read_u64(&reader, &o->info);
+        reader_read_u32(&reader, &o->windowColor);
+        reader_read_u32(&reader, &o->colorDepth);
+        reader_read_u32(&reader, &o->resolution);
+        reader_read_u32(&reader, &o->frequency);
+        reader_read_u32(&reader, &o->vertexSync);
+        reader_read_u32(&reader, &o->priority);
+        reader_read_u32(&reader, &o->backImage);
+        reader_read_u32(&reader, &o->frontImage);
+        reader_read_u32(&reader, &o->loadImage);
+        reader_read_u32(&reader, &o->loadAlpha);
     } else {
         reader_skip(&reader, -4);
         o->info = 0;
@@ -67,41 +58,41 @@ int OPTN_Parse(DataWin *dw) {
         bool variable_errors;
         bool creation_event_order;
         
-        reader_read_b32_le(&reader, &fullscreen);
-        reader_read_b32_le(&reader, &interpolate_pixels);
-        reader_read_b32_le(&reader, &use_new_audio);
-        reader_read_b32_le(&reader, &no_border);
-        reader_read_b32_le(&reader, &show_cursor);
-        reader_read_i32_le(&reader, &o->scale);
-        reader_read_b32_le(&reader, &sizable);
-        reader_read_b32_le(&reader, &stay_on_top);
-        reader_read_u32_le(&reader, &o->windowColor);
-        reader_read_b32_le(&reader, &change_resolution);
-        reader_read_u32_le(&reader, &o->colorDepth);
-        reader_read_u32_le(&reader, &o->resolution);
-        reader_read_u32_le(&reader, &o->frequency);
-        reader_read_b32_le(&reader, &no_buttons);
-        reader_read_u32_le(&reader, &o->vertexSync);
-        reader_read_b32_le(&reader, &screen_key);
-        reader_read_b32_le(&reader, &help_key);
-        reader_read_b32_le(&reader, &quit_key);
-        reader_read_b32_le(&reader, &save_key);
-        reader_read_b32_le(&reader, &screenshot_key);
-        reader_read_b32_le(&reader, &close_sec);
-        reader_read_u32_le(&reader, &o->priority);
-        reader_read_b32_le(&reader, &freeze);
-        reader_read_b32_le(&reader, &show_progress);
-        reader_read_u32_le(&reader, &o->backImage);
-        reader_read_u32_le(&reader, &o->frontImage);
-        reader_read_u32_le(&reader, &o->loadImage);
-        reader_read_b32_le(&reader, &load_transparent);
-        reader_read_u32_le(&reader, &o->loadAlpha);
-        reader_read_b32_le(&reader, &scale_progress);
-        reader_read_b32_le(&reader, &display_errors);
-        reader_read_b32_le(&reader, &write_errors);
-        reader_read_b32_le(&reader, &abort_errors);
-        reader_read_b32_le(&reader, &variable_errors);
-        reader_read_b32_le(&reader, &creation_event_order);
+        reader_read_b32(&reader, &fullscreen);
+        reader_read_b32(&reader, &interpolate_pixels);
+        reader_read_b32(&reader, &use_new_audio);
+        reader_read_b32(&reader, &no_border);
+        reader_read_b32(&reader, &show_cursor);
+        reader_read_i32(&reader, &o->scale);
+        reader_read_b32(&reader, &sizable);
+        reader_read_b32(&reader, &stay_on_top);
+        reader_read_u32(&reader, &o->windowColor);
+        reader_read_b32(&reader, &change_resolution);
+        reader_read_u32(&reader, &o->colorDepth);
+        reader_read_u32(&reader, &o->resolution);
+        reader_read_u32(&reader, &o->frequency);
+        reader_read_b32(&reader, &no_buttons);
+        reader_read_u32(&reader, &o->vertexSync);
+        reader_read_b32(&reader, &screen_key);
+        reader_read_b32(&reader, &help_key);
+        reader_read_b32(&reader, &quit_key);
+        reader_read_b32(&reader, &save_key);
+        reader_read_b32(&reader, &screenshot_key);
+        reader_read_b32(&reader, &close_sec);
+        reader_read_u32(&reader, &o->priority);
+        reader_read_b32(&reader, &freeze);
+        reader_read_b32(&reader, &show_progress);
+        reader_read_u32(&reader, &o->backImage);
+        reader_read_u32(&reader, &o->frontImage);
+        reader_read_u32(&reader, &o->loadImage);
+        reader_read_b32(&reader, &load_transparent);
+        reader_read_u32(&reader, &o->loadAlpha);
+        reader_read_b32(&reader, &scale_progress);
+        reader_read_b32(&reader, &display_errors);
+        reader_read_b32(&reader, &write_errors);
+        reader_read_b32(&reader, &abort_errors);
+        reader_read_b32(&reader, &variable_errors);
+        reader_read_b32(&reader, &creation_event_order);
 
         if (fullscreen)            o->info |= INFO_FULLSCREEN;
         if (interpolate_pixels)    o->info |= INFO_INTERPOLATE_PIXELS;
@@ -136,7 +127,7 @@ int OPTN_Parse(DataWin *dw) {
         return 0;
     }
 
-    reader_read_u32_le(&reader, &o->constantCount);
+    reader_read_u32(&reader, &o->constantCount);
 
     if (o->constantCount == 0) {
         o->constants = NULL;
