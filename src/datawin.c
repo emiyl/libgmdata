@@ -3,10 +3,10 @@
 #include "chunks.h"
 #include "chunks/optn.h"
 #include "strings.h"
-#include "utils.h"
 
 #include "chunks/gen8.h"
 #include "chunks/optn.h"
+#include "chunks/lang.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -87,6 +87,7 @@ int parse(DataWin *dw) {
 
     assert(GEN8_Parse(dw) == 0);
     assert(OPTN_Parse(dw) == 0);
+    assert(LANG_Parse(dw) == 0);
 
     return 0;
 }
