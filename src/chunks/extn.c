@@ -4,7 +4,7 @@ int Extension_parse(Reader *reader, DataWin *dw, Extension *ext, int32_t stringC
 int ExtensionFile_parse(Reader *reader, DataWin *dw, ExtensionFile *file);
 int ExtensionFunction_parse(Reader *reader, DataWin *dw, ExtensionFunction *func);
 
-int EXTN_Parse(DataWin *dw) {
+int EXTN_parse(DataWin *dw) {
     Chunk chunk = {0};
     Extn *e = &dw->extn;
 
