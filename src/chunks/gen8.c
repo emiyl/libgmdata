@@ -1,5 +1,4 @@
 #include "gen8.h"
-#include "common.h"
 
 static void GEN8_ParseRoomOrder(Reader *reader, Gen8 *g) {
     reader_read_u32(reader, &g->roomOrderCount);

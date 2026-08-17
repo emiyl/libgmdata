@@ -7,6 +7,7 @@
 
 void GEN8_Print(const Gen8 *g);
 void OPTN_Print(const Optn *o);
+void LANG_Print(const Lang *l);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -23,6 +24,7 @@ int main(int argc, char **argv) {
     const char *filename = NULL;
     bool printGen8 = false;
     bool printOptn = false;
+    bool printLang = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -38,10 +40,13 @@ int main(int argc, char **argv) {
             if (strcmp(name, "*") == 0) {
                 printGen8 = true;
                 printOptn = true;
+                printLang = true;
             } else if (strcmp(name, "gen8") == 0) {
                 printGen8 = true;
             } else if (strcmp(name, "optn") == 0) {
                 printOptn = true;
+            } else if (strcmp(name, "lang") == 0) {
+                printLang = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -83,9 +88,11 @@ int main(int argc, char **argv) {
     if (printGen8) {
         GEN8_Print(&dw.gen8);
     }
-
     if (printOptn) {
         OPTN_Print(&dw.optn);
+    }
+    if (printLang) {
+        LANG_Print(&dw.lang);
     }
 
     datawin_free(&dw);
@@ -196,5 +203,58 @@ void OPTN_Print(const Optn *o) {
                o->constants[i].name ? o->constants[i].name : "(null)");
         printf("    value:                %s\n",
                o->constants[i].value ? o->constants[i].value : "(null)");
+    }
+}
+
+void LANG_Print(const Lang *l) {
+    if (l == NULL) {
+        return;
+    }
+
+    printf("LANG:\n");
+    printf("  unknown1:      %" PRIu32 "\n", l->unknown1);
+    printf("  languageCount: %" PRIu32 "\n", l->languageCount);
+    printf("  entryCount:    %" PRIu32 "\n", l->entryCount);
+
+    printf("  entryIds:\n");
+    if (l->entryCount == 0) {
+        printf("    (none)\n");
+    } else {
+        for (uint32_t i = 0; i < l->entryCount; i++) {
+            printf("    [%u] %s\n",
+                   i,
+                   l->entryIds[i] != NULL ? l->entryIds[i] : "(null)");
+        }
+    }
+
+    printf("  languages:\n");
+    if (l->languageCount == 0) {
+        printf("    (none)\n");
+        return;
+    }
+
+    for (uint32_t i = 0; i < l->languageCount; i++) {
+        const Language *language = &l->languages[i];
+
+        printf("    [%u]:\n", i);
+        printf("      name:   %s\n",
+               language->name != NULL ? language->name : "(null)");
+        printf("      region: %s\n",
+               language->region != NULL ? language->region : "(null)");
+
+        printf("      entries:\n");
+
+        if (language->entryCount == 0) {
+            printf("        (none)\n");
+            continue;
+        }
+
+        for (uint32_t j = 0; j < language->entryCount; j++) {
+            printf("        [%u] %s\n",
+                   j,
+                   language->entries[j] != NULL
+                       ? language->entries[j]
+                       : "(null)");
+        }
     }
 }

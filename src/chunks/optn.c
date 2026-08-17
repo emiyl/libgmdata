@@ -1,5 +1,4 @@
 #include "optn.h"
-#include "common.h"
 
 int OPTN_Parse(DataWin *dw) {
     Chunk chunk = {0};

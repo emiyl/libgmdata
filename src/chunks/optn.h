@@ -1,7 +1,7 @@
 #ifndef OPTN_H
 #define OPTN_H
 
-#include "../types.h"
+#include "common.h"
 
 int OPTN_Parse(DataWin *dw);
 

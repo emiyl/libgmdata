@@ -46,6 +46,7 @@ typedef struct {
 
     Gen8 gen8;
     Optn optn;
+    Lang lang;
 
     bool initialized;
 } DataWin;
