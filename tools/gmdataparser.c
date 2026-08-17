@@ -1,8 +1,5 @@
 #include "datawin.h"
 
-#include "chunks/gen8.h"
-#include "chunks/optn.h"
-
 #include <stdio.h>
 
 int main(int argc, char **argv) {
@@ -24,8 +21,6 @@ int main(int argc, char **argv) {
     }
 
     printf("Loaded %zu bytes with %zu chunks\n", dw.file_size, dw.chunks.count);
-    GEN8_Print(&dw.gen8);
-    OPTN_Print(&dw.optn);
 
     datawin_free(&dw);
     return 0;
