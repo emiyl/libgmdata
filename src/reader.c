@@ -305,9 +305,22 @@ int Reader_readString(Reader *reader, DataWin *dw, const char **out) {
         return -1;
     }
 
-    *out = get_string(dw, offset);
+    const char *source = get_string(dw, offset);
+    if (source == NULL) {
+        *out = NULL;
+        return -1;
+    }
 
-    return *out != NULL ? 0 : -1;
+    size_t length = strlen(source);
+    char *copy = (char *)malloc(length + 1U);
+    if (copy == NULL) {
+        *out = NULL;
+        return -1;
+    }
+
+    memcpy(copy, source, length + 1U);
+    *out = copy;
+    return 0;
 }
 
 int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_count) {
