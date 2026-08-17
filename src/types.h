@@ -10,6 +10,7 @@
 #include "types/lang.h"
 #include "types/extn.h"
 #include "types/sond.h"
+#include "types/agrp.h"
 
 typedef struct {
     uint8_t *data;
@@ -58,6 +59,7 @@ typedef struct {
     Lang lang;
     Extn extn;
     Sond sond;
+    Agrp agrp;
 
     DetectedFormat detected_format;
 

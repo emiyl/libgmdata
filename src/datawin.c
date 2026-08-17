@@ -8,6 +8,7 @@
 #include "chunks/lang.h"
 #include "chunks/extn.h"
 #include "chunks/sond.h"
+#include "chunks/agrp.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -92,6 +93,7 @@ int DataWin_parse(DataWin *dw) {
     assert(LANG_parse(dw) == 0);
     assert(EXTN_parse(dw) == 0);
     assert(SOND_parse(dw) == 0);
+    assert(AGRP_parse(dw) == 0);
 
     return 0;
 }
@@ -109,6 +111,7 @@ void DataWin_free(DataWin *dw) {
     LANG_free(&dw->lang);
     EXTN_free(&dw->extn);
     SOND_free(&dw->sond);
+    AGRP_free(&dw->agrp);
 
     free(dw->file_data);
     dw->file_data = NULL;

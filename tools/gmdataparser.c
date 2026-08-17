@@ -10,6 +10,7 @@ void OPTN_Print(const Optn *o);
 void LANG_Print(const Lang *l);
 void EXTN_Print(const Extn *e);
 void SOND_Print(const Sond *s);
+void AGRP_Print(const Agrp *a);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -29,6 +30,7 @@ int main(int argc, char **argv) {
     bool printLang = false;
     bool printExtn = false;
     bool printSond = false;
+    bool printAgrp = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -45,6 +47,9 @@ int main(int argc, char **argv) {
                 printGen8 = true;
                 printOptn = true;
                 printLang = true;
+                printExtn = true;
+                printSond = true;
+                printAgrp = true;
             } else if (strcmp(name, "gen8") == 0) {
                 printGen8 = true;
             } else if (strcmp(name, "optn") == 0) {
@@ -55,6 +60,8 @@ int main(int argc, char **argv) {
                 printExtn = true;
             } else if (strcmp(name, "sond") == 0) {
                 printSond = true;
+            } else if (strcmp(name, "agrp") == 0) {
+                printAgrp = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -103,6 +110,7 @@ int main(int argc, char **argv) {
     if (printLang) LANG_Print(&dw.lang);
     if (printExtn) EXTN_Print(&dw.extn);
     if (printSond) SOND_Print(&dw.sond);
+    if (printAgrp) AGRP_Print(&dw.agrp);
 
     DataWin_free(&dw);
     return 0;
@@ -358,5 +366,27 @@ void SOND_Print(const Sond *s) {
                (snd->flags & AUDIO_ENTRY_FLAG_REGULAR) != 0
                    ? "true"
                    : "false");
+    }
+}
+
+void AGRP_Print(const Agrp *a) {
+    printf("AGRP:\n");
+    printf("  count: %" PRIu32 "\n", a->count);
+
+    for (uint32_t i = 0; i < a->count; i++) {
+        const AudioGroup *ag = &a->audioGroups[i];
+
+        printf("  audioGroup[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n", ag->present ? "true" : "false");
+
+        if (!ag->present) {
+            continue;
+        }
+
+        printf("    name: %s\n", ag->name ? ag->name : "(null)");
+
+        if (ag->path) {
+            printf("    path: %s\n", ag->path);
+        }
     }
 }
