@@ -8,6 +8,7 @@
 void GEN8_Print(const Gen8 *g);
 void OPTN_Print(const Optn *o);
 void LANG_Print(const Lang *l);
+void EXTN_Print(const Extn *e);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -25,6 +26,7 @@ int main(int argc, char **argv) {
     bool printGen8 = false;
     bool printOptn = false;
     bool printLang = false;
+    bool printExtn = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -47,6 +49,8 @@ int main(int argc, char **argv) {
                 printOptn = true;
             } else if (strcmp(name, "lang") == 0) {
                 printLang = true;
+            } else if (strcmp(name, "extn") == 0) {
+                printExtn = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -85,15 +89,10 @@ int main(int argc, char **argv) {
     printf("Loaded %zu bytes with %zu chunks\n",
            dw.file_size, dw.chunks.count);
 
-    if (printGen8) {
-        GEN8_Print(&dw.gen8);
-    }
-    if (printOptn) {
-        OPTN_Print(&dw.optn);
-    }
-    if (printLang) {
-        LANG_Print(&dw.lang);
-    }
+    if (printGen8) GEN8_Print(&dw.gen8);
+    if (printOptn) OPTN_Print(&dw.optn);
+    if (printLang) LANG_Print(&dw.lang);
+    if (printExtn) EXTN_Print(&dw.extn);
 
     datawin_free(&dw);
     return 0;
@@ -255,6 +254,62 @@ void LANG_Print(const Lang *l) {
                    language->entries[j] != NULL
                        ? language->entries[j]
                        : "(null)");
+        }
+    }
+}
+
+void EXTN_Print(const Extn *e) {
+    printf("EXTN:\n");
+    printf("  extensionCount: %" PRIu32 "\n", e->count);
+
+    for (uint32_t i = 0; i < e->count; i++) {
+        const Extension *ext = &e->extensions[i];
+
+        printf("  [%u] Extension:\n", i);
+        printf("    folderName: %s\n", ext->folderName ? ext->folderName : "");
+        printf("    name: %s\n", ext->name ? ext->name : "");
+        printf("    className: %s\n", ext->className ? ext->className : "");
+        printf("    fileCount: %" PRIu32 "\n", ext->fileCount);
+
+        for (uint32_t j = 0; j < ext->fileCount; j++) {
+            const ExtensionFile *file = &ext->files[j];
+
+            printf("    [%u] File:\n", j);
+            printf("      filename: %s\n",
+                   file->filename ? file->filename : "");
+            printf("      cleanupScript: %s\n",
+                   file->cleanupScript ? file->cleanupScript : "");
+            printf("      initScript: %s\n",
+                   file->initScript ? file->initScript : "");
+            printf("      kind: %" PRIu32 "\n", file->kind);
+            printf("      functionCount: %" PRIu32 "\n",
+                   file->functionCount);
+
+            for (uint32_t k = 0; k < file->functionCount; k++) {
+                const ExtensionFunction *func = &file->functions[k];
+
+                printf("      [%u] Function:\n", k);
+                printf("        name: %s\n",
+                       func->name ? func->name : "");
+                printf("        id: %" PRIu32 "\n", func->id);
+                printf("        kind: %" PRIu32 "\n", func->kind);
+                printf("        retType: %" PRIu32 "\n", func->retType);
+                printf("        extName: %s\n",
+                       func->extName ? func->extName : "");
+                printf("        argumentCount: %" PRIu32 "\n",
+                       func->argumentCount);
+
+                if (func->argumentCount > 0) {
+                    printf("        arguments: ");
+
+                    for (uint32_t n = 0; n < func->argumentCount; n++) {
+                        if (n > 0) printf(", ");
+                        printf("%" PRIu32, func->arguments[n]);
+                    }
+
+                    printf("\n");
+                }
+            }
         }
     }
 }

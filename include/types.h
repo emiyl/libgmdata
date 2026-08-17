@@ -8,6 +8,7 @@
 #include "types/gen8.h"
 #include "types/optn.h"
 #include "types/lang.h"
+#include "types/extn.h"
 
 typedef struct {
     uint8_t *data;
@@ -47,6 +48,7 @@ typedef struct {
     Gen8 gen8;
     Optn optn;
     Lang lang;
+    Extn extn;
 
     bool initialized;
 } DataWin;
