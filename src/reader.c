@@ -109,12 +109,12 @@ int _read_u64_at(Reader *reader, size_t offset, uint64_t *out) {
     return 0;
 }
 
-int Reader_readUint8At(Reader *reader, size_t offset, uint8_t *out) {
+int Reader_readUInt8At(Reader *reader, size_t offset, uint8_t *out) {
     return _read_u8_at(reader, offset, out);
 }
 
-int Reader_readUint8(Reader *reader, uint8_t *out) {
-    return Reader_readUint8At(reader, reader->cursor, out);
+int Reader_readUInt8(Reader *reader, uint8_t *out) {
+    return Reader_readUInt8At(reader, reader->cursor, out);
 }
 
 int Reader_readInt8At(Reader *reader, size_t offset, int8_t *out) {
@@ -131,12 +131,12 @@ int Reader_readInt8(Reader *reader, int8_t *out) {
     return Reader_readInt8At(reader, reader->cursor, out);
 }
 
-int Reader_readUint16At(Reader *reader, size_t offset, uint16_t *out) {
+int Reader_readUInt16At(Reader *reader, size_t offset, uint16_t *out) {
     return _read_u16_at(reader, offset, out);
 }
 
-int Reader_readUint16(Reader *reader, uint16_t *out) {
-    return Reader_readUint16At(reader, reader->cursor, out);
+int Reader_readUInt16(Reader *reader, uint16_t *out) {
+    return Reader_readUInt16At(reader, reader->cursor, out);
 }
 
 int Reader_readInt16At(Reader *reader, size_t offset, int16_t *out) {
@@ -167,12 +167,12 @@ int Reader_readBool32(Reader *reader, bool *out) {
     return Reader_readBool32At(reader, reader->cursor, out);
 }
 
-int Reader_readUint32At(Reader *reader, size_t offset, uint32_t *out) {
+int Reader_readUInt32At(Reader *reader, size_t offset, uint32_t *out) {
     return _read_u32_at(reader, offset, out);
 }
 
-int Reader_readUint32(Reader *reader, uint32_t *out) {
-    return Reader_readUint32At(reader, reader->cursor, out);
+int Reader_readUInt32(Reader *reader, uint32_t *out) {
+    return Reader_readUInt32At(reader, reader->cursor, out);
 }
 
 int Reader_readInt32At(Reader *reader, size_t offset, int32_t *out) {
@@ -205,12 +205,12 @@ int Reader_readFloat32(Reader *reader, float *out) {
     return Reader_readFloat32At(reader, reader->cursor, out);
 }
 
-int Reader_readUint64At(Reader *reader, size_t offset, uint64_t *out) {
+int Reader_readUInt64At(Reader *reader, size_t offset, uint64_t *out) {
     return _read_u64_at(reader, offset, out);
 }
 
-int Reader_readUint64(Reader *reader, uint64_t *out) {
-    return Reader_readUint64At(reader, reader->cursor, out);
+int Reader_readUInt64(Reader *reader, uint64_t *out) {
+    return Reader_readUInt64At(reader, reader->cursor, out);
 }
 
 int Reader_readInt64At(Reader *reader, size_t offset, int64_t *out) {
@@ -253,7 +253,7 @@ int Reader_readString(Reader *reader, DataWin *dw, const char **out) {
         return -1;
     }
 
-    if (Reader_readUint32(reader, &offset) != 0) {
+    if (Reader_readUInt32(reader, &offset) != 0) {
         return -1;
     }
 
@@ -268,7 +268,7 @@ int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_c
     }
 
     uint32_t count;
-    if (Reader_readUint32(reader, &count) != 0) {
+    if (Reader_readUInt32(reader, &count) != 0) {
         return -1;
     }
 
@@ -284,7 +284,7 @@ int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_c
     }
 
     for (uint32_t i = 0; i < count; ++i) {
-        if (Reader_readUint32(reader, &ptrs[i]) != 0) {
+        if (Reader_readUInt32(reader, &ptrs[i]) != 0) {
             free(ptrs);
             return -1;
         }

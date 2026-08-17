@@ -17,17 +17,17 @@ int OPTN_Parse(DataWin *dw) {
 
     if (newFormat) {
         Reader_readInt32(&reader, &o->shaderExtensionVersion);
-        Reader_readUint64(&reader, &o->info);
-        Reader_readUint32(&reader, &o->windowColor);
-        Reader_readUint32(&reader, &o->colorDepth);
-        Reader_readUint32(&reader, &o->resolution);
-        Reader_readUint32(&reader, &o->frequency);
-        Reader_readUint32(&reader, &o->vertexSync);
-        Reader_readUint32(&reader, &o->priority);
-        Reader_readUint32(&reader, &o->backImage);
-        Reader_readUint32(&reader, &o->frontImage);
-        Reader_readUint32(&reader, &o->loadImage);
-        Reader_readUint32(&reader, &o->loadAlpha);
+        Reader_readUInt64(&reader, &o->info);
+        Reader_readUInt32(&reader, &o->windowColor);
+        Reader_readUInt32(&reader, &o->colorDepth);
+        Reader_readUInt32(&reader, &o->resolution);
+        Reader_readUInt32(&reader, &o->frequency);
+        Reader_readUInt32(&reader, &o->vertexSync);
+        Reader_readUInt32(&reader, &o->priority);
+        Reader_readUInt32(&reader, &o->backImage);
+        Reader_readUInt32(&reader, &o->frontImage);
+        Reader_readUInt32(&reader, &o->loadImage);
+        Reader_readUInt32(&reader, &o->loadAlpha);
     } else {
         Reader_skip(&reader, -4);
         o->info = 0;
@@ -65,27 +65,27 @@ int OPTN_Parse(DataWin *dw) {
         Reader_readInt32(&reader, &o->scale);
         Reader_readBool32(&reader, &sizable);
         Reader_readBool32(&reader, &stay_on_top);
-        Reader_readUint32(&reader, &o->windowColor);
+        Reader_readUInt32(&reader, &o->windowColor);
         Reader_readBool32(&reader, &change_resolution);
-        Reader_readUint32(&reader, &o->colorDepth);
-        Reader_readUint32(&reader, &o->resolution);
-        Reader_readUint32(&reader, &o->frequency);
+        Reader_readUInt32(&reader, &o->colorDepth);
+        Reader_readUInt32(&reader, &o->resolution);
+        Reader_readUInt32(&reader, &o->frequency);
         Reader_readBool32(&reader, &no_buttons);
-        Reader_readUint32(&reader, &o->vertexSync);
+        Reader_readUInt32(&reader, &o->vertexSync);
         Reader_readBool32(&reader, &screen_key);
         Reader_readBool32(&reader, &help_key);
         Reader_readBool32(&reader, &quit_key);
         Reader_readBool32(&reader, &save_key);
         Reader_readBool32(&reader, &screenshot_key);
         Reader_readBool32(&reader, &close_sec);
-        Reader_readUint32(&reader, &o->priority);
+        Reader_readUInt32(&reader, &o->priority);
         Reader_readBool32(&reader, &freeze);
         Reader_readBool32(&reader, &show_progress);
-        Reader_readUint32(&reader, &o->backImage);
-        Reader_readUint32(&reader, &o->frontImage);
-        Reader_readUint32(&reader, &o->loadImage);
+        Reader_readUInt32(&reader, &o->backImage);
+        Reader_readUInt32(&reader, &o->frontImage);
+        Reader_readUInt32(&reader, &o->loadImage);
         Reader_readBool32(&reader, &load_transparent);
-        Reader_readUint32(&reader, &o->loadAlpha);
+        Reader_readUInt32(&reader, &o->loadAlpha);
         Reader_readBool32(&reader, &scale_progress);
         Reader_readBool32(&reader, &display_errors);
         Reader_readBool32(&reader, &write_errors);
@@ -126,7 +126,7 @@ int OPTN_Parse(DataWin *dw) {
         return 0;
     }
 
-    Reader_readUint32(&reader, &o->constantCount);
+    Reader_readUInt32(&reader, &o->constantCount);
 
     if (o->constantCount == 0) {
         o->constants = NULL;

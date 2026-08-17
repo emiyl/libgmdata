@@ -1,7 +1,7 @@
 #include "gen8.h"
 
 static void GEN8_ParseRoomOrder(Reader *reader, Gen8 *g) {
-    Reader_readUint32(reader, &g->roomOrderCount);
+    Reader_readUInt32(reader, &g->roomOrderCount);
 
     if (g->roomOrderCount == 0) {
         g->roomOrder = NULL;
@@ -29,8 +29,8 @@ int GEN8_Parse(DataWin *dw) {
     Reader_init(&reader, base, chunk.length);
 
     // isDebuggerDisabled and wadVersion
-    Reader_readUint8(&reader, &g->isDebuggerDisabled);
-    Reader_readUint8(&reader, &g->wadVersion);
+    Reader_readUInt8(&reader, &g->isDebuggerDisabled);
+    Reader_readUInt8(&reader, &g->wadVersion);
     Reader_skip(&reader, 2); // padding
 
     Reader_readString(&reader, dw, &g->fileName);
@@ -41,9 +41,9 @@ int GEN8_Parse(DataWin *dw) {
         Reader_readString(&reader, dw, &g->config);
     }
 
-    Reader_readUint32(&reader, &g->lastObj);
-    Reader_readUint32(&reader, &g->lastTile);
-    Reader_readUint32(&reader, &g->gameID);
+    Reader_readUInt32(&reader, &g->lastObj);
+    Reader_readUInt32(&reader, &g->lastTile);
+    Reader_readUInt32(&reader, &g->gameID);
 
     Reader_readBytes(&reader, g->directPlayGuid, sizeof(g->directPlayGuid));
 
@@ -56,22 +56,22 @@ int GEN8_Parse(DataWin *dw) {
         g->build = 198;
     } else {
         Reader_readString(&reader, dw, &g->name);
-        Reader_readUint32(&reader, &g->major);
-        Reader_readUint32(&reader, &g->minor);
-        Reader_readUint32(&reader, &g->release);
-        Reader_readUint32(&reader, &g->build);
+        Reader_readUInt32(&reader, &g->major);
+        Reader_readUInt32(&reader, &g->minor);
+        Reader_readUInt32(&reader, &g->release);
+        Reader_readUInt32(&reader, &g->build);
     }
 
-    Reader_readUint32(&reader, &g->defaultWindowWidth);
-    Reader_readUint32(&reader, &g->defaultWindowHeight);
-    Reader_readUint32(&reader, &g->info);
-    Reader_readUint32(&reader, &g->licenseCRC32);
+    Reader_readUInt32(&reader, &g->defaultWindowWidth);
+    Reader_readUInt32(&reader, &g->defaultWindowHeight);
+    Reader_readUInt32(&reader, &g->info);
+    Reader_readUInt32(&reader, &g->licenseCRC32);
     Reader_readBytes(&reader, g->licenseMD5, sizeof(g->licenseMD5));
 
     // Compact WAD8 has a slightly different tail
     if (isCompactWad8) {
         uint32_t timestamp;
-        Reader_readUint32(&reader, &timestamp);
+        Reader_readUInt32(&reader, &timestamp);
         g->timestamp = (uint64_t)timestamp;
 
         Reader_skip(&reader, 4); // gap at offset 72
@@ -101,13 +101,13 @@ int GEN8_Parse(DataWin *dw) {
         }
 
         if (g->wadVersion >= 11) {
-            Reader_readUint64(&reader, &g->activeTargets);
+            Reader_readUInt64(&reader, &g->activeTargets);
         } else {
             g->activeTargets = 0;
         }
 
         if (g->wadVersion >= 12) {
-            Reader_readUint64(&reader, &g->functionClassifications);
+            Reader_readUInt64(&reader, &g->functionClassifications);
         } else {
             g->functionClassifications = 0;
         }
@@ -120,14 +120,14 @@ int GEN8_Parse(DataWin *dw) {
     }
 
     // WAD8 >= 12
-    Reader_readUint64(&reader, &g->timestamp);
+    Reader_readUInt64(&reader, &g->timestamp);
     Reader_readString(&reader, dw, &g->displayName);
-    Reader_readUint64(&reader, &g->activeTargets);
-    Reader_readUint64(&reader, &g->functionClassifications);
+    Reader_readUInt64(&reader, &g->activeTargets);
+    Reader_readUInt64(&reader, &g->functionClassifications);
     Reader_readInt32(&reader, &g->steamAppID);
 
     if (g->wadVersion >= 14) {
-        Reader_readUint32(&reader, &g->debuggerPort);
+        Reader_readUInt32(&reader, &g->debuggerPort);
     } else {
         g->debuggerPort = 0;
     }
@@ -163,7 +163,7 @@ void GEN8_Bytedump(DataWin *dw) {
 
     repeat(chunk.length, i) {
         uint8_t byte;
-        Reader_readUint8(&reader, &byte);
+        Reader_readUInt8(&reader, &byte);
 
         if (i % 16 == 0)
             printf("[%02x] ", i);

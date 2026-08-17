@@ -34,7 +34,7 @@ int EXTN_Parse(DataWin *dw) {
         uint32_t value;
 
         // 2022.6: [folder][name][className][filesPtr][optionsPtr][files list...]
-        if (Reader_readUint32At(&reader, firstExt + 12, &value) == 0 &&
+        if (Reader_readUInt32At(&reader, firstExt + 12, &value) == 0 &&
             value == firstExt + 20) {
             extStringCount = 3;
         }
@@ -44,9 +44,9 @@ int EXTN_Parse(DataWin *dw) {
         else {
             uint32_t filesPtr;
 
-            if (Reader_readUint32At(&reader, firstExt + 12, &value) == 0 &&
+            if (Reader_readUInt32At(&reader, firstExt + 12, &value) == 0 &&
                 value >= 0x1000 &&
-                Reader_readUint32At(&reader, firstExt + 16, &filesPtr) == 0 &&
+                Reader_readUInt32At(&reader, firstExt + 16, &filesPtr) == 0 &&
                 filesPtr == firstExt + 24) {
                 extStringCount = 4;
             }
@@ -76,7 +76,7 @@ int parse_extension(Reader *reader, DataWin *dw, Extension *ext, int32_t stringC
 
     if (stringCount > 0) {
         uint32_t filesPtr;
-        Reader_readUint32(reader, &filesPtr);
+        Reader_readUInt32(reader, &filesPtr);
         Reader_seek(reader, filesPtr);
     }
 
@@ -109,7 +109,7 @@ int parse_extension_file(Reader *reader, DataWin *dw, ExtensionFile *file) {
     Reader_readString(reader, dw, &file->filename);
     Reader_readString(reader, dw, &file->cleanupScript);
     Reader_readString(reader, dw, &file->initScript);
-    Reader_readUint32(reader, &file->kind);
+    Reader_readUInt32(reader, &file->kind);
 
     uint32_t funcCount;
     uint32_t *funcPtrs;
@@ -139,12 +139,12 @@ int parse_extension_function(Reader *reader, DataWin *dw, ExtensionFunction *fun
     }
 
     Reader_readString(reader, dw, &func->name);
-    Reader_readUint32(reader, &func->id);
-    Reader_readUint32(reader, &func->kind);
-    Reader_readUint32(reader, &func->retType);
+    Reader_readUInt32(reader, &func->id);
+    Reader_readUInt32(reader, &func->kind);
+    Reader_readUInt32(reader, &func->retType);
     Reader_readString(reader, dw, &func->extName);
 
-    Reader_readUint32(reader, &func->argumentCount);
+    Reader_readUInt32(reader, &func->argumentCount);
     if (func->argumentCount == 0) {
         func->arguments = NULL;
         return 0;
@@ -152,7 +152,7 @@ int parse_extension_function(Reader *reader, DataWin *dw, ExtensionFunction *fun
 
     func->arguments = (uint32_t *)malloc(sizeof(uint32_t) * func->argumentCount);
     repeat(func->argumentCount, i) {
-        Reader_readUint32(reader, &func->arguments[i]);
+        Reader_readUInt32(reader, &func->arguments[i]);
     }
 
     return 0;

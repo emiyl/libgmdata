@@ -12,9 +12,9 @@ int LANG_Parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length);
 
-    Reader_readUint32(&reader, &l->unknown1);
-    Reader_readUint32(&reader, &l->languageCount);
-    Reader_readUint32(&reader, &l->entryCount);
+    Reader_readUInt32(&reader, &l->unknown1);
+    Reader_readUInt32(&reader, &l->languageCount);
+    Reader_readUInt32(&reader, &l->entryCount);
 
     // Entry IDs
     if (l->entryCount > 0) {
