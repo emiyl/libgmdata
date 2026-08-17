@@ -1,4 +1,4 @@
-#include "lang.h"
+#include "common.h"
 
 int LANG_parse(DataWin *dw) {
     Chunk chunk = {0};

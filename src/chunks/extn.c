@@ -1,4 +1,4 @@
-#include "extn.h"
+#include "common.h"
 
 int Extension_parse(Reader *reader, DataWin *dw, Extension *ext, int32_t stringCount);
 int ExtensionFile_parse(Reader *reader, DataWin *dw, ExtensionFile *file);

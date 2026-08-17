@@ -1,14 +1,9 @@
 #include "datawin.h"
 
-#include "chunks.h"
+#include "chunk_table.h"
 #include "strings.h"
 
-#include "chunks/gen8.h"
-#include "chunks/optn.h"
-#include "chunks/lang.h"
-#include "chunks/extn.h"
-#include "chunks/sond.h"
-#include "chunks/agrp.h"
+#include "chunks/chunks.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -94,6 +89,7 @@ int DataWin_parse(DataWin *dw) {
     assert(EXTN_parse(dw) == 0);
     assert(SOND_parse(dw) == 0);
     assert(AGRP_parse(dw) == 0);
+    assert(SPRT_parse(dw) == 0);
 
     return 0;
 }

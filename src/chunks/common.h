@@ -9,7 +9,7 @@
 
 #include "../utils.h"
 #include "../types.h"
-#include "../chunks.h"
+#include "../chunk_table.h"
 #include "../reader.h"
 
 #endif

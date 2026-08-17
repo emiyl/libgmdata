@@ -11,6 +11,7 @@ void LANG_Print(const Lang *l);
 void EXTN_Print(const Extn *e);
 void SOND_Print(const Sond *s);
 void AGRP_Print(const Agrp *a);
+void SPRT_Print(const Sprt *s);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -31,6 +32,7 @@ int main(int argc, char **argv) {
     bool printExtn = false;
     bool printSond = false;
     bool printAgrp = false;
+    bool printSprt = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -50,6 +52,7 @@ int main(int argc, char **argv) {
                 printExtn = true;
                 printSond = true;
                 printAgrp = true;
+                printSprt = true;
             } else if (strcmp(name, "gen8") == 0) {
                 printGen8 = true;
             } else if (strcmp(name, "optn") == 0) {
@@ -62,6 +65,8 @@ int main(int argc, char **argv) {
                 printSond = true;
             } else if (strcmp(name, "agrp") == 0) {
                 printAgrp = true;
+            } else if (strcmp(name, "sprt") == 0) {
+                printSprt = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -111,6 +116,7 @@ int main(int argc, char **argv) {
     if (printExtn) EXTN_Print(&dw.extn);
     if (printSond) SOND_Print(&dw.sond);
     if (printAgrp) AGRP_Print(&dw.agrp);
+    if (printSprt) SPRT_Print(&dw.sprt);
 
     DataWin_free(&dw);
     return 0;
@@ -388,5 +394,103 @@ void AGRP_Print(const Agrp *a) {
         if (ag->path) {
             printf("    path: %s\n", ag->path);
         }
+    }
+}
+
+void SPRT_Print(const Sprt *s) {
+    printf("SPRT:\n");
+    printf("  count: %" PRIu32 "\n", s->count);
+    printf("  parsedCount: %" PRIu32 "\n", s->parsedCount);
+
+    for (uint32_t i = 0; i < s->count; i++) {
+        const Sprite *spr = &s->sprites[i];
+
+        printf("  sprite[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n", spr->present ? "true" : "false");
+
+        if (!spr->present) {
+            continue;
+        }
+
+        printf("    name: %s\n", spr->name ? spr->name : "(null)");
+        printf("    width: %" PRIu32 "\n", spr->width);
+        printf("    height: %" PRIu32 "\n", spr->height);
+
+        printf("    marginLeft: %" PRId32 "\n", spr->marginLeft);
+        printf("    marginRight: %" PRId32 "\n", spr->marginRight);
+        printf("    marginBottom: %" PRId32 "\n", spr->marginBottom);
+        printf("    marginTop: %" PRId32 "\n", spr->marginTop);
+
+        printf("    transparent: %s\n",
+               spr->transparent ? "true" : "false");
+        printf("    smooth: %s\n",
+               spr->smooth ? "true" : "false");
+        printf("    preload: %s\n",
+               spr->preload ? "true" : "false");
+
+        printf("    bboxMode: %" PRIu32 "\n", spr->bboxMode);
+        printf("    sepMasks: %" PRIu32 "\n", spr->sepMasks);
+
+        printf("    originX: %" PRId32 "\n", spr->originX);
+        printf("    originY: %" PRId32 "\n", spr->originY);
+
+        printf("    specialType: %s\n",
+               spr->specialType ? "true" : "false");
+
+        if (spr->specialType) {
+            printf("    sVersion: %" PRIu32 "\n", spr->sVersion);
+            printf("    sSpriteType: %" PRIu32 "\n", spr->sSpriteType);
+
+            if (spr->sSpriteType == 0) {
+                printf("    gms2PlaybackSpeed: %f\n",
+                       spr->gms2PlaybackSpeed);
+                printf("    gms2PlaybackSpeedType: %s\n",
+                       spr->gms2PlaybackSpeedType ? "true" : "false");
+            }
+        }
+
+        printf("    textureCount: %" PRId32 "\n", spr->textureCount);
+
+        if (spr->textureCount > 0 && spr->tpagIndices != NULL) {
+            printf("    tpagIndices:");
+            for (uint32_t j = 0; j < spr->textureCount; j++) {
+                printf(" %" PRId32, spr->tpagIndices[j]);
+            }
+            printf("\n");
+        }
+
+        printf("    maskWidth: %" PRIu32 "\n", spr->maskWidth);
+        printf("    maskHeight: %" PRIu32 "\n", spr->maskHeight);
+        printf("    maskOffsetX: %" PRId32 "\n", spr->maskOffsetX);
+        printf("    maskOffsetY: %" PRId32 "\n", spr->maskOffsetY);
+        printf("    maskCount: %" PRIu32 "\n", spr->maskCount);
+
+        /*
+         * Don't print the actual mask bytes by default. They can be
+         * extremely large and are primarily useful for debugging the
+         * parser itself.
+         */
+        printf("    masks: %s\n",
+               spr->masks ? "present" : "null");
+
+        if (spr->masks && spr->maskCount > 0) {
+            printf("    maskDimensions: %" PRIu32 "x%" PRIu32 "\n",
+                   spr->maskWidth,
+                   spr->maskHeight);
+        }
+
+        printf("    nineSlice:\n");
+        printf("      enabled: %s\n",
+               spr->nineSliceEnabled ? "true" : "false");
+        printf("      left: %" PRId32 "\n", spr->nsLeft);
+        printf("      top: %" PRId32 "\n", spr->nsTop);
+        printf("      right: %" PRId32 "\n", spr->nsRight);
+        printf("      bottom: %" PRId32 "\n", spr->nsBottom);
+
+        printf("      tileModes:");
+        for (int j = 0; j < 5; j++) {
+            printf(" %" PRIu8, spr->nsTileModes[j]);
+        }
+        printf("\n");
     }
 }

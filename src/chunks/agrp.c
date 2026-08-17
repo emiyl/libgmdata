@@ -1,4 +1,4 @@
-#include "agrp.h"
+#include "common.h"
 #include "../datawin.h"
 
 int AudioGroup_parse(Reader *reader, DataWin *dw, AudioGroup *ag);

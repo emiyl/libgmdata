@@ -11,6 +11,7 @@
 #include "types/extn.h"
 #include "types/sond.h"
 #include "types/agrp.h"
+#include "types/sprt.h"
 
 typedef struct {
     uint8_t *data;
@@ -60,8 +61,10 @@ typedef struct {
     Extn extn;
     Sond sond;
     Agrp agrp;
+    Sprt sprt;
 
     DetectedFormat detected_format;
+    uint8_t* mappedFile;
 
     bool initialized;
 } DataWin;

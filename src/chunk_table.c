@@ -1,4 +1,4 @@
-#include "chunks.h"
+#include "chunk_table.h"
 
 #include <stdlib.h>
 #include <string.h>
