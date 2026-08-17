@@ -109,15 +109,15 @@ int _read_u64_at(Reader *reader, size_t offset, uint64_t *out) {
     return 0;
 }
 
-int Reader_read_u8_at(Reader *reader, size_t offset, uint8_t *out) {
+int Reader_readUint8At(Reader *reader, size_t offset, uint8_t *out) {
     return _read_u8_at(reader, offset, out);
 }
 
-int Reader_read_u8(Reader *reader, uint8_t *out) {
-    return Reader_read_u8_at(reader, reader->cursor, out);
+int Reader_readUint8(Reader *reader, uint8_t *out) {
+    return Reader_readUint8At(reader, reader->cursor, out);
 }
 
-int Reader_read_i8_at(Reader *reader, size_t offset, int8_t *out) {
+int Reader_readInt8At(Reader *reader, size_t offset, int8_t *out) {
     uint8_t value;
     if (_read_u8_at(reader, offset, &value) != 0) {
         return -1;
@@ -127,19 +127,19 @@ int Reader_read_i8_at(Reader *reader, size_t offset, int8_t *out) {
     return 0;
 }
 
-int Reader_read_i8(Reader *reader, int8_t *out) {
-    return Reader_read_i8_at(reader, reader->cursor, out);
+int Reader_readInt8(Reader *reader, int8_t *out) {
+    return Reader_readInt8At(reader, reader->cursor, out);
 }
 
-int Reader_read_u16_at(Reader *reader, size_t offset, uint16_t *out) {
+int Reader_readUint16At(Reader *reader, size_t offset, uint16_t *out) {
     return _read_u16_at(reader, offset, out);
 }
 
-int Reader_read_u16(Reader *reader, uint16_t *out) {
-    return Reader_read_u16_at(reader, reader->cursor, out);
+int Reader_readUint16(Reader *reader, uint16_t *out) {
+    return Reader_readUint16At(reader, reader->cursor, out);
 }
 
-int Reader_read_i16_at(Reader *reader, size_t offset, int16_t *out) {
+int Reader_readInt16At(Reader *reader, size_t offset, int16_t *out) {
     uint16_t value;
     if (_read_u16_at(reader, offset, &value) != 0) {
         return -1;
@@ -149,11 +149,11 @@ int Reader_read_i16_at(Reader *reader, size_t offset, int16_t *out) {
     return 0;
 }
 
-int Reader_read_i16(Reader *reader, int16_t *out) {
-    return Reader_read_i16_at(reader, reader->cursor, out);
+int Reader_readInt16(Reader *reader, int16_t *out) {
+    return Reader_readInt16At(reader, reader->cursor, out);
 }
 
-int Reader_read_b32_at(Reader *reader, size_t offset, bool *out) {
+int Reader_readBool32At(Reader *reader, size_t offset, bool *out) {
     uint32_t value;
     if (_read_u32_at(reader, offset, &value) != 0) {
         return -1;
@@ -163,19 +163,19 @@ int Reader_read_b32_at(Reader *reader, size_t offset, bool *out) {
     return 0;
 }
 
-int Reader_read_b32(Reader *reader, bool *out) {
-    return Reader_read_b32_at(reader, reader->cursor, out);
+int Reader_readBool32(Reader *reader, bool *out) {
+    return Reader_readBool32At(reader, reader->cursor, out);
 }
 
-int Reader_read_u32_at(Reader *reader, size_t offset, uint32_t *out) {
+int Reader_readUint32At(Reader *reader, size_t offset, uint32_t *out) {
     return _read_u32_at(reader, offset, out);
 }
 
-int Reader_read_u32(Reader *reader, uint32_t *out) {
-    return Reader_read_u32_at(reader, reader->cursor, out);
+int Reader_readUint32(Reader *reader, uint32_t *out) {
+    return Reader_readUint32At(reader, reader->cursor, out);
 }
 
-int Reader_read_i32_at(Reader *reader, size_t offset, int32_t *out) {
+int Reader_readInt32At(Reader *reader, size_t offset, int32_t *out) {
     uint32_t value;
     if (_read_u32_at(reader, offset, &value) != 0) {
         return -1;
@@ -186,11 +186,11 @@ int Reader_read_i32_at(Reader *reader, size_t offset, int32_t *out) {
     return 0;
 }
 
-int Reader_read_i32(Reader *reader, int32_t *out) {
-    return Reader_read_i32_at(reader, reader->cursor, out);
+int Reader_readInt32(Reader *reader, int32_t *out) {
+    return Reader_readInt32At(reader, reader->cursor, out);
 }
 
-int Reader_read_f32_at(Reader *reader, size_t offset, float *out) {
+int Reader_readFloat32At(Reader *reader, size_t offset, float *out) {
     uint32_t value;
     if (_read_u32_at(reader, offset, &value) != 0) {
         return -1;
@@ -201,19 +201,19 @@ int Reader_read_f32_at(Reader *reader, size_t offset, float *out) {
     return 0;
 }
 
-int Reader_read_f32(Reader *reader, float *out) {
-    return Reader_read_f32_at(reader, reader->cursor, out);
+int Reader_readFloat32(Reader *reader, float *out) {
+    return Reader_readFloat32At(reader, reader->cursor, out);
 }
 
-int Reader_read_u64_at(Reader *reader, size_t offset, uint64_t *out) {
+int Reader_readUint64At(Reader *reader, size_t offset, uint64_t *out) {
     return _read_u64_at(reader, offset, out);
 }
 
-int Reader_read_u64(Reader *reader, uint64_t *out) {
-    return Reader_read_u64_at(reader, reader->cursor, out);
+int Reader_readUint64(Reader *reader, uint64_t *out) {
+    return Reader_readUint64At(reader, reader->cursor, out);
 }
 
-int Reader_read_i64_at(Reader *reader, size_t offset, int64_t *out) {
+int Reader_readInt64At(Reader *reader, size_t offset, int64_t *out) {
     uint64_t value;
     if (_read_u64_at(reader, offset, &value) != 0) {
         return -1;
@@ -224,11 +224,11 @@ int Reader_read_i64_at(Reader *reader, size_t offset, int64_t *out) {
     return 0;
 }
 
-int Reader_read_i64(Reader *reader, int64_t *out) {
-    return Reader_read_i64_at(reader, reader->cursor, out);
+int Reader_readInt64(Reader *reader, int64_t *out) {
+    return Reader_readInt64At(reader, reader->cursor, out);
 }
 
-int Reader_read_bytes(Reader *reader, void *out, size_t len) {
+int Reader_readBytes(Reader *reader, void *out, size_t len) {
     if (reader == NULL || reader->data == NULL || out == NULL) {
         return -1;
     }
@@ -246,14 +246,14 @@ int Reader_read_bytes(Reader *reader, void *out, size_t len) {
     return 0;
 }
 
-int Reader_read_string(Reader *reader, DataWin *dw, const char **out) {
+int Reader_readString(Reader *reader, DataWin *dw, const char **out) {
     uint32_t offset;
 
     if (reader == NULL || dw == NULL || out == NULL) {
         return -1;
     }
 
-    if (Reader_read_u32(reader, &offset) != 0) {
+    if (Reader_readUint32(reader, &offset) != 0) {
         return -1;
     }
 
@@ -262,13 +262,13 @@ int Reader_read_string(Reader *reader, DataWin *dw, const char **out) {
     return *out != NULL ? 0 : -1;
 }
 
-int read_pointer_table(Reader *reader, uint32_t **out_ptrs, uint32_t *out_count) {
+int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_count) {
     if (reader == NULL || out_ptrs == NULL || out_count == NULL) {
         return -1;
     }
 
     uint32_t count;
-    if (Reader_read_u32(reader, &count) != 0) {
+    if (Reader_readUint32(reader, &count) != 0) {
         return -1;
     }
 
@@ -284,7 +284,7 @@ int read_pointer_table(Reader *reader, uint32_t **out_ptrs, uint32_t *out_count)
     }
 
     for (uint32_t i = 0; i < count; ++i) {
-        if (Reader_read_u32(reader, &ptrs[i]) != 0) {
+        if (Reader_readUint32(reader, &ptrs[i]) != 0) {
             free(ptrs);
             return -1;
         }
