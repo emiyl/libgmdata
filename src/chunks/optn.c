@@ -1,6 +1,6 @@
 #include "optn.h"
 
-int OPTN_Parse(DataWin *dw) {
+int OPTN_parse(DataWin *dw) {
     Chunk chunk = {0};
     Optn *o = &dw->optn;
 
@@ -141,4 +141,21 @@ int OPTN_Parse(DataWin *dw) {
     }
 
     return 0;
+}
+
+void OPTN_free(Optn *o) {
+    if (o == NULL) {
+        return;
+    }
+
+    if (o->constants != NULL) {
+        for (uint32_t i = 0; i < o->constantCount; ++i) {
+            free((void *)o->constants[i].name);
+            free((void *)o->constants[i].value);
+        }
+        free(o->constants);
+        o->constants = NULL;
+    }
+
+    o->constantCount = 0;
 }

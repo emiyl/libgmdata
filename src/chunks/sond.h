@@ -3,6 +3,7 @@
 
 #include "common.h"
 
-int SOND_Parse(DataWin *dw);
+int SOND_parse(DataWin *dw);
+void SOND_free(Sond *s);
 
 #endif

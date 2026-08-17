@@ -3,6 +3,7 @@
 
 #include "common.h"
 
-int EXTN_Parse(DataWin *dw);
+int EXTN_parse(DataWin *dw);
+void EXTN_free(Extn *e);
 
 #endif

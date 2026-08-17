@@ -1,8 +1,8 @@
 #include "extn.h"
 
-int parse_extension(Reader *reader, DataWin *dw, Extension *ext, int32_t stringCount);
-int parse_extension_file(Reader *reader, DataWin *dw, ExtensionFile *file);
-int parse_extension_function(Reader *reader, DataWin *dw, ExtensionFunction *func);
+int Extension_parse(Reader *reader, DataWin *dw, Extension *ext, int32_t stringCount);
+int ExtensionFile_parse(Reader *reader, DataWin *dw, ExtensionFile *file);
+int ExtensionFunction_parse(Reader *reader, DataWin *dw, ExtensionFunction *func);
 
 int EXTN_Parse(DataWin *dw) {
     Chunk chunk = {0};
@@ -57,13 +57,13 @@ int EXTN_Parse(DataWin *dw) {
     repeat(extCount, i) {
         Reader_seek(&reader, extPtrs[i]);
         Extension* ext = &e->extensions[i];
-        parse_extension(&reader, dw, ext, extStringCount);
+        Extension_parse(&reader, dw, ext, extStringCount);
     }
 
     return 0;
 }
 
-int parse_extension(Reader *reader, DataWin *dw, Extension *ext, int32_t stringCount) {
+int Extension_parse(Reader *reader, DataWin *dw, Extension *ext, int32_t stringCount) {
     if (reader == NULL || ext == NULL) {
         return -1;
     }
@@ -95,13 +95,13 @@ int parse_extension(Reader *reader, DataWin *dw, Extension *ext, int32_t stringC
     repeat(fileCount, i) {
         Reader_seek(reader, filePtrs[i]);
         ExtensionFile *file = &ext->files[i];
-        parse_extension_file(reader, dw, file);
+        ExtensionFile_parse(reader, dw, file);
     }
 
     return 0;
 }
 
-int parse_extension_file(Reader *reader, DataWin *dw, ExtensionFile *file) {
+int ExtensionFile_parse(Reader *reader, DataWin *dw, ExtensionFile *file) {
     if (reader == NULL || file == NULL) {
         return -1;
     }
@@ -127,13 +127,13 @@ int parse_extension_file(Reader *reader, DataWin *dw, ExtensionFile *file) {
     repeat(funcCount, i) {
         Reader_seek(reader, funcPtrs[i]);
         ExtensionFunction *func = &file->functions[i];
-        parse_extension_function(reader, dw, func);
+        ExtensionFunction_parse(reader, dw, func);
     }
 
     return 0;
 }
 
-int parse_extension_function(Reader *reader, DataWin *dw, ExtensionFunction *func) {
+int ExtensionFunction_parse(Reader *reader, DataWin *dw, ExtensionFunction *func) {
     if (reader == NULL || func == NULL) {
         return -1;
     }
@@ -156,4 +156,37 @@ int parse_extension_function(Reader *reader, DataWin *dw, ExtensionFunction *fun
     }
 
     return 0;
+}
+
+void ExtensionFunction_free(ExtensionFunction *func) {
+    if (func == NULL) return;
+
+    free(func->arguments);
+}
+
+void ExtensionFile_free(ExtensionFile *file) {
+    if (file == NULL) return;
+
+    repeat(file->functionCount, i) {
+        ExtensionFunction_free(&file->functions[i]);
+    }
+    free(file->functions);
+}
+
+void Extension_free(Extension *ext) {
+    if (ext == NULL) return;
+
+    repeat(ext->fileCount, i) {
+        ExtensionFile_free(&ext->files[i]);
+    }
+    free(ext->files);
+}
+
+void EXTN_free(Extn *e) {
+    if (e == NULL) return;
+
+    repeat(e->count, i) {
+        Extension_free(&e->extensions[i]);
+    }
+    free(e->extensions);
 }

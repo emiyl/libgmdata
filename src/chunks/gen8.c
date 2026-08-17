@@ -15,7 +15,7 @@ static void GEN8_ParseRoomOrder(Reader *reader, Gen8 *g) {
     }
 }
 
-int GEN8_Parse(DataWin *dw) {
+int GEN8_parse(DataWin *dw) {
     Chunk chunk = {0};
     Gen8* g = &dw->gen8;
 
@@ -148,7 +148,23 @@ int GEN8_Parse(DataWin *dw) {
     return 0;
 }
 
-void GEN8_Bytedump(DataWin *dw) {
+void GEN8_free(Gen8 *g) {
+    if (g == NULL) return;
+
+    free((void *)g->fileName);
+    free((void *)g->config);
+    free((void *)g->name);
+    free((void *)g->displayName);
+    free(g->roomOrder);
+
+    g->fileName = NULL;
+    g->config = NULL;
+    g->name = NULL;
+    g->displayName = NULL;
+    g->roomOrder = NULL;
+}
+
+void GEN8_bytedump(DataWin *dw) {
     Chunk chunk = {0};
 
     assert(find_chunk(dw, "GEN8", &chunk) == 0);

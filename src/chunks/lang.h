@@ -3,6 +3,7 @@
 
 #include "common.h"
 
-int LANG_Parse(DataWin *dw);
+int LANG_parse(DataWin *dw);
+void LANG_free(Lang *l);
 
 #endif

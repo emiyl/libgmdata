@@ -1,6 +1,6 @@
 #include "lang.h"
 
-int LANG_Parse(DataWin *dw) {
+int LANG_parse(DataWin *dw) {
     Chunk chunk = {0};
     Lang *l = &dw->lang;
 
@@ -47,4 +47,26 @@ int LANG_Parse(DataWin *dw) {
     }
 
     return 0;
+}
+
+void LANG_free(Lang *l) {
+    if (l == NULL) {
+        return;
+    }
+
+    if (l->entryIds != NULL) {
+        free(l->entryIds);
+        l->entryIds = NULL;
+    }
+
+    if (l->languages != NULL) {
+        for (uint32_t i = 0; i < l->languageCount; ++i) {
+            if (l->languages[i].entries != NULL) {
+                free(l->languages[i].entries);
+                l->languages[i].entries = NULL;
+            }
+        }
+        free(l->languages);
+        l->languages = NULL;
+    }
 }

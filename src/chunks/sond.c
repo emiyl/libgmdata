@@ -3,7 +3,7 @@
 
 int Sound_parse(Reader *reader, DataWin *dw, Sound *sound);
 
-int SOND_Parse(DataWin *dw) {
+int SOND_parse(DataWin *dw) {
     Chunk chunk = {0};
     Sond *s = &dw->sond;
 
@@ -123,4 +123,29 @@ int Sound_parse(Reader *reader, DataWin *dw, Sound *snd) {
     Reader_readInt32(reader, &snd->audioFile);
 
     return 0;
+}
+
+void Sound_free(Sound *snd) {
+    if (snd == NULL) {
+        return;
+    }
+
+    snd->present = false;
+    snd->name = NULL;
+    snd->type = NULL;
+    snd->file = NULL;
+}
+
+void SOND_free(Sond *s) {
+    if (s == NULL) {
+        return;
+    }
+
+    for (uint32_t i = 0; i < s->count; ++i) {
+        Sound_free(&s->sounds[i]);
+    }
+
+    free(s->sounds);
+    s->sounds = NULL;
+    s->count = 0;
 }

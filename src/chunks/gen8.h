@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-int GEN8_Parse(DataWin *dw);
-void GEN8_Bytedump(DataWin *dw);
+int GEN8_parse(DataWin *dw);
+void GEN8_free(Gen8 *g);
 
 #endif

@@ -3,6 +3,7 @@
 
 #include "common.h"
 
-int OPTN_Parse(DataWin *dw);
+int OPTN_parse(DataWin *dw);
+void OPTN_free(Optn *o);
 
 #endif

@@ -86,12 +86,12 @@ int DataWin_parse(DataWin *dw) {
     assert(find_chunk(dw, "STRG", &strg) == 0);
     assert(parse_string_table(dw, strg.offset, strg.length) == 0);
 
-    assert(GEN8_Parse(dw) == 0);
+    assert(GEN8_parse(dw) == 0);
     DataWin_bumpVersionTo(dw, dw->gen8.major, dw->gen8.minor, dw->gen8.release, dw->gen8.build);
-    assert(OPTN_Parse(dw) == 0);
-    assert(LANG_Parse(dw) == 0);
-    assert(EXTN_Parse(dw) == 0);
-    assert(SOND_Parse(dw) == 0);
+    assert(OPTN_parse(dw) == 0);
+    assert(LANG_parse(dw) == 0);
+    assert(EXTN_parse(dw) == 0);
+    assert(SOND_parse(dw) == 0);
 
     return 0;
 }
@@ -103,6 +103,13 @@ void DataWin_free(DataWin *dw) {
 
     string_table_free(&dw->strings);
     chunk_table_free(&dw->chunks);
+
+    GEN8_free(&dw->gen8);
+    OPTN_free(&dw->optn);
+    LANG_free(&dw->lang);
+    EXTN_free(&dw->extn);
+    SOND_free(&dw->sond);
+
     free(dw->file_data);
     dw->file_data = NULL;
     dw->file_size = 0;
