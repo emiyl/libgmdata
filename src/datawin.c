@@ -86,7 +86,7 @@ int parse(DataWin *dw) {
     assert(parse_string_table(dw, strg.offset, strg.length) == 0);
 
     assert(GEN8_Parse(dw) == 0);
-    OPTN_Parse(dw);
+    assert(OPTN_Parse(dw) == 0);
 
     return 0;
 }
