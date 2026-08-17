@@ -87,6 +87,7 @@ int DataWin_parse(DataWin *dw) {
     assert(parse_string_table(dw, strg.offset, strg.length) == 0);
 
     assert(GEN8_Parse(dw) == 0);
+    DataWin_bumpVersionTo(dw, dw->gen8.major, dw->gen8.minor, dw->gen8.release, dw->gen8.build);
     assert(OPTN_Parse(dw) == 0);
     assert(LANG_Parse(dw) == 0);
     assert(EXTN_Parse(dw) == 0);
