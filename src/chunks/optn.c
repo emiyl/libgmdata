@@ -2,7 +2,7 @@
 
 int OPTN_parse(DataWin *dw) {
     Chunk chunk = {0};
-    Optn *o = &dw->optn;
+    OptnChunk *o = &dw->optn;
 
     if (find_chunk(dw, "OPTN", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
@@ -143,7 +143,7 @@ int OPTN_parse(DataWin *dw) {
     return 0;
 }
 
-void OPTN_free(Optn *o) {
+void OPTN_free(OptnChunk *o) {
     if (o == NULL) {
         return;
     }

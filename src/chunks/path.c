@@ -7,7 +7,7 @@ void GamePath_computeInternal(GamePath* path);
 
 int PATH_parse(DataWin *dw) {
     Chunk chunk = {0};
-    Path *p = &dw->path;
+    PathChunk *p = &dw->path;
 
     if (find_chunk(dw, "PATH", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
@@ -93,7 +93,7 @@ int GamePath_free(GamePath *path) {
     return 0;
 }
 
-int PATH_free(Path *path) {
+int PATH_free(PathChunk *path) {
     repeat(path->count, i) {
         GamePath_free(&path->paths[i]);
     }

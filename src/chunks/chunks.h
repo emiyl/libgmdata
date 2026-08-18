@@ -39,4 +39,7 @@ void GLOB_free(Glob *g);
 int SHDR_parse(DataWin *dw);
 void SHDR_free(Shdr *s);
 
+int FONT_parse(DataWin *dw);
+void FONT_free(FontChunk *f);
+
 #endif

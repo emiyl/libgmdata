@@ -5,7 +5,7 @@ int Sound_parse(Reader *reader, DataWin *dw, Sound *sound);
 
 int SOND_parse(DataWin *dw) {
     Chunk chunk = {0};
-    Sond *s = &dw->sond;
+    SondChunk *s = &dw->sond;
 
     if (find_chunk(dw, "SOND", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
@@ -131,7 +131,7 @@ void Sound_free(Sound *snd) {
     snd->file = NULL;
 }
 
-void SOND_free(Sond *s) {
+void SOND_free(SondChunk *s) {
     if (s == NULL) {
         return;
     }

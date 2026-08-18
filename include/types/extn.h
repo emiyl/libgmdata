@@ -33,6 +33,6 @@ typedef struct {
 typedef struct {
     uint32_t count;
     Extension* extensions;
-} Extn;
+} ExtnChunk;
 
 #endif

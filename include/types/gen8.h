@@ -31,6 +31,6 @@ typedef struct {
     uint32_t roomOrderCount;
     int32_t* roomOrder;
     float gms2FPS;
-} Gen8;
+} Gen8Chunk;
 
 #endif

@@ -5,7 +5,7 @@ int Sprite_parse(Reader *reader, DataWin *dw, Sprite *sprite);
 
 int SPRT_parse(DataWin *dw) {
     Chunk chunk = {0};
-    Sprt *s = &dw->sprt;
+    SprtChunk *s = &dw->sprt;
 
     if (find_chunk(dw, "SPRT", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
@@ -221,7 +221,7 @@ void Sprite_free(Sprite *spr) {
     spr->maskDataOwned = false;
 }
 
-void SPRT_free(Sprt *s) {
+void SPRT_free(SprtChunk *s) {
     if (s == NULL) return;
 
     repeat(s->count, i) {

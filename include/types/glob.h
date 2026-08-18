@@ -6,6 +6,6 @@
 typedef struct {
     uint32_t count;
     int32_t* codeIds;
-} Glob;
+} GlobChunk;
 
 #endif

@@ -4,7 +4,7 @@ int Shader_parse(Reader *reader, DataWin *dw, Shader *shader);
 
 int SHDR_parse(DataWin *dw) {
     Chunk chunk = {0};
-    Shdr *s = &dw->shdr;
+    ShdrChunk *s = &dw->shdr;
 
     if (find_chunk(dw, "SHDR", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
@@ -144,7 +144,7 @@ void Shader_free(Shader *sh) {
     }
 }
 
-void SHDR_free(Shdr *s) {
+void SHDR_free(ShdrChunk *s) {
     if (s == NULL) return;
 
     repeat(s->count, i) {

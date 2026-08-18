@@ -27,6 +27,6 @@ typedef struct {
 typedef struct {
     uint32_t count;
     Sound* sounds;
-} Sond;
+} SondChunk;
 
 #endif

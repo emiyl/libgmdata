@@ -5,7 +5,7 @@ int Background_parse(Reader *reader, DataWin *dw, Background *bg);
 
 int BGND_parse(DataWin *dw) {
     Chunk chunk = {0};
-    Bgnd *b = &dw->bgnd;
+    BgndChunk *b = &dw->bgnd;
 
     if (find_chunk(dw, "BGND", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
@@ -119,7 +119,7 @@ int Background_free(Background *bg) {
     return 0;
 }
 
-int BGND_free(Bgnd *b) {
+int BGND_free(BgndChunk *b) {
     if (b->backgrounds) {
         repeat(b->count, i) {
             Background_free(&b->backgrounds[i]);

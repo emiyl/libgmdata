@@ -2,7 +2,7 @@
 
 int LANG_parse(DataWin *dw) {
     Chunk chunk = {0};
-    Lang *l = &dw->lang;
+    LangChunk *l = &dw->lang;
 
     if (find_chunk(dw, "LANG", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
@@ -49,7 +49,7 @@ int LANG_parse(DataWin *dw) {
     return 0;
 }
 
-void LANG_free(Lang *l) {
+void LANG_free(LangChunk *l) {
     if (l == NULL) {
         return;
     }

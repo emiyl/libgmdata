@@ -5,18 +5,18 @@
 #include <assert.h>
 #include <inttypes.h>
 
-void GEN8_Print(const Gen8 *g);
-void OPTN_Print(const Optn *o);
-void LANG_Print(const Lang *l);
-void EXTN_Print(const Extn *e);
-void SOND_Print(const Sond *s);
-void AGRP_Print(const Agrp *a);
-void SPRT_Print(const Sprt *s);
-void BGND_Print(const Bgnd *b);
-void PATH_Print(const Path *p);
-void SCPT_Print(const Scpt *s);
-void GLOB_Print(const Glob *g);
-void SHDR_Print(const Shdr *s);
+void GEN8_Print(const Gen8Chunk *g);
+void OPTN_Print(const OptnChunk *o);
+void LANG_Print(const LangChunk *l);
+void EXTN_Print(const ExtnChunk *e);
+void SOND_Print(const SondChunk *s);
+void AGRP_Print(const AgrpChunk *a);
+void SPRT_Print(const SprtChunk *s);
+void BGND_Print(const BgndChunk *b);
+void PATH_Print(const PathChunk *p);
+void SCPT_Print(const ScptChunk *s);
+void GLOB_Print(const GlobChunk *g);
+void SHDR_Print(const ShdrChunk *s);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -152,7 +152,7 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void GEN8_Print(const Gen8 *g) {
+void GEN8_Print(const Gen8Chunk *g) {
     printf("GEN8:\n");
     printf("  isDebuggerDisabled: %s\n", g->isDebuggerDisabled ? "Yes" : "No");
     printf("  wadVersion: %" PRIu8 "\n", g->wadVersion);
@@ -196,7 +196,7 @@ void GEN8_Print(const Gen8 *g) {
     printf("  gms2FPS: %f\n", g->gms2FPS);
 }
 
-void OPTN_Print(const Optn *o) {
+void OPTN_Print(const OptnChunk *o) {
     if (o == NULL) {
         return;
     }
@@ -259,7 +259,7 @@ void OPTN_Print(const Optn *o) {
     }
 }
 
-void LANG_Print(const Lang *l) {
+void LANG_Print(const LangChunk *l) {
     if (l == NULL) {
         return;
     }
@@ -312,7 +312,7 @@ void LANG_Print(const Lang *l) {
     }
 }
 
-void EXTN_Print(const Extn *e) {
+void EXTN_Print(const ExtnChunk *e) {
     printf("EXTN:\n");
     printf("  extensionCount: %" PRIu32 "\n", e->count);
 
@@ -368,7 +368,7 @@ void EXTN_Print(const Extn *e) {
     }
 }
 
-void SOND_Print(const Sond *s) {
+void SOND_Print(const SondChunk *s) {
     printf("SOND:\n");
     printf("  count: %" PRIu32 "\n", s->count);
 
@@ -405,7 +405,7 @@ void SOND_Print(const Sond *s) {
     }
 }
 
-void AGRP_Print(const Agrp *a) {
+void AGRP_Print(const AgrpChunk *a) {
     printf("AGRP:\n");
     printf("  count: %" PRIu32 "\n", a->count);
 
@@ -427,7 +427,7 @@ void AGRP_Print(const Agrp *a) {
     }
 }
 
-void SPRT_Print(const Sprt *s) {
+void SPRT_Print(const SprtChunk *s) {
     printf("SPRT:\n");
     printf("  count: %" PRIu32 "\n", s->count);
     printf("  parsedCount: %" PRIu32 "\n", s->parsedCount);
@@ -525,7 +525,7 @@ void SPRT_Print(const Sprt *s) {
     }
 }
 
-void BGND_Print(const Bgnd *b) {
+void BGND_Print(const BgndChunk *b) {
     printf("BGND:\n");
     printf("  count: %" PRIu32 "\n", b->count);
 
@@ -589,7 +589,7 @@ void BGND_Print(const Bgnd *b) {
     }
 }
 
-void PATH_Print(const Path *p) {
+void PATH_Print(const PathChunk *p) {
     printf("PATH:\n");
     printf("  count: %" PRIu32 "\n", p->count);
 
@@ -641,7 +641,7 @@ void PATH_Print(const Path *p) {
     }
 }
 
-void SCPT_Print(const Scpt *s) {
+void SCPT_Print(const ScptChunk *s) {
     printf("SCPT:\n");
     printf("  count: %" PRIu32 "\n", s->count);
 
@@ -662,7 +662,7 @@ void SCPT_Print(const Scpt *s) {
     }
 }
 
-void GLOB_Print(const Glob *g) {
+void GLOB_Print(const GlobChunk *g) {
     printf("GLOB:\n");
     printf("  count: %" PRIu32 "\n", g->count);
 
@@ -677,7 +677,7 @@ void GLOB_Print(const Glob *g) {
     }
 }
 
-void SHDR_Print(const Shdr *s) {
+void SHDR_Print(const ShdrChunk *s) {
     printf("SHDR:\n");
     printf("  count: %" PRIu32 "\n", s->count);
 

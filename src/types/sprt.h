@@ -48,6 +48,6 @@ typedef struct {
     uint32_t count;
     uint32_t parsedCount; // number of sprites loaded from SPRT; slots >= parsedCount are runtime-allocated and own their `name`
     Sprite* sprites;
-} Sprt;
+} SprtChunk;
 
 #endif

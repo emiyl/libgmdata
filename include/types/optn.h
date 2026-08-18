@@ -50,6 +50,6 @@ typedef struct {
     uint32_t loadAlpha;
     uint32_t constantCount;
     OptnConstant* constants;
-} Optn;
+} OptnChunk;
 
 #endif

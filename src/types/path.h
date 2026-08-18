@@ -39,6 +39,6 @@ typedef struct {
 typedef struct {
     uint32_t count;
     GamePath* paths;
-} Path;
+} PathChunk;
 
 #endif

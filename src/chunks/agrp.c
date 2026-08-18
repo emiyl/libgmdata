@@ -5,7 +5,7 @@ int AudioGroup_parse(Reader *reader, DataWin *dw, AudioGroup *ag);
 
 int AGRP_parse(DataWin *dw) {
     Chunk chunk = {0};
-    Agrp *a = &dw->agrp;
+    AgrpChunk *a = &dw->agrp;
 
     if (find_chunk(dw, "AGRP", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
@@ -90,7 +90,7 @@ void AudioGroup_free(AudioGroup *ag) {
     if (ag->path) free((void*)ag->path);
 }
 
-void AGRP_free(Agrp *a) {
+void AGRP_free(AgrpChunk *a) {
     if (a->audioGroups) {
         repeat(a->count, i) {
             AudioGroup_free(&a->audioGroups[i]);

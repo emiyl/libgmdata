@@ -17,6 +17,7 @@
 #include "types/scpt.h"
 #include "types/glob.h"
 #include "types/shdr.h"
+#include "types/font.h"
 
 typedef struct {
     uint8_t *data;
@@ -62,18 +63,19 @@ typedef struct {
     StringTable strings;
     ChunkTable chunks;
 
-    Gen8 gen8;
-    Optn optn;
-    Lang lang;
-    Extn extn;
-    Sond sond;
-    Agrp agrp;
-    Sprt sprt;
-    Bgnd bgnd;
-    Path path;
-    Scpt scpt;
-    Glob glob;
-    Shdr shdr;
+    Gen8Chunk gen8;
+    OptnChunk optn;
+    LangChunk lang;
+    ExtnChunk extn;
+    SondChunk sond;
+    AgrpChunk agrp;
+    SprtChunk sprt;
+    BgndChunk bgnd;
+    PathChunk path;
+    ScptChunk scpt;
+    GlobChunk glob;
+    ShdrChunk shdr;
+    FontChunk font;
 
     DetectedFormat detected_format;
     uint8_t* mappedFile;

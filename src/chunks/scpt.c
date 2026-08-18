@@ -4,7 +4,7 @@ int Script_parse(Reader *reader, DataWin *dw, Script *script);
 
 int SCPT_parse(DataWin *dw) {
     Chunk chunk = {0};
-    Scpt *s = &dw->scpt;
+    ScptChunk *s = &dw->scpt;
 
     if (find_chunk(dw, "SCPT", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
@@ -52,7 +52,7 @@ int Script_free(Script *script) {
     return 0;
 }
 
-int SCPT_free(Scpt *scpt) {
+int SCPT_free(ScptChunk *scpt) {
     repeat(scpt->count, i) {
         Script_free(&scpt->scripts[i]);
     }

@@ -16,6 +16,6 @@ typedef struct {
     uint32_t entryCount;
     const char** entryIds;
     Language* languages;
-} Lang;
+} LangChunk;
 
 #endif

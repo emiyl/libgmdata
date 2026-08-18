@@ -12,6 +12,6 @@ typedef struct {
 typedef struct {
     uint32_t count;
     AudioGroup* audioGroups;
-} Agrp;
+} AgrpChunk;
 
 #endif

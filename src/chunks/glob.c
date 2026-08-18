@@ -2,7 +2,7 @@
 
 int GLOB_parse(DataWin *dw) {
     Chunk chunk = {0};
-    Glob *g = &dw->glob;
+    GlobChunk *g = &dw->glob;
 
     if (find_chunk(dw, "GLOB", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
@@ -26,7 +26,7 @@ int GLOB_parse(DataWin *dw) {
     return 0;
 }
 
-int GLOB_free(Glob *g) {
+int GLOB_free(GlobChunk *g) {
     if (g == NULL) return -1;
     free(g->codeIds);
     g->codeIds = NULL;

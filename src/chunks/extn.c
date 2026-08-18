@@ -6,7 +6,7 @@ int ExtensionFunction_parse(Reader *reader, DataWin *dw, ExtensionFunction *func
 
 int EXTN_parse(DataWin *dw) {
     Chunk chunk = {0};
-    Extn *e = &dw->extn;
+    ExtnChunk *e = &dw->extn;
 
     if (find_chunk(dw, "EXTN", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
@@ -182,7 +182,7 @@ void Extension_free(Extension *ext) {
     free(ext->files);
 }
 
-void EXTN_free(Extn *e) {
+void EXTN_free(ExtnChunk *e) {
     if (e == NULL) return;
 
     repeat(e->count, i) {

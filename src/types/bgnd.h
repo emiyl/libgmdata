@@ -28,6 +28,6 @@ typedef struct {
 typedef struct {
     uint32_t count;
     Background* backgrounds;
-} Bgnd;
+} BgndChunk;
 
 #endif

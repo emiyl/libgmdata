@@ -35,6 +35,6 @@ typedef struct {
 typedef struct {
     uint32_t count;
     Shader* shaders;
-} Shdr;
+} ShdrChunk;
 
 #endif
