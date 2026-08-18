@@ -91,6 +91,7 @@ int DataWin_parse(DataWin *dw) {
     assert(AGRP_parse(dw) == 0);
     assert(SPRT_parse(dw) == 0);
     assert(BGND_parse(dw) == 0);
+    assert(PATH_parse(dw) == 0);
 
     return 0;
 }

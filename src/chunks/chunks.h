@@ -27,4 +27,7 @@ void SPRT_free(Sprt *s);
 int BGND_parse(DataWin *dw);
 void BGND_free(Bgnd *b);
 
+int PATH_parse(DataWin *dw);
+void PATH_free(Path *p);
+
 #endif
