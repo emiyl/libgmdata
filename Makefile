@@ -20,6 +20,17 @@ LIB_TARGET = $(LIB_DIR)/libgmdata.a
 CLI_SRC = tools/gmdataparser.c
 CLI_TARGET = $(BIN_DIR)/gmdataparser
 
+PUBLIC_HEADERS = include/types.h include/types/*.h
+
+.DEFAULT_GOAL := all
+
+.PHONY: all lib install clean prepare_public_headers
+
+prepare_public_headers:
+	mkdir -p include/types
+	cp src/types.h include/types.h
+	cp src/types/*.h include/types/
+
 all: $(LIB_TARGET) $(CLI_TARGET)
 
 lib: $(LIB_TARGET)
@@ -29,13 +40,15 @@ install: $(LIB_TARGET) $(CLI_TARGET)
 	install -m 755 "$(CLI_TARGET)" "$(INSTALL_BIN_DIR)/gmdataparser"
 	install -m 644 "$(LIB_TARGET)" "$(INSTALL_LIB_DIR)/libgmdata.a"
 	install -m 644 include/*.h "$(INSTALL_INC_DIR)/"
+	install -m 644 include/types/*.h "$(INSTALL_INC_DIR)/types/"
 
-$(LIB_TARGET): $(LIB_OBJS)
+
+$(LIB_TARGET): $(LIB_OBJS) | prepare_public_headers
 	mkdir -p $(LIB_DIR)
 	$(AR) rcs $@ $^
 	$(RANLIB) $@
 
-$(CLI_TARGET): $(CLI_SRC) $(LIB_TARGET)
+$(CLI_TARGET): $(CLI_SRC) $(LIB_TARGET) | prepare_public_headers
 	mkdir -p $(BIN_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $(CLI_SRC) $(LIB_TARGET)
 
