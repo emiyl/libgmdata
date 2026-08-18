@@ -15,11 +15,14 @@
 #include "types/bgnd.h"
 #include "types/path.h"
 #include "types/scpt.h"
+#include "types/glob.h"
 
 typedef struct {
     uint8_t *data;
     size_t size;
+    size_t offset;
     size_t cursor;
+    const char* name; // Optional: Name of the data source for logging/debugging
 } Reader;
 
 typedef struct {
@@ -68,6 +71,7 @@ typedef struct {
     Bgnd bgnd;
     Path path;
     Scpt scpt;
+    Glob glob;
 
     DetectedFormat detected_format;
     uint8_t* mappedFile;

@@ -15,6 +15,7 @@ void SPRT_Print(const Sprt *s);
 void BGND_Print(const Bgnd *b);
 void PATH_Print(const Path *p);
 void SCPT_Print(const Scpt *s);
+void GLOB_Print(const Glob *g);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -39,6 +40,7 @@ int main(int argc, char **argv) {
     bool printBgnd = false;
     bool printPath = false;
     bool printScpt = false;
+    bool printGlob = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -62,6 +64,7 @@ int main(int argc, char **argv) {
                 printBgnd = true;
                 printPath = true;
                 printScpt = true;
+                printGlob = true;
             } else if (strcmp(name, "gen8") == 0) {
                 printGen8 = true;
             } else if (strcmp(name, "optn") == 0) {
@@ -82,6 +85,8 @@ int main(int argc, char **argv) {
                 printPath = true;
             } else if (strcmp(name, "scpt") == 0) {
                 printScpt = true;
+            } else if (strcmp(name, "glob") == 0) {
+                printGlob = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -135,6 +140,7 @@ int main(int argc, char **argv) {
     if (printBgnd) BGND_Print(&dw.bgnd);
     if (printPath) PATH_Print(&dw.path);
     if (printScpt) SCPT_Print(&dw.scpt);
+    if (printGlob) GLOB_Print(&dw.glob);
 
     DataWin_free(&dw);
     return 0;
@@ -647,5 +653,20 @@ void SCPT_Print(const Scpt *s) {
         printf("    name: %s\n",
                script->name ? script->name : "(null)");
         printf("    codeId: %" PRId32 "\n", script->codeId);
+    }
+}
+
+void GLOB_Print(const Glob *g) {
+    printf("GLOB:\n");
+    printf("  count: %" PRIu32 "\n", g->count);
+
+    if (g->codeIds == NULL) {
+        return;
+    }
+
+    for (uint32_t i = 0; i < g->count; i++) {
+        printf("  codeIds[%" PRIu32 "]: %" PRId32 "\n",
+               i,
+               g->codeIds[i]);
     }
 }

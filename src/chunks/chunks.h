@@ -33,4 +33,7 @@ void PATH_free(Path *p);
 int SCPT_parse(DataWin *dw);
 void SCPT_free(Scpt *s);
 
+int GLOB_parse(DataWin *dw);
+void GLOB_free(Glob *g);
+
 #endif
