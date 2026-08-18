@@ -17,6 +17,7 @@ typedef struct {
     uint8_t *data;
     size_t size;
     size_t cursor;
+    const char* name; // Optional: Name of the data source for logging/debugging
 } Reader;
 
 typedef struct {
