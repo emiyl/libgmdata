@@ -1,12 +1,13 @@
 #include "reader.h"
 #include "strings.h"
+#include "log.h"
 
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 
-void Reader_init(Reader *reader, const uint8_t *data, size_t size) {
+void Reader_init(Reader *reader, const uint8_t *data, size_t size, const char* name) {
     if (reader == NULL) {
         return;
     }
@@ -14,6 +15,7 @@ void Reader_init(Reader *reader, const uint8_t *data, size_t size) {
     reader->data = (uint8_t *)data;
     reader->size = size;
     reader->cursor = 0;
+    reader->name = name;
 }
 
 size_t Reader_remaining(const Reader *reader) {
@@ -30,10 +32,12 @@ size_t Reader_remaining(const Reader *reader) {
 
 int Reader_seek(Reader *reader, size_t offset) {
     if (reader == NULL || reader->data == NULL) {
+        logWarn("Reader_seek (%s): Attempted to seek in a NULL reader or with NULL data\n", reader ? reader->name : "NULL");
         return -1;
     }
 
     if (offset > reader->size) {
+        logWarn("Reader_seek (%s): Attempted to seek beyond the end of the buffer (offset: %zu, size: %zu)\n", reader->name, offset, reader->size);
         return -1;
     }
 
