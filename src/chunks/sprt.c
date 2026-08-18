@@ -19,7 +19,7 @@ int SPRT_parse(DataWin *dw) {
     uint32_t *ptrs;
     if (Reader_readPointerTable(&reader, &ptrs, &count) != 0) return -1;
     s->count = count;
-    s->parsedCount = count;
+    s->parsedCount = 0;
 
     if (count == 0) {
         s->sprites = NULL;
