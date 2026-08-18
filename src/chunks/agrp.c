@@ -61,7 +61,7 @@ int AGRP_parse(DataWin *dw) {
         }
     }
 
-    a->audioGroups = (AudioGroup *)calloc(count, sizeof(AudioGroup));
+    a->audioGroups = (AudioGroup *)safeCalloc(count, sizeof(AudioGroup));
 
     repeat(count, i) {
         if (ptrs[i] == 0) continue;

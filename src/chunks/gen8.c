@@ -8,7 +8,7 @@ static void GEN8_ParseRoomOrder(Reader *reader, Gen8 *g) {
         return;
     }
 
-    g->roomOrder = malloc(g->roomOrderCount * sizeof(*g->roomOrder));
+    g->roomOrder = safeMalloc(g->roomOrderCount * sizeof(*g->roomOrder));
 
     repeat(g->roomOrderCount, i) {
         Reader_readInt32(reader, &g->roomOrder[i]);

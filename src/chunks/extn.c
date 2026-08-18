@@ -53,7 +53,7 @@ int EXTN_parse(DataWin *dw) {
         }
     }
 
-    e->extensions = (Extension *)malloc(sizeof(Extension) * extCount);
+    e->extensions = (Extension *)safeMalloc(sizeof(Extension) * extCount);
     repeat(extCount, i) {
         Reader_seek(&reader, extPtrs[i]);
         Extension* ext = &e->extensions[i];
@@ -91,7 +91,7 @@ int Extension_parse(Reader *reader, DataWin *dw, Extension *ext, int32_t stringC
         return 0;
     }
 
-    ext->files = (ExtensionFile *)malloc(sizeof(ExtensionFile) * fileCount);
+    ext->files = (ExtensionFile *)safeMalloc(sizeof(ExtensionFile) * fileCount);
     repeat(fileCount, i) {
         Reader_seek(reader, filePtrs[i]);
         ExtensionFile *file = &ext->files[i];
@@ -123,7 +123,7 @@ int ExtensionFile_parse(Reader *reader, DataWin *dw, ExtensionFile *file) {
         return 0;
     }
 
-    file->functions = (ExtensionFunction *)malloc(sizeof(ExtensionFunction) * funcCount);
+    file->functions = (ExtensionFunction *)safeMalloc(sizeof(ExtensionFunction) * funcCount);
     repeat(funcCount, i) {
         Reader_seek(reader, funcPtrs[i]);
         ExtensionFunction *func = &file->functions[i];
@@ -150,7 +150,7 @@ int ExtensionFunction_parse(Reader *reader, DataWin *dw, ExtensionFunction *func
         return 0;
     }
 
-    func->arguments = (uint32_t *)malloc(sizeof(uint32_t) * func->argumentCount);
+    func->arguments = (uint32_t *)safeMalloc(sizeof(uint32_t) * func->argumentCount);
     repeat(func->argumentCount, i) {
         Reader_readUInt32(reader, &func->arguments[i]);
     }

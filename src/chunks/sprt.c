@@ -19,12 +19,12 @@ int SPRT_parse(DataWin *dw) {
     uint32_t *ptrs;
     if (Reader_readPointerTable(&reader, &ptrs, &count) != 0) return -1;
     s->count = count;
-    s->parsedCount = 0;
+    s->parsedCount = count;
 
     if (count == 0) {
         s->sprites = NULL;
         free(ptrs);
-        return 0; // Success
+        return 0;
     }
 
     s->sprites = (Sprite *)calloc(count, sizeof(Sprite));
@@ -93,7 +93,7 @@ int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
                 check = 0;
             }
         } else {
-            printf("libgmdata: Detected special sprite type %u (%s), but we don't support it yet!\n", spr->sSpriteType, spr->sSpriteType == 2 ? "Spine" : spr->sSpriteType == 1 ? "SWF" : "Unknown");
+            logWarn("libgmdata: Detected special sprite type %u (%s), but we don't support it yet!\n", spr->sSpriteType, spr->sSpriteType == 2 ? "Spine" : spr->sSpriteType == 1 ? "SWF" : "Unknown");
             spr->textureCount = 0;
             spr->tpagIndices = NULL;
             spr->maskCount = 0;
@@ -106,10 +106,7 @@ int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
     spr->textureCount = check;
     if (spr->textureCount > 0) {
         // Temporarily store the absolute file offsets here; parseTPAG resolves them in-place to TPAG indices once the TPAG table is known.
-        spr->tpagIndices = (int32_t *)malloc(spr->textureCount * sizeof(int32_t));
-        if (spr->tpagIndices == NULL) {
-            return -1;
-        }
+        spr->tpagIndices = (int32_t *)safeMalloc(spr->textureCount * sizeof(int32_t));
         repeat (spr->textureCount, i) {
             Reader_readInt32(reader, &spr->tpagIndices[i]);
         }
@@ -154,20 +151,14 @@ int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
         uint32_t bytesPerMask = bytesPerRow * spr->maskHeight;
 
         if (spr->sepMasks == 1 || !skipLoadingPreciseMasksForNonPreciseSprites) {
-            spr->masks = (uint8_t **)malloc(maskDataCount * sizeof(uint8_t*));
-            if (spr->masks == NULL) {
-                return -1;
-            }
+            spr->masks = (uint8_t **)safeMalloc(maskDataCount * sizeof(uint8_t*));
             if (dw->mappedFile) {
                 repeat(maskDataCount, j) {
                     spr->masks[j] = dw->mappedFile + reader->cursor;
                 }
             } else {
                 repeat(maskDataCount, j) {
-                    spr->masks[j] = (uint8_t *)malloc(bytesPerMask);
-                    if (spr->masks[j] == NULL) {
-                        return -1;
-                    }
+                    spr->masks[j] = (uint8_t *)safeMalloc(bytesPerMask);
                     Reader_readBytes(reader, spr->masks[j], bytesPerMask);
                 }
             }

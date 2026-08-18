@@ -133,7 +133,7 @@ int OPTN_parse(DataWin *dw) {
         return 0;
     }
 
-    o->constants = (OptnConstant *)malloc(o->constantCount * sizeof(OptnConstant));
+    o->constants = (OptnConstant *)safeMalloc(o->constantCount * sizeof(OptnConstant));
 
     repeat(o->constantCount, i) {
         Reader_readString(&reader, dw, &o->constants[i].name);

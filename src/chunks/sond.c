@@ -55,12 +55,7 @@ int SOND_parse(DataWin *dw) {
         }
     }
 
-    s->sounds = (Sound*) malloc(sizeof(Sound) * count);
-    if (s->sounds == NULL) {
-        free(ptrs);
-        return -1;
-    }
-
+    s->sounds = (Sound*) safeMalloc(sizeof(Sound) * count);
     repeat(count, i) {
         if (ptrs[i] == 0) {
             memset(&s->sounds[i], 0, sizeof(Sound));

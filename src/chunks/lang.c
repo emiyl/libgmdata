@@ -18,7 +18,7 @@ int LANG_parse(DataWin *dw) {
 
     // Entry IDs
     if (l->entryCount > 0) {
-        l->entryIds = (const char **)malloc(l->entryCount * sizeof(const char*));
+        l->entryIds = (const char **)safeMalloc(l->entryCount * sizeof(const char*));
         repeat(l->entryCount, i) {
             Reader_readString(&reader, dw, &l->entryIds[i]);
         }
@@ -28,13 +28,13 @@ int LANG_parse(DataWin *dw) {
 
     // Languages
     if (l->languageCount > 0) {
-        l->languages = (Language *)malloc(l->languageCount * sizeof(Language));
+        l->languages = (Language *)safeMalloc(l->languageCount * sizeof(Language));
         repeat(l->languageCount, i) {
             Reader_readString(&reader, dw, &l->languages[i].name);
             Reader_readString(&reader, dw, &l->languages[i].region);
             l->languages[i].entryCount = l->entryCount;
             if (l->entryCount > 0) {
-                l->languages[i].entries = (const char **)malloc(l->entryCount * sizeof(const char*));
+                l->languages[i].entries = (const char **)safeMalloc(l->entryCount * sizeof(const char*));
                 repeat(l->entryCount, j) {
                     Reader_readString(&reader, dw, &l->languages[i].entries[j]);
                 }
