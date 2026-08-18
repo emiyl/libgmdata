@@ -30,4 +30,7 @@ void BGND_free(Bgnd *b);
 int PATH_parse(DataWin *dw);
 void PATH_free(Path *p);
 
+int SCPT_parse(DataWin *dw);
+void SCPT_free(Scpt *s);
+
 #endif

@@ -14,6 +14,7 @@
 #include "types/sprt.h"
 #include "types/bgnd.h"
 #include "types/path.h"
+#include "types/scpt.h"
 
 typedef struct {
     uint8_t *data;
@@ -66,6 +67,7 @@ typedef struct {
     Sprt sprt;
     Bgnd bgnd;
     Path path;
+    Scpt scpt;
 
     DetectedFormat detected_format;
     uint8_t* mappedFile;

@@ -14,6 +14,7 @@ void AGRP_Print(const Agrp *a);
 void SPRT_Print(const Sprt *s);
 void BGND_Print(const Bgnd *b);
 void PATH_Print(const Path *p);
+void SCPT_Print(const Scpt *s);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -37,6 +38,7 @@ int main(int argc, char **argv) {
     bool printSprt = false;
     bool printBgnd = false;
     bool printPath = false;
+    bool printScpt = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -59,6 +61,7 @@ int main(int argc, char **argv) {
                 printSprt = true;
                 printBgnd = true;
                 printPath = true;
+                printScpt = true;
             } else if (strcmp(name, "gen8") == 0) {
                 printGen8 = true;
             } else if (strcmp(name, "optn") == 0) {
@@ -77,6 +80,8 @@ int main(int argc, char **argv) {
                 printBgnd = true;
             } else if (strcmp(name, "path") == 0) {
                 printPath = true;
+            } else if (strcmp(name, "scpt") == 0) {
+                printScpt = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -129,6 +134,7 @@ int main(int argc, char **argv) {
     if (printSprt) SPRT_Print(&dw.sprt);
     if (printBgnd) BGND_Print(&dw.bgnd);
     if (printPath) PATH_Print(&dw.path);
+    if (printScpt) SCPT_Print(&dw.scpt);
 
     DataWin_free(&dw);
     return 0;
@@ -620,5 +626,26 @@ void PATH_Print(const Path *p) {
                 printf("      speed: %f\n", point->speed);
             }
         }
+    }
+}
+
+void SCPT_Print(const Scpt *s) {
+    printf("SCPT:\n");
+    printf("  count: %" PRIu32 "\n", s->count);
+
+    for (uint32_t i = 0; i < s->count; i++) {
+        const Script *script = &s->scripts[i];
+
+        printf("  script[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n",
+               script->present ? "true" : "false");
+
+        if (!script->present) {
+            continue;
+        }
+
+        printf("    name: %s\n",
+               script->name ? script->name : "(null)");
+        printf("    codeId: %" PRId32 "\n", script->codeId);
     }
 }
