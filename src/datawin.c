@@ -112,6 +112,7 @@ void DataWin_free(DataWin *dw) {
     AGRP_free(&dw->agrp);
     SPRT_free(&dw->sprt);
     BGND_free(&dw->bgnd);
+    PATH_free(&dw->path);
 
     free(dw->file_data);
     dw->file_data = NULL;
