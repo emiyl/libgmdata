@@ -13,6 +13,7 @@ void SOND_Print(const Sond *s);
 void AGRP_Print(const Agrp *a);
 void SPRT_Print(const Sprt *s);
 void BGND_Print(const Bgnd *b);
+void PATH_Print(const Path *p);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -35,6 +36,7 @@ int main(int argc, char **argv) {
     bool printAgrp = false;
     bool printSprt = false;
     bool printBgnd = false;
+    bool printPath = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -56,6 +58,7 @@ int main(int argc, char **argv) {
                 printAgrp = true;
                 printSprt = true;
                 printBgnd = true;
+                printPath = true;
             } else if (strcmp(name, "gen8") == 0) {
                 printGen8 = true;
             } else if (strcmp(name, "optn") == 0) {
@@ -72,6 +75,8 @@ int main(int argc, char **argv) {
                 printSprt = true;
             } else if (strcmp(name, "bgnd") == 0) {
                 printBgnd = true;
+            } else if (strcmp(name, "path") == 0) {
+                printPath = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -123,6 +128,7 @@ int main(int argc, char **argv) {
     if (printAgrp) AGRP_Print(&dw.agrp);
     if (printSprt) SPRT_Print(&dw.sprt);
     if (printBgnd) BGND_Print(&dw.bgnd);
+    if (printPath) PATH_Print(&dw.path);
 
     DataWin_free(&dw);
     return 0;
@@ -561,6 +567,58 @@ void BGND_Print(const Bgnd *b) {
                 }
             }
             printf("\n");
+        }
+    }
+}
+
+void PATH_Print(const Path *p) {
+    printf("PATH:\n");
+    printf("  count: %" PRIu32 "\n", p->count);
+
+    for (uint32_t i = 0; i < p->count; i++) {
+        const GamePath *path = &p->paths[i];
+
+        printf("  path[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n", path->present ? "true" : "false");
+
+        if (!path->present) {
+            continue;
+        }
+
+        printf("    name: %s\n", path->name ? path->name : "(null)");
+        printf("    isSmooth: %s\n",
+               path->isSmooth ? "true" : "false");
+        printf("    isClosed: %s\n",
+               path->isClosed ? "true" : "false");
+        printf("    precision: %" PRIu32 "\n", path->precision);
+        printf("    exists: %s\n",
+               path->exists ? "true" : "false");
+
+        printf("    pointCount: %" PRIu32 "\n", path->pointCount);
+
+        for (uint32_t j = 0; j < path->pointCount; j++) {
+            const PathPoint *point = &path->points[j];
+
+            printf("    point[%" PRIu32 "]:\n", j);
+            printf("      x: %f\n", point->x);
+            printf("      y: %f\n", point->y);
+            printf("      speed: %f\n", point->speed);
+        }
+
+        printf("    internalPointCount: %" PRIu32 "\n",
+               path->internalPointCount);
+        printf("    length: %f\n", path->length);
+
+        if (path->internalPoints != NULL) {
+            for (uint32_t j = 0; j < path->internalPointCount; j++) {
+                const InternalPathPoint *point =
+                    &path->internalPoints[j];
+
+                printf("    internalPoint[%" PRIu32 "]:\n", j);
+                printf("      x: %f\n", point->x);
+                printf("      y: %f\n", point->y);
+                printf("      speed: %f\n", point->speed);
+            }
         }
     }
 }

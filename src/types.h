@@ -13,6 +13,7 @@
 #include "types/agrp.h"
 #include "types/sprt.h"
 #include "types/bgnd.h"
+#include "types/path.h"
 
 typedef struct {
     uint8_t *data;
@@ -66,6 +67,7 @@ typedef struct {
     Agrp agrp;
     Sprt sprt;
     Bgnd bgnd;
+    Path path;
 
     DetectedFormat detected_format;
     uint8_t* mappedFile;
