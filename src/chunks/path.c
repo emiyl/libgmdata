@@ -80,6 +80,29 @@ int PathPoint_parse(Reader *reader, PathPoint *point) {
     return 0;
 }
 
+int GamePath_free(GamePath *path) {
+    free(path->points);
+    path->points = NULL;
+    path->pointCount = 0;
+
+    free(path->internalPoints);
+    path->internalPoints = NULL;
+    path->internalPointCount = 0;
+    path->length = 0.0;
+
+    return 0;
+}
+
+int PATH_free(Path *path) {
+    repeat(path->count, i) {
+        GamePath_free(&path->paths[i]);
+    }
+    free(path->paths);
+    path->paths = NULL;
+    path->count = 0;
+    return 0;
+}
+
 static InternalPathPoint *tempIntPoints = NULL;
 static uint32_t tempIntPointCount = 0;
 static uint32_t tempIntPointCapacity = 0;
