@@ -351,11 +351,24 @@ int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_c
     }
 
     for (uint32_t i = 0; i < count; ++i) {
-        if (Reader_readUInt32(reader, &ptrs[i]) != 0) {
+        uint32_t absolute;
+        if (Reader_readUInt32(reader, &absolute) != 0) {
             free(ptrs);
             return -1;
         }
-        ptrs[i] -= reader->offset;  // Adjust pointer based on the reader's offset
+
+        if (absolute < reader->offset) {
+            ptrs[i] = 0;
+            continue;
+        }
+
+        uint32_t relative = absolute - reader->offset;
+        if (relative >= reader->size) {
+            ptrs[i] = 0;
+            continue;
+        }
+
+        ptrs[i] = relative;
     }
 
     *out_ptrs = ptrs;

@@ -95,6 +95,8 @@ int DataWin_parse(DataWin *dw) {
     assert(SCPT_parse(dw) == 0);
     assert(GLOB_parse(dw) == 0);
     assert(SHDR_parse(dw) == 0);
+    assert(FONT_parse(dw) == 0);
+    assert(TMLN_parse(dw) == 0);
 
     return 0;
 }
@@ -119,6 +121,8 @@ void DataWin_free(DataWin *dw) {
     SCPT_free(&dw->scpt);
     GLOB_free(&dw->glob);
     SHDR_free(&dw->shdr);
+    FONT_free(&dw->font);
+    TMLN_free(&dw->tmln);
 
     free(dw->file_data);
     dw->file_data = NULL;

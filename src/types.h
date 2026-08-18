@@ -18,6 +18,7 @@
 #include "types/glob.h"
 #include "types/shdr.h"
 #include "types/font.h"
+#include "types/tmln.h"
 
 typedef struct {
     uint8_t *data;
@@ -76,6 +77,7 @@ typedef struct {
     GlobChunk glob;
     ShdrChunk shdr;
     FontChunk font;
+    TmlnChunk tmln;
 
     DetectedFormat detected_format;
     uint8_t* mappedFile;

@@ -42,4 +42,7 @@ void SHDR_free(ShdrChunk *s);
 int FONT_parse(DataWin *dw);
 void FONT_free(FontChunk *f);
 
+int TMLN_parse(DataWin *dw);
+void TMLN_free(TmlnChunk *t);
+
 #endif

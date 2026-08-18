@@ -17,6 +17,8 @@ void PATH_Print(const PathChunk *p);
 void SCPT_Print(const ScptChunk *s);
 void GLOB_Print(const GlobChunk *g);
 void SHDR_Print(const ShdrChunk *s);
+void FONT_Print(const FontChunk *f);
+void TMLN_Print(const TmlnChunk *t);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -43,6 +45,8 @@ int main(int argc, char **argv) {
     bool printScpt = false;
     bool printGlob = false;
     bool printShdr = false;
+    bool printFont = false;
+    bool printTmln = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -68,6 +72,8 @@ int main(int argc, char **argv) {
                 printScpt = true;
                 printGlob = true;
                 printShdr = true;
+                printFont = true;
+                printTmln = true;
             } else if (strcmp(name, "gen8") == 0) {
                 printGen8 = true;
             } else if (strcmp(name, "optn") == 0) {
@@ -92,6 +98,10 @@ int main(int argc, char **argv) {
                 printGlob = true;
             } else if (strcmp(name, "shdr") == 0) {
                 printShdr = true;
+            } else if (strcmp(name, "font") == 0) {
+                printFont = true;
+            } else if (strcmp(name, "tmln") == 0) {
+                printTmln = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -147,6 +157,8 @@ int main(int argc, char **argv) {
     if (printScpt) SCPT_Print(&dw.scpt);
     if (printGlob) GLOB_Print(&dw.glob);
     if (printShdr) SHDR_Print(&dw.shdr);
+    if (printFont) FONT_Print(&dw.font);
+    if (printTmln) TMLN_Print(&dw.tmln);
 
     DataWin_free(&dw);
     return 0;
@@ -757,6 +769,163 @@ void SHDR_Print(const ShdrChunk *s) {
                        sh->cgPS3_PixelOffset);
                 printf("    cgPS3_PixelLen: %" PRIu32 "\n",
                        sh->cgPS3_PixelLen);
+            }
+        }
+    }
+}
+
+void FONT_Print(const FontChunk *f) {
+    printf("FONT:\n");
+    printf("  count: %" PRIu32 "\n", f->count);
+
+    for (uint32_t i = 0; i < f->count; i++) {
+        const Font *font = &f->fonts[i];
+
+        printf("  font[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n", font->present ? "true" : "false");
+
+        if (!font->present) {
+            continue;
+        }
+
+        printf("    name: %s\n",
+               font->name ? font->name : "(null)");
+        printf("    displayName: %s\n",
+               font->displayName ? font->displayName : "(null)");
+
+        printf("    emSize: %f\n", font->emSize);
+        printf("    bold: %s\n", font->bold ? "true" : "false");
+        printf("    italic: %s\n", font->italic ? "true" : "false");
+
+        printf("    rangeStart: %" PRIu16 "\n", font->rangeStart);
+        printf("    rangeEnd: %" PRIu32 "\n", font->rangeEnd);
+        printf("    charset: %" PRIu8 "\n", font->charset);
+        printf("    antiAliasing: %" PRIu8 "\n", font->antiAliasing);
+
+        printf("    tpagIndex: %" PRId32 "\n", font->tpagIndex);
+        printf("    scaleX: %f\n", font->scaleX);
+        printf("    scaleY: %f\n", font->scaleY);
+
+        printf("    ascenderOffset: %" PRId32 "\n",
+               font->ascenderOffset);
+        printf("    hasAscender: %s\n",
+               font->hasAscender ? "true" : "false");
+        printf("    ascender: %" PRIu32 "\n", font->ascender);
+
+        printf("    hasSDFSpread: %s\n",
+               font->hasSDFSpread ? "true" : "false");
+        printf("    sdfSpread: %" PRIu32 "\n", font->sdfSpread);
+
+        printf("    hasLineHeight: %s\n",
+               font->hasLineHeight ? "true" : "false");
+        printf("    lineHeight: %" PRIu32 "\n", font->lineHeight);
+
+        printf("    isSpriteFont: %s\n",
+               font->isSpriteFont ? "true" : "false");
+        printf("    spriteIndex: %" PRId32 "\n",
+               font->spriteIndex);
+        printf("    spriteOriginYAdjust: %" PRId32 "\n",
+               font->spriteOriginYAdjust);
+
+        printf("    glyphCount: %" PRIu32 "\n", font->glyphCount);
+        printf("    maxGlyphHeight: %" PRIu32 "\n",
+               font->maxGlyphHeight);
+
+        for (uint32_t j = 0; j < font->glyphCount; j++) {
+            const FontGlyph *glyph = &font->glyphs[j];
+
+            printf("    glyph[%" PRIu32 "]:\n", j);
+            printf("      character: %" PRIu16 "\n",
+                   glyph->character);
+            printf("      sourceX: %" PRIu16 "\n",
+                   glyph->sourceX);
+            printf("      sourceY: %" PRIu16 "\n",
+                   glyph->sourceY);
+            printf("      sourceWidth: %" PRIu16 "\n",
+                   glyph->sourceWidth);
+            printf("      sourceHeight: %" PRIu16 "\n",
+                   glyph->sourceHeight);
+            printf("      shift: %" PRId16 "\n",
+                   glyph->shift);
+            printf("      offset: %" PRId16 "\n",
+                   glyph->offset);
+
+            printf("      kerningCount: %" PRIu16 "\n",
+                   glyph->kerningCount);
+
+            for (uint16_t k = 0; k < glyph->kerningCount; k++) {
+                const KerningPair *pair = &glyph->kerning[k];
+
+                printf("      kerning[%" PRIu16 "]:\n", k);
+                printf("        character: %" PRId16 "\n",
+                       pair->character);
+                printf("        shiftModifier: %" PRId16 "\n",
+                       pair->shiftModifier);
+            }
+        }
+    }
+}
+
+void TMLN_Print(const TmlnChunk *t) {
+    printf("TMLN:\n");
+    printf("  count: %" PRIu32 "\n", t->count);
+
+    for (uint32_t i = 0; i < t->count; i++) {
+        const Timeline *tl = &t->timelines[i];
+
+        printf("  timeline[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n", tl->present ? "true" : "false");
+
+        if (!tl->present) {
+            continue;
+        }
+
+        printf("    name: %s\n",
+               tl->name ? tl->name : "(null)");
+        printf("    momentCount: %" PRIu32 "\n",
+               tl->momentCount);
+
+        for (uint32_t j = 0; j < tl->momentCount; j++) {
+            const TimelineMoment *moment = &tl->moments[j];
+
+            printf("    moment[%" PRIu32 "]:\n", j);
+            printf("      actionCount: %" PRIu32 "\n",
+                   moment->actionCount);
+
+            for (uint32_t k = 0; k < moment->actionCount; k++) {
+                const EventAction *action = &moment->actions[k];
+
+                printf("      action[%" PRIu32 "]:\n", k);
+                printf("        libID: %" PRIu32 "\n",
+                       action->libID);
+                printf("        id: %" PRIu32 "\n",
+                       action->id);
+                printf("        kind: %" PRIu32 "\n",
+                       action->kind);
+                printf("        useRelative: %s\n",
+                       action->useRelative ? "true" : "false");
+                printf("        isQuestion: %s\n",
+                       action->isQuestion ? "true" : "false");
+                printf("        useApplyTo: %s\n",
+                       action->useApplyTo ? "true" : "false");
+                printf("        exeType: %" PRIu32 "\n",
+                       action->exeType);
+                printf("        actionName: %s\n",
+                       action->actionName
+                           ? action->actionName
+                           : "(null)");
+                printf("        codeId: %" PRId32 "\n",
+                       action->codeId);
+                printf("        argumentCount: %" PRIu32 "\n",
+                       action->argumentCount);
+                printf("        who: %" PRId32 "\n",
+                       action->who);
+                printf("        relative: %s\n",
+                       action->relative ? "true" : "false");
+                printf("        isNot: %s\n",
+                       action->isNot ? "true" : "false");
+                printf("        unknownAlwaysZero: %" PRIu32 "\n",
+                       action->unknownAlwaysZero);
             }
         }
     }

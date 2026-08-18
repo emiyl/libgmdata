@@ -33,7 +33,7 @@ int SPRT_parse(DataWin *dw) {
         return -1;
     }
     repeat (count, i) {
-        if (ptrs[i] == 0) continue;
+        if (ptrs[i] == 0 || ptrs[i] >= reader.size) continue;
         Reader_seek(&reader, ptrs[i]);
         if (Sprite_parse(&reader, dw, &s->sprites[i]) != 0) {
             free(ptrs);
