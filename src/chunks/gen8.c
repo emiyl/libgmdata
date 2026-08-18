@@ -1,23 +1,10 @@
 #include "common.h"
 
-static void GEN8_ParseRoomOrder(Reader *reader, Gen8 *g) {
-    Reader_readUInt32(reader, &g->roomOrderCount);
-
-    if (g->roomOrderCount == 0) {
-        g->roomOrder = NULL;
-        return;
-    }
-
-    g->roomOrder = safeMalloc(g->roomOrderCount * sizeof(*g->roomOrder));
-
-    repeat(g->roomOrderCount, i) {
-        Reader_readInt32(reader, &g->roomOrder[i]);
-    }
-}
+static int RoomOrder_parse(Reader *reader, Gen8Chunk *g);
 
 int GEN8_parse(DataWin *dw) {
     Chunk chunk = {0};
-    Gen8* g = &dw->gen8;
+    Gen8Chunk* g = &dw->gen8;
 
     if(find_chunk(dw, "GEN8", &chunk) != 0) return -1;
     if(chunk.offset + chunk.length > dw->file_size) return -1;
@@ -82,7 +69,7 @@ int GEN8_parse(DataWin *dw) {
         g->steamAppID = 0;
         g->debuggerPort = 0;
 
-        GEN8_ParseRoomOrder(&reader, g);
+        RoomOrder_parse(&reader, g);
         return 0;
     }
 
@@ -115,7 +102,7 @@ int GEN8_parse(DataWin *dw) {
         g->steamAppID = 0;
         g->debuggerPort = 0;
 
-        GEN8_ParseRoomOrder(&reader, g);
+        RoomOrder_parse(&reader, g);
         return 0;
     }
 
@@ -132,7 +119,7 @@ int GEN8_parse(DataWin *dw) {
         g->debuggerPort = 0;
     }
 
-    GEN8_ParseRoomOrder(&reader, g);
+    RoomOrder_parse(&reader, g);
 
     // GMS2+ fields
     if (g->major >= 2) {
@@ -148,18 +135,34 @@ int GEN8_parse(DataWin *dw) {
     return 0;
 }
 
-void GEN8_free(Gen8 *g) {
-    if (g == NULL) return;
+static int RoomOrder_parse(Reader *reader, Gen8Chunk *g) {
+    Reader_readUInt32(reader, &g->roomOrderCount);
 
-    free((void *)g->fileName);
-    free((void *)g->config);
-    free((void *)g->name);
-    free((void *)g->displayName);
-    free(g->roomOrder);
+    if (g->roomOrderCount == 0) {
+        g->roomOrder = NULL;
+        return 0;
+    }
 
-    g->fileName = NULL;
-    g->config = NULL;
-    g->name = NULL;
-    g->displayName = NULL;
-    g->roomOrder = NULL;
+    g->roomOrder = safeMalloc(g->roomOrderCount * sizeof(*g->roomOrder));
+
+    repeat(g->roomOrderCount, i) {
+        Reader_readInt32(reader, &g->roomOrder[i]);
+    }
+    return 0;
+}
+
+void RoomOrder_free(Gen8Chunk *g) {
+    if (g->roomOrder) {
+        free(g->roomOrder);
+        g->roomOrder = NULL;
+    }
+    g->roomOrderCount = 0;
+}
+
+void GEN8_free(Gen8Chunk *g) {
+    if (g->fileName) free((void*)g->fileName);
+    if (g->config) free((void*)g->config);
+    if (g->name) free((void*)g->name);
+    if (g->displayName) free((void*)g->displayName);
+    RoomOrder_free(g);
 }
