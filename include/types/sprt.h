@@ -28,6 +28,7 @@ typedef struct {
     int32_t* tpagIndices;    // resolved TPAG indices (one per frame); -1 for unresolved
     uint32_t maskCount;       // number of collision masks (one per frame, or 0)
     uint8_t** masks;          // array of maskCount packed bit arrays (nullptr if none)
+    bool maskDataOwned;       // true when masks[] entries were heap-allocated; false when they point into the file mapping
     // Collision mask storage dimensions. Pre-2024.6 these equal the full sprite width/height with zero offset.
     // GMS 2024.6+ stores masks at bounding-box dimensions, so the mask covers only [maskOffsetX, maskOffsetX+maskWidth).
     uint32_t maskWidth;

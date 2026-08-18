@@ -152,9 +152,11 @@ int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
 
         if (spr->sepMasks == 1 || !skipLoadingPreciseMasksForNonPreciseSprites) {
             spr->masks = (uint8_t **)safeMalloc(maskDataCount * sizeof(uint8_t*));
+            spr->maskDataOwned = !dw->mappedFile;
             if (dw->mappedFile) {
                 repeat(maskDataCount, j) {
                     spr->masks[j] = dw->mappedFile + reader->cursor;
+                    reader->cursor += bytesPerMask;
                 }
             } else {
                 repeat(maskDataCount, j) {
@@ -165,6 +167,7 @@ int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
         } else {
             Reader_skip(reader, bytesPerMask * maskDataCount);
             spr->masks = NULL;
+            spr->maskDataOwned = false;
         }
         // Pad the TOTAL mask data to 4-byte alignment (not per-mask)
         uint32_t totalMaskBytes = bytesPerMask * maskDataCount;
@@ -200,14 +203,22 @@ void Sprite_free(Sprite *spr) {
     if (spr == NULL) return;
 
     free((void *)spr->name);
+    spr->name = NULL;
+
     free(spr->tpagIndices);
+    spr->tpagIndices = NULL;
 
     if (spr->masks != NULL) {
-        repeat(spr->maskCount, i) {
-            free(spr->masks[i]);
+        if (spr->maskDataOwned) {
+            repeat(spr->maskCount, i) {
+                free(spr->masks[i]);
+            }
         }
         free(spr->masks);
+        spr->masks = NULL;
     }
+    spr->maskCount = 0;
+    spr->maskDataOwned = false;
 }
 
 void SPRT_free(Sprt *s) {
