@@ -14,7 +14,7 @@ int EXTN_parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    Reader_init(&reader, base, chunk.length);
+    Reader_init(&reader, base, chunk.length, "EXTN");
 
     uint32_t extCount;
     uint32_t *extPtrs;

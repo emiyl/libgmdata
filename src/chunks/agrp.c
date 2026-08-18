@@ -13,7 +13,7 @@ int AGRP_parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    Reader_init(&reader, base, chunk.length);
+    Reader_init(&reader, base, chunk.length, "AGRP");
 
     uint32_t count;
     uint32_t* ptrs;
@@ -49,7 +49,7 @@ int AGRP_parse(DataWin *dw) {
                 return 0;
             }
 
-            Reader_seek(&reader, ptrs[0]);
+            Reader_seek(&reader, ptrs[0] - chunk.offset);
             const char* name;
             const char* path;
             Reader_readString(&reader, dw, &name);
@@ -65,7 +65,7 @@ int AGRP_parse(DataWin *dw) {
 
     repeat(count, i) {
         if (ptrs[i] == 0) continue;
-        Reader_seek(&reader, ptrs[i]);
+        Reader_seek(&reader, ptrs[i] - chunk.offset);
         if (AudioGroup_parse(&reader, dw, &a->audioGroups[i]) != 0) {
             free(ptrs);
             return -1;

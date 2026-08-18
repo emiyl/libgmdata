@@ -13,7 +13,7 @@ int SOND_parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    Reader_init(&reader, base, chunk.length);
+    Reader_init(&reader, base, chunk.length, "SOND");
 
     uint32_t count;
     uint32_t* ptrs;
@@ -62,7 +62,7 @@ int SOND_parse(DataWin *dw) {
             continue;
         }
 
-        Reader_seek(&reader, ptrs[i]);
+        Reader_seek(&reader, ptrs[i] - chunk.length);
         if (Sound_parse(&reader, dw, &s->sounds[i]) != 0) {
             free(ptrs);
             return -1;

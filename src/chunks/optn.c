@@ -10,7 +10,7 @@ int OPTN_parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    Reader_init(&reader, base, chunk.length);
+    Reader_init(&reader, base, chunk.length, "OPTN");
 
     Reader_readInt32(&reader, &o->shaderExtensionFlag);
     bool newFormat = o->shaderExtensionFlag == (int32_t)0x80000000;

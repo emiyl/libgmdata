@@ -26,7 +26,7 @@ int GEN8_parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    Reader_init(&reader, base, chunk.length);
+    Reader_init(&reader, base, chunk.length, "GEN8");
 
     // isDebuggerDisabled and wadVersion
     Reader_readUInt8(&reader, &g->isDebuggerDisabled);
@@ -162,34 +162,4 @@ void GEN8_free(Gen8 *g) {
     g->name = NULL;
     g->displayName = NULL;
     g->roomOrder = NULL;
-}
-
-void GEN8_bytedump(DataWin *dw) {
-    Chunk chunk = {0};
-
-    assert(find_chunk(dw, "GEN8", &chunk) == 0);
-    assert(chunk.offset + chunk.length <= dw->file_size);
-
-    const uint8_t *base = dw->file_data + chunk.offset;
-
-    Reader reader;
-    Reader_init(&reader, base, chunk.length);
-
-    printf("GEN8 Bytedump:\n");
-
-    repeat(chunk.length, i) {
-        uint8_t byte;
-        Reader_readUInt8(&reader, &byte);
-
-        if (i % 16 == 0)
-            printf("[%02x] ", i);
-        printf("%02X", byte);
-        if (i % 4 == 3)
-            printf(" ");
-        if (i % 16 == 15)
-            printf("\n");
-    }
-
-    if (chunk.length % 16 != 0)
-        printf("\n");
 }

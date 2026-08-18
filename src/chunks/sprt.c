@@ -13,7 +13,7 @@ int SPRT_parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    Reader_init(&reader, base, chunk.length);
+    Reader_init(&reader, base, chunk.length, "SPRT");
 
     uint32_t count;
     uint32_t *ptrs;
