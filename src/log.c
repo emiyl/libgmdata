@@ -10,6 +10,8 @@
 
 static bool logColour;
 
+#ifndef PLATFORM_LOG_DEFINED
+#define PLATFORM_LOG_DEFINED
 void platformLog(const logType type, const char *format, va_list va) {
     FILE *out = stderr;
     const char* colourPrefix = ANSI_COLOUR_CODE_RESET;
@@ -37,6 +39,9 @@ void platformLog(const logType type, const char *format, va_list va) {
     if (logColour) fputs(ANSI_COLOUR_CODE_RESET, out);
     vfprintf(out, format, va);
 }
+#else
+void platformLog(const logType type, const char *format, va_list va);
+#endif
 
 void logInfo(const char* fmt, ...) {
 	va_list va;
