@@ -12,6 +12,7 @@ void EXTN_Print(const Extn *e);
 void SOND_Print(const Sond *s);
 void AGRP_Print(const Agrp *a);
 void SPRT_Print(const Sprt *s);
+void BGND_Print(const Bgnd *b);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -33,6 +34,7 @@ int main(int argc, char **argv) {
     bool printSond = false;
     bool printAgrp = false;
     bool printSprt = false;
+    bool printBgnd = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -53,6 +55,7 @@ int main(int argc, char **argv) {
                 printSond = true;
                 printAgrp = true;
                 printSprt = true;
+                printBgnd = true;
             } else if (strcmp(name, "gen8") == 0) {
                 printGen8 = true;
             } else if (strcmp(name, "optn") == 0) {
@@ -67,6 +70,8 @@ int main(int argc, char **argv) {
                 printAgrp = true;
             } else if (strcmp(name, "sprt") == 0) {
                 printSprt = true;
+            } else if (strcmp(name, "bgnd") == 0) {
+                printBgnd = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -117,6 +122,7 @@ int main(int argc, char **argv) {
     if (printSond) SOND_Print(&dw.sond);
     if (printAgrp) AGRP_Print(&dw.agrp);
     if (printSprt) SPRT_Print(&dw.sprt);
+    if (printBgnd) BGND_Print(&dw.bgnd);
 
     DataWin_free(&dw);
     return 0;
@@ -492,5 +498,69 @@ void SPRT_Print(const Sprt *s) {
             printf(" %" PRIu8, spr->nsTileModes[j]);
         }
         printf("\n");
+    }
+}
+
+void BGND_Print(const Bgnd *b) {
+    printf("BGND:\n");
+    printf("  count: %" PRIu32 "\n", b->count);
+
+    for (uint32_t i = 0; i < b->count; i++) {
+        const Background *bg = &b->backgrounds[i];
+
+        printf("  background[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n", bg->present ? "true" : "false");
+
+        if (!bg->present) {
+            continue;
+        }
+
+        printf("    name: %s\n", bg->name ? bg->name : "(null)");
+        printf("    smooth: %s\n", bg->smooth ? "true" : "false");
+        printf("    preload: %s\n", bg->preload ? "true" : "false");
+        printf("    tpagIndex: %" PRId32 "\n", bg->tpagIndex);
+
+        if (bg->gms2UnknownAlways2 || bg->gms2TileWidth | bg->gms2TileHeight) {
+            printf("    gms2UnknownAlways2: %" PRIu32 "\n",
+                   bg->gms2UnknownAlways2);
+            printf("    gms2TileWidth: %" PRIu32 "\n",
+                   bg->gms2TileWidth);
+            printf("    gms2TileHeight: %" PRIu32 "\n",
+                   bg->gms2TileHeight);
+
+            if (bg->gms2TileSeparationX != 0 || bg->gms2TileSeparationY != 0) {
+                printf("    gms2TileSeparationX: %" PRIu32 "\n",
+                       bg->gms2TileSeparationX);
+                printf("    gms2TileSeparationY: %" PRIu32 "\n",
+                       bg->gms2TileSeparationY);
+            }
+
+            printf("    gms2OutputBorderX: %" PRIu32 "\n",
+                   bg->gms2OutputBorderX);
+            printf("    gms2OutputBorderY: %" PRIu32 "\n",
+                   bg->gms2OutputBorderY);
+            printf("    gms2TileColumns: %" PRIu32 "\n",
+                   bg->gms2TileColumns);
+            printf("    gms2ItemsPerTileCount: %" PRIu32 "\n",
+                   bg->gms2ItemsPerTileCount);
+            printf("    gms2TileCount: %" PRIu32 "\n",
+                   bg->gms2TileCount);
+            printf("    gms2ExportedSpriteIndex: %" PRId32 "\n",
+                   bg->gms2ExportedSpriteIndex);
+            printf("    gms2FrameLength: %" PRId64 "\n",
+                   bg->gms2FrameLength);
+
+            uint64_t tileIdCount =
+                (uint64_t) bg->gms2TileCount *
+                (uint64_t) bg->gms2ItemsPerTileCount;
+
+            printf("    gms2TileIds:");
+            if (bg->gms2TileIds != NULL) {
+                for (uint64_t j = 0; j < tileIdCount; j++) {
+                    printf(" %" PRIu32, bg->gms2TileIds[j]);
+                }
+            }
+            printf("\n");
+        }
     }
 }

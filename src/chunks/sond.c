@@ -46,7 +46,7 @@ int SOND_parse(DataWin *dw) {
             size_t savedPos = reader.cursor;
             size_t probe = (size_t) (soundPtrs[0] + (4 * 9));
             assert((probe % 16) != 4);
-            Reader_seek(&reader, probe);
+            Reader_seek(&reader, probe - chunk.offset);
             uint32_t nextPtr;
             if ((Reader_readUInt32(&reader, &nextPtr) == 0) && nextPtr == 0) {
                 DataWin_bumpVersionTo(dw, 2024, 6, 0, 0);
@@ -62,7 +62,7 @@ int SOND_parse(DataWin *dw) {
             continue;
         }
 
-        Reader_seek(&reader, ptrs[i] - chunk.length);
+        Reader_seek(&reader, ptrs[i] - chunk.offset);
         if (Sound_parse(&reader, dw, &s->sounds[i]) != 0) {
             free(ptrs);
             return -1;

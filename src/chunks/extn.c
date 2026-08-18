@@ -55,7 +55,7 @@ int EXTN_parse(DataWin *dw) {
 
     e->extensions = (Extension *)safeMalloc(sizeof(Extension) * extCount);
     repeat(extCount, i) {
-        Reader_seek(&reader, extPtrs[i]);
+        Reader_seek(&reader, extPtrs[i] - chunk.offset);
         Extension* ext = &e->extensions[i];
         Extension_parse(&reader, dw, ext, extStringCount);
     }

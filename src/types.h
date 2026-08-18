@@ -12,6 +12,7 @@
 #include "types/sond.h"
 #include "types/agrp.h"
 #include "types/sprt.h"
+#include "types/bgnd.h"
 
 typedef struct {
     uint8_t *data;
@@ -63,6 +64,7 @@ typedef struct {
     Sond sond;
     Agrp agrp;
     Sprt sprt;
+    Bgnd bgnd;
 
     DetectedFormat detected_format;
     uint8_t* mappedFile;

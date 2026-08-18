@@ -24,4 +24,7 @@ void AGRP_free(Agrp *a);
 int SPRT_parse(DataWin *dw);
 void SPRT_free(Sprt *s); 
 
+int BGND_parse(DataWin *dw);
+void BGND_free(Bgnd *b);
+
 #endif

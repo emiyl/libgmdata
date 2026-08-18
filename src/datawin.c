@@ -90,6 +90,7 @@ int DataWin_parse(DataWin *dw) {
     assert(SOND_parse(dw) == 0);
     assert(AGRP_parse(dw) == 0);
     assert(SPRT_parse(dw) == 0);
+    assert(BGND_parse(dw) == 0);
 
     return 0;
 }
@@ -108,6 +109,8 @@ void DataWin_free(DataWin *dw) {
     EXTN_free(&dw->extn);
     SOND_free(&dw->sond);
     AGRP_free(&dw->agrp);
+    SPRT_free(&dw->sprt);
+    BGND_free(&dw->bgnd);
 
     free(dw->file_data);
     dw->file_data = NULL;
