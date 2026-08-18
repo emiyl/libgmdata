@@ -16,6 +16,7 @@
 #include "types/path.h"
 #include "types/scpt.h"
 #include "types/glob.h"
+#include "types/shdr.h"
 
 typedef struct {
     uint8_t *data;
@@ -72,6 +73,7 @@ typedef struct {
     Path path;
     Scpt scpt;
     Glob glob;
+    Shdr shdr;
 
     DetectedFormat detected_format;
     uint8_t* mappedFile;

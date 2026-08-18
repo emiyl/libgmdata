@@ -94,6 +94,7 @@ int DataWin_parse(DataWin *dw) {
     assert(PATH_parse(dw) == 0);
     assert(SCPT_parse(dw) == 0);
     assert(GLOB_parse(dw) == 0);
+    assert(SHDR_parse(dw) == 0);
 
     return 0;
 }
@@ -117,6 +118,7 @@ void DataWin_free(DataWin *dw) {
     PATH_free(&dw->path);
     SCPT_free(&dw->scpt);
     GLOB_free(&dw->glob);
+    SHDR_free(&dw->shdr);
 
     free(dw->file_data);
     dw->file_data = NULL;

@@ -16,6 +16,7 @@ void BGND_Print(const Bgnd *b);
 void PATH_Print(const Path *p);
 void SCPT_Print(const Scpt *s);
 void GLOB_Print(const Glob *g);
+void SHDR_Print(const Shdr *s);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -41,6 +42,7 @@ int main(int argc, char **argv) {
     bool printPath = false;
     bool printScpt = false;
     bool printGlob = false;
+    bool printShdr = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -65,6 +67,7 @@ int main(int argc, char **argv) {
                 printPath = true;
                 printScpt = true;
                 printGlob = true;
+                printShdr = true;
             } else if (strcmp(name, "gen8") == 0) {
                 printGen8 = true;
             } else if (strcmp(name, "optn") == 0) {
@@ -87,6 +90,8 @@ int main(int argc, char **argv) {
                 printScpt = true;
             } else if (strcmp(name, "glob") == 0) {
                 printGlob = true;
+            } else if (strcmp(name, "shdr") == 0) {
+                printShdr = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -141,6 +146,7 @@ int main(int argc, char **argv) {
     if (printPath) PATH_Print(&dw.path);
     if (printScpt) SCPT_Print(&dw.scpt);
     if (printGlob) GLOB_Print(&dw.glob);
+    if (printShdr) SHDR_Print(&dw.shdr);
 
     DataWin_free(&dw);
     return 0;
@@ -668,5 +674,90 @@ void GLOB_Print(const Glob *g) {
         printf("  codeIds[%" PRIu32 "]: %" PRId32 "\n",
                i,
                g->codeIds[i]);
+    }
+}
+
+void SHDR_Print(const Shdr *s) {
+    printf("SHDR:\n");
+    printf("  count: %" PRIu32 "\n", s->count);
+
+    for (uint32_t i = 0; i < s->count; i++) {
+        const Shader *sh = &s->shaders[i];
+
+        printf("  shader[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n", sh->present ? "true" : "false");
+
+        if (!sh->present) {
+            continue;
+        }
+
+        printf("    name: %s\n", sh->name ? sh->name : "(null)");
+        printf("    type: %" PRIu32 "\n", sh->type);
+
+        printf("    glslES_Vertex: %s\n",
+               sh->glslES_Vertex ? sh->glslES_Vertex : "(null)");
+        printf("    glslES_Fragment: %s\n",
+               sh->glslES_Fragment ? sh->glslES_Fragment : "(null)");
+        printf("    glsl_Vertex: %s\n",
+               sh->glsl_Vertex ? sh->glsl_Vertex : "(null)");
+        printf("    glsl_Fragment: %s\n",
+               sh->glsl_Fragment ? sh->glsl_Fragment : "(null)");
+        printf("    hlsl9_Vertex: %s\n",
+               sh->hlsl9_Vertex ? sh->hlsl9_Vertex : "(null)");
+        printf("    hlsl9_Fragment: %s\n",
+               sh->hlsl9_Fragment ? sh->hlsl9_Fragment : "(null)");
+
+        printf("    hlsl11_VertexOffset: %" PRIu32 "\n",
+               sh->hlsl11_VertexOffset);
+        printf("    hlsl11_PixelOffset: %" PRIu32 "\n",
+               sh->hlsl11_PixelOffset);
+
+        printf("    vertexAttributeCount: %" PRIu32 "\n",
+               sh->vertexAttributeCount);
+
+        if (sh->vertexAttributes != NULL) {
+            for (uint32_t j = 0; j < sh->vertexAttributeCount; j++) {
+                printf("    vertexAttribute[%" PRIu32 "]: %s\n",
+                       j,
+                       sh->vertexAttributes[j]
+                           ? sh->vertexAttributes[j]
+                           : "(null)");
+            }
+        }
+
+        if (sh->pssl_VertexOffset != 0 || sh->pssl_PixelOffset != 0 ||
+            sh->cgVita_VertexOffset != 0 || sh->cgVita_PixelOffset != 0 ||
+            sh->cgPS3_VertexOffset != 0 || sh->cgPS3_PixelOffset != 0) {
+            printf("    version: %" PRId32 "\n", sh->version);
+
+            printf("    pssl_VertexOffset: %" PRIu32 "\n",
+                   sh->pssl_VertexOffset);
+            printf("    pssl_VertexLen: %" PRIu32 "\n",
+                   sh->pssl_VertexLen);
+            printf("    pssl_PixelOffset: %" PRIu32 "\n",
+                   sh->pssl_PixelOffset);
+            printf("    pssl_PixelLen: %" PRIu32 "\n",
+                   sh->pssl_PixelLen);
+
+            printf("    cgVita_VertexOffset: %" PRIu32 "\n",
+                   sh->cgVita_VertexOffset);
+            printf("    cgVita_VertexLen: %" PRIu32 "\n",
+                   sh->cgVita_VertexLen);
+            printf("    cgVita_PixelOffset: %" PRIu32 "\n",
+                   sh->cgVita_PixelOffset);
+            printf("    cgVita_PixelLen: %" PRIu32 "\n",
+                   sh->cgVita_PixelLen);
+
+            if (sh->version >= 2) {
+                printf("    cgPS3_VertexOffset: %" PRIu32 "\n",
+                       sh->cgPS3_VertexOffset);
+                printf("    cgPS3_VertexLen: %" PRIu32 "\n",
+                       sh->cgPS3_VertexLen);
+                printf("    cgPS3_PixelOffset: %" PRIu32 "\n",
+                       sh->cgPS3_PixelOffset);
+                printf("    cgPS3_PixelLen: %" PRIu32 "\n",
+                       sh->cgPS3_PixelLen);
+            }
+        }
     }
 }
