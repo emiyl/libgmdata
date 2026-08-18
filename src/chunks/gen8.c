@@ -26,7 +26,7 @@ int GEN8_parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    Reader_init(&reader, base, chunk.length, "GEN8");
+    Reader_init(&reader, base, chunk.length, chunk.offset, "GEN8");
 
     // isDebuggerDisabled and wadVersion
     Reader_readUInt8(&reader, &g->isDebuggerDisabled);

@@ -13,7 +13,7 @@ int BGND_parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    Reader_init(&reader, base, chunk.length, "BGND");
+    Reader_init(&reader, base, chunk.length, chunk.offset, "BGND");
 
     uint32_t count;
     uint32_t *ptrs;
@@ -69,7 +69,7 @@ int BGND_parse(DataWin *dw) {
     b->backgrounds = (Background *)safeCalloc(count, sizeof(Background));
     repeat(count, i) {
         if (ptrs[i] == 0) continue;
-        Reader_seek(&reader, ptrs[i] - chunk.offset);
+        Reader_seek(&reader, ptrs[i]);
         if (Background_parse(&reader, dw, &b->backgrounds[i]) != 0) {
             free(ptrs);
             return -1;

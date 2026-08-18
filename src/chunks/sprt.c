@@ -13,7 +13,7 @@ int SPRT_parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    Reader_init(&reader, base, chunk.length, "SPRT");
+    Reader_init(&reader, base, chunk.length, chunk.offset, "SPRT");
 
     uint32_t count;
     uint32_t *ptrs;
@@ -34,7 +34,7 @@ int SPRT_parse(DataWin *dw) {
     }
     repeat (count, i) {
         if (ptrs[i] == 0) continue;
-        Reader_seek(&reader, ptrs[i] - chunk.offset);
+        Reader_seek(&reader, ptrs[i]);
         if (Sprite_parse(&reader, dw, &s->sprites[i]) != 0) {
             free(ptrs);
             free(s->sprites);

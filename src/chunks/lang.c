@@ -10,7 +10,7 @@ int LANG_parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    Reader_init(&reader, base, chunk.length, "LANG");
+    Reader_init(&reader, base, chunk.length, chunk.offset, "LANG");
 
     Reader_readUInt32(&reader, &l->unknown1);
     Reader_readUInt32(&reader, &l->languageCount);

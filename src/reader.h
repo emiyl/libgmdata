@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-void Reader_init(Reader *reader, const uint8_t *data, size_t size, const char* name);
+void Reader_init(Reader *reader, const uint8_t *data, size_t size, size_t offset, const char* name);
 size_t Reader_remaining(const Reader *reader);
 int Reader_seek(Reader *reader, size_t offset);
 int Reader_skip(Reader *reader, int count);

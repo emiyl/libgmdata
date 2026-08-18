@@ -1,19 +1,21 @@
 #include "reader.h"
 #include "strings.h"
 #include "log.h"
+#include "utils.h"
 
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 
-void Reader_init(Reader *reader, const uint8_t *data, size_t size, const char* name) {
+void Reader_init(Reader *reader, const uint8_t *data, size_t size, size_t offset, const char* name) {
     if (reader == NULL) {
         return;
     }
 
     reader->data = (uint8_t *)data;
     reader->size = size;
+    reader->offset = offset;
     reader->cursor = 0;
     reader->name = name;
 }
@@ -353,6 +355,7 @@ int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_c
             free(ptrs);
             return -1;
         }
+        ptrs[i] -= reader->offset;  // Adjust pointer based on the reader's offset
     }
 
     *out_ptrs = ptrs;

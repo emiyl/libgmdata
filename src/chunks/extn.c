@@ -14,7 +14,7 @@ int EXTN_parse(DataWin *dw) {
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader reader;
-    Reader_init(&reader, base, chunk.length, "EXTN");
+    Reader_init(&reader, base, chunk.length, chunk.offset, "EXTN");
 
     uint32_t extCount;
     uint32_t *extPtrs;
@@ -55,7 +55,7 @@ int EXTN_parse(DataWin *dw) {
 
     e->extensions = (Extension *)safeMalloc(sizeof(Extension) * extCount);
     repeat(extCount, i) {
-        Reader_seek(&reader, extPtrs[i] - chunk.offset);
+        Reader_seek(&reader, extPtrs[i]);
         Extension* ext = &e->extensions[i];
         Extension_parse(&reader, dw, ext, extStringCount);
     }
