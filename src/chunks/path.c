@@ -55,6 +55,8 @@ static int GamePath_parse(Reader *reader, DataWin *dw, GamePath *path) {
         path->points = NULL;
     }
 
+    GamePath_computeInternal(path);
+
     return 0;
 }
 
