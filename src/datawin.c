@@ -80,12 +80,29 @@ int DataWin_parse(DataWin *dw) {
     }
 
     Chunk strg = {0};
-    assert(find_chunk(dw, "STRG", &strg) == 0);
-    assert(parse_string_table(dw, strg.offset, strg.length) == 0);
+    if (get_chunk(dw, "STRG", &strg) >= 0) {
+        assert(parse_string_table(dw, strg.offset, strg.length) == 0);
+    }
+    
+    // bool codeExists = false;
+    // if (chunk_exists(dw, "CODE") == 0) {
+    //     codeExists = true;
+    // }
+
+    if (chunk_exists(dw, "ACRV") == 0 || chunk_exists(dw, "SEQN") == 0 || chunk_exists(dw, "TAGS") == 0) {
+        DataWin_bumpVersionTo(dw, 2, 3, 0, 0);
+    } else if (chunk_exists(dw, "FEDS") == 0) {
+        DataWin_bumpVersionTo(dw, 2, 3, 6, 0);
+    } else if (chunk_exists(dw, "FEAT") == 0) {
+        DataWin_bumpVersionTo(dw, 2022, 8, 0, 0);
+    } else if (chunk_exists(dw, "UILR") == 0) {
+        DataWin_bumpVersionTo(dw, 2024, 13, 0, 0);
+    } else if (chunk_exists(dw, "PSEM") == 0 || chunk_exists(dw, "PSYS") == 0) {
+        DataWin_bumpVersionTo(dw, 2023, 2, 0, 0);
+    }
 
     assert(GEN8_parse(dw) == 0);
     DataWin_bumpVersionTo(dw, dw->gen8.major, dw->gen8.minor, dw->gen8.release, dw->gen8.build);
-    logInfo("Detected data.win version: %u.%u.%u.%u\n", dw->gen8.major, dw->gen8.minor, dw->gen8.release, dw->gen8.build);
     assert(OPTN_parse(dw) == 0);
     logInfo("Parsed chunk OPTN\n");
     assert(LANG_parse(dw) == 0);
@@ -112,6 +129,8 @@ int DataWin_parse(DataWin *dw) {
     logInfo("Parsed chunk FONT\n");
     assert(TMLN_parse(dw) == 0);
     logInfo("Parsed chunk TMLN\n");
+    assert(OBJT_parse(dw) == 0);
+    logInfo("Parsed chunk OBJT\n");
 
     return 0;
 }

@@ -6,7 +6,7 @@ int GEN8_parse(DataWin *dw) {
     Chunk chunk = {0};
     Gen8Chunk* g = &dw->gen8;
 
-    if(find_chunk(dw, "GEN8", &chunk) != 0) return -1;
+    if(get_chunk(dw, "GEN8", &chunk) != 0) return -1;
     if(chunk.offset + chunk.length > dw->file_size) return -1;
 
     const bool isCompactWad8 = g->wadVersion < 8 && chunk.length <= 108;

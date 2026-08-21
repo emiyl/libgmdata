@@ -10,7 +10,7 @@ int PATH_parse(DataWin *dw) {
     Chunk chunk = {0};
     PathChunk *p = &dw->path;
 
-    if (find_chunk(dw, "PATH", &chunk) != 0) return -1;
+    if (get_chunk(dw, "PATH", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
 
     const uint8_t *base = dw->file_data + chunk.offset;

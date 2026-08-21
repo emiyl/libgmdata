@@ -19,6 +19,7 @@
 #include "types/shdr.h"
 #include "types/font.h"
 #include "types/tmln.h"
+#include "types/objt.h"
 
 typedef struct {
     uint8_t *data;
@@ -78,6 +79,7 @@ typedef struct {
     ShdrChunk shdr;
     FontChunk font;
     TmlnChunk tmln;
+    ObjtChunk objt;
 
     DetectedFormat detected_format;
     uint8_t* mappedFile;

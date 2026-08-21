@@ -45,4 +45,6 @@ void FONT_free(FontChunk *f);
 int TMLN_parse(DataWin *dw);
 void TMLN_free(TmlnChunk *t);
 
+int OBJT_parse(DataWin *dw);
+
 #endif

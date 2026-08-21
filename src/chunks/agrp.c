@@ -7,7 +7,7 @@ int AGRP_parse(DataWin *dw) {
     Chunk chunk = {0};
     AgrpChunk *a = &dw->agrp;
 
-    if (find_chunk(dw, "AGRP", &chunk) != 0) return -1;
+    if (get_chunk(dw, "AGRP", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
 
     const uint8_t *base = dw->file_data + chunk.offset;

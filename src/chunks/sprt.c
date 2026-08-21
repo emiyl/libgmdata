@@ -8,7 +8,7 @@ int SPRT_parse(DataWin *dw) {
     Chunk chunk = {0};
     SprtChunk *s = &dw->sprt;
 
-    if (find_chunk(dw, "SPRT", &chunk) != 0) return -1;
+    if (get_chunk(dw, "SPRT", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
 
     const uint8_t *base = dw->file_data + chunk.offset;

@@ -81,13 +81,22 @@ void vLogError(const char* fmt, va_list va) {
 }
 
 void logDebug(const char* fmt, ...) {
+#ifdef DEBUG
 	va_list va;
 
 	va_start(va, fmt);
 	platformLog(LOG_TYPE_DEBUG, fmt, va);
 	va_end(va);
+#else
+    (void)fmt;
+#endif
 }
 
 void vLogDebug(const char* fmt, va_list va) {
+#ifdef DEBUG
 	platformLog(LOG_TYPE_DEBUG, fmt, va);
+#else
+    (void)fmt;
+    (void)va;
+#endif
 }

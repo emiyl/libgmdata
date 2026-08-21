@@ -6,7 +6,7 @@ int FONT_parse(DataWin *dw) {
     Chunk chunk = {0};
     FontChunk *f = &dw->font;
 
-    if (find_chunk(dw, "FONT", &chunk) != 0) return -1;
+    if (get_chunk(dw, "FONT", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
 
     const uint8_t *base = dw->file_data + chunk.offset;

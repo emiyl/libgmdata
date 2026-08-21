@@ -6,7 +6,7 @@ int TMLN_parse(DataWin *dw) {
     Chunk chunk = {0};
     TmlnChunk *t = &dw->tmln;
 
-    if (find_chunk(dw, "TMLN", &chunk) != 0) return -1;
+    if (get_chunk(dw, "TMLN", &chunk) != 0) return -1;
     if (chunk.offset + chunk.length > dw->file_size) return -1;
 
     const uint8_t *base = dw->file_data + chunk.offset;
@@ -82,7 +82,8 @@ static int Timeline_parse(Reader *reader, DataWin *dw, Timeline *tl) {
     return 0;
 }
 
-static int EventAction_parse(Reader *reader, DataWin *dw, EventAction *action) {
+// Used in objt.c too
+int EventAction_parse(Reader *reader, DataWin *dw, EventAction *action) {
     Reader_readUInt32(reader, &action->libID);
     Reader_readUInt32(reader, &action->id);
     Reader_readUInt32(reader, &action->kind);

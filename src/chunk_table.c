@@ -26,19 +26,30 @@ void chunk_table_free(ChunkTable *table) {
     table->capacity = 0;
 }
 
-int find_chunk(const DataWin *dw, const char *name, Chunk *out) {
-    if (dw == NULL || name == NULL || out == NULL) {
+int find_chunk(const DataWin *dw, const char *name) {
+    if (dw == NULL || name == NULL) {
         return -1;
     }
 
     for (size_t i = 0; i < dw->chunks.count; ++i) {
         if (memcmp(dw->chunks.items[i].name, name, 4) == 0) {
-            *out = dw->chunks.items[i];
-            return 0;
+            return i;
         }
     }
 
     return -1;
+}
+
+int chunk_exists(const DataWin *dw, const char *name) {
+    return find_chunk(dw, name) >= 0;
+}
+
+int get_chunk(const DataWin *dw, const char *name, Chunk *out) {
+    int chunk_pos = find_chunk(dw, name);
+    if (chunk_pos < 0) return -1;
+
+    *out = dw->chunks.items[chunk_pos];
+    return 0;
 }
 
 int parse_form_chunks(DataWin *dw) {

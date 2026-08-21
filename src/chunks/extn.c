@@ -6,7 +6,7 @@ int EXTN_parse(DataWin *dw) {
     Chunk chunk = {0};
     ExtnChunk *e = &dw->extn;
 
-    if (find_chunk(dw, "EXTN", &chunk) != 0) {
+    if (get_chunk(dw, "EXTN", &chunk) != 0) {
         logError("[EXTN_parse] Couldn't find EXTN chunk\n");
         return -1;
     }
