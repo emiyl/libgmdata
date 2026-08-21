@@ -43,7 +43,7 @@ int FONT_parse(DataWin *dw) {
         }
     }
     
-    int result = Reader_pointerTable_parse(
+    int result = Reader_parsePointerTable(
         &reader, dw,
         ptrs, f->count,
         (void **)&f->fonts, sizeof(Font),
@@ -127,7 +127,7 @@ static int Font_parse(Reader *reader, DataWin *dw, Font *f, uint32_t fontOptiona
         return 0;
     }
     
-    int result = Reader_pointerTable_parse(
+    int result = Reader_parsePointerTable(
         reader, dw,
         ptrs, f->glyphCount,
         (void **)&f->glyphs, sizeof(FontGlyph),

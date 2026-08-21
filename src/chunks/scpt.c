@@ -14,28 +14,14 @@ int SCPT_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "SCPT");
 
-    uint32_t *ptrs = NULL;
-    if (Reader_readPointerTable(&reader, &ptrs, &s->count) != 0)
-        return -1;
-
-    if (s->count == 0) {
-        s->scripts = NULL;
-        free(ptrs);
-        return 0;
-    }
-    
-    int result = Reader_pointerTable_parse(
+    return Reader_readAndParsePointerTable(
         &reader, dw,
-        ptrs, s->count,
-        (void **)&s->scripts, sizeof(Script),
-        NULL,
+        (void **)&s->scripts, NULL,
+        &s->count, sizeof(Script),
         SCPT_pointerTable_parse,
         SCPT_pointerTable_missingHandler,
         NULL
     );
-
-    free(ptrs);
-    return result;
 }
 
 static int Script_parse(Reader *reader, DataWin *dw, Script *script) {

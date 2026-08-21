@@ -2,6 +2,7 @@
 
 #include "chunk_table.h"
 #include "strings.h"
+#include "log.h"
 
 #include "chunks/chunks.h"
 
@@ -84,19 +85,33 @@ int DataWin_parse(DataWin *dw) {
 
     assert(GEN8_parse(dw) == 0);
     DataWin_bumpVersionTo(dw, dw->gen8.major, dw->gen8.minor, dw->gen8.release, dw->gen8.build);
+    logInfo("Detected data.win version: %u.%u.%u.%u\n", dw->gen8.major, dw->gen8.minor, dw->gen8.release, dw->gen8.build);
     assert(OPTN_parse(dw) == 0);
+    logInfo("Parsed chunk OPTN\n");
     assert(LANG_parse(dw) == 0);
+    logInfo("Parsed chunk LANG\n");
     assert(EXTN_parse(dw) == 0);
+    logInfo("Parsed chunk EXTN\n");
     assert(SOND_parse(dw) == 0);
+    logInfo("Parsed chunk SOND\n");
     assert(AGRP_parse(dw) == 0);
+    logInfo("Parsed chunk AGRP\n");
     assert(SPRT_parse(dw) == 0);
+    logInfo("Parsed chunk SPRT\n");
     assert(BGND_parse(dw) == 0);
+    logInfo("Parsed chunk BGND\n");
     assert(PATH_parse(dw) == 0);
+    logInfo("Parsed chunk PATH\n");
     assert(SCPT_parse(dw) == 0);
+    logInfo("Parsed chunk SCPT\n");
     assert(GLOB_parse(dw) == 0);
+    logInfo("Parsed chunk GLOB\n");
     assert(SHDR_parse(dw) == 0);
+    logInfo("Parsed chunk SHDR\n");
     assert(FONT_parse(dw) == 0);
+    logInfo("Parsed chunk FONT\n");
     assert(TMLN_parse(dw) == 0);
+    logInfo("Parsed chunk TMLN\n");
 
     return 0;
 }

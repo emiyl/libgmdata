@@ -18,27 +18,14 @@ int PATH_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "PATH");
 
-    uint32_t *ptrs;
-    Reader_readPointerTable(&reader, &ptrs, &p->count);
-    
-    if (p->count == 0) {
-        p->paths = NULL;
-        free(ptrs);
-        return 0;
-    }
-
-    int result = Reader_pointerTable_parse(
+    return Reader_readAndParsePointerTable(
         &reader, dw,
-        ptrs, p->count,
-        (void **)&p->paths, sizeof(GamePath),
-        NULL,
+        (void **)&p->paths, NULL,
+        &p->count, sizeof(GamePath),
         PATH_pointerTable_parse,
         PATH_pointerTable_missingHandler,
         NULL
     );
-
-    free(ptrs);
-    return result;
 }
 
 static int GamePath_parse(Reader *reader, DataWin *dw, GamePath *path) {

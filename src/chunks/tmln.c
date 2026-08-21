@@ -14,29 +14,14 @@ int TMLN_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "TMLN");
 
-    uint32_t *ptrs;
-    Reader_readPointerTable(&reader, &ptrs, &t->count);
-
-    if (t->count == 0) {
-        t->timelines = NULL;
-        free(ptrs);
-        return 0;
-    }
-
-    t->timelines = (Timeline*)safeCalloc(t->count, sizeof(Timeline));
-    
-    int result = Reader_pointerTable_parse(
+    return Reader_readAndParsePointerTable(
         &reader, dw,
-        ptrs, t->count,
-        (void **)&t->timelines, sizeof(Timeline),
-        NULL,
+        (void **)&t->timelines, NULL,
+        &t->count, sizeof(Timeline),
         TMLN_pointerTable_parse,
         TMLN_pointerTable_missingHandler,
         NULL
     );
-
-    free(ptrs);
-    return result;
 }
 
 static int Timeline_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
@@ -75,7 +60,7 @@ static int Timeline_parse(Reader *reader, DataWin *dw, Timeline *tl) {
                 tl->moments[j].actions = NULL;
             }
             
-            int result = Reader_pointerTable_parse(
+            int result = Reader_parsePointerTable(
                 reader, dw,
                 ptrs, count,
                 (void **)&tl->moments[j].actions, sizeof(EventAction),

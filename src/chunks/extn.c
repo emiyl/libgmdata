@@ -59,7 +59,7 @@ int EXTN_parse(DataWin *dw) {
         }
     }
 
-    int result = Reader_pointerTable_parse(
+    int result = Reader_parsePointerTable(
         &reader, dw,
         ptrs, e->count,
         (void **)&e->extensions, sizeof(Extension),
@@ -135,7 +135,7 @@ static int Extension_parse(Reader *reader, DataWin *dw, Extension *e, int32_t st
         return 0;
     }
 
-    int result = Reader_pointerTable_parse(
+    int result = Reader_parsePointerTable(
         &fullReader, dw,
         ptrs, e->fileCount,
         (void **)&e->files, sizeof(ExtensionFile),
@@ -189,7 +189,7 @@ static int ExtensionFile_parse(Reader *reader, DataWin *dw, ExtensionFile *f) {
         return 0;
     }
 
-    int result = Reader_pointerTable_parse(
+    int result = Reader_parsePointerTable(
         reader, dw,
         ptrs, f->functionCount,
         (void **)&f->functions, sizeof(ExtensionFunction),

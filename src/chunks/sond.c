@@ -53,7 +53,7 @@ int SOND_parse(DataWin *dw) {
         }
     }
     
-    Reader_pointerTable_parse(
+    Reader_parsePointerTable(
         &reader, dw,
         ptrs, s->count,
         (void **)&s->sounds, sizeof(Sound),

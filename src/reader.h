@@ -30,16 +30,14 @@ int Reader_readInt64(Reader *reader, int64_t *out);
 int Reader_readBytes(Reader *reader, void *out, size_t len);
 int Reader_readString(Reader *reader, DataWin *dw, const char** out);
 
-int Reader_readPointerTableRaw(Reader *reader, uint32_t **out_ptrs, uint32_t *out_count);
-int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_count);
-
 typedef int (*PointerTableFunction)(
     Reader *reader,
     DataWin *dw,
     void *out,
     void* extraData
 );
-int Reader_pointerTable_parse(
+int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_count);
+int Reader_parsePointerTable(
     Reader *reader, DataWin *dw,
     uint32_t *ptrs, uint32_t count,
     void **items, size_t itemSize,
@@ -48,6 +46,18 @@ int Reader_pointerTable_parse(
     PointerTableFunction missingHandler,
     PointerTableFunction successHandler
 );
+int Reader_readAndParsePointerTable(
+    Reader *reader,
+    DataWin *dw,
+    void **out,
+    void* extraData,
+    uint32_t *count,
+    size_t elementSize,
+    PointerTableFunction parseHandler,
+    PointerTableFunction missingHandler,
+    PointerTableFunction successHandler
+);
+
 const uint8_t *Reader_ptr_at(const Reader *reader, size_t offset);
 
 uint16_t read_u16_le_at(const uint8_t *buffer, size_t size, size_t offset);

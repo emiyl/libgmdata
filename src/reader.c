@@ -329,7 +329,7 @@ int Reader_readString(Reader *reader, DataWin *dw, const char **out) {
     return 0;
 }
 
-int Reader_readPointerTableRaw(Reader *reader, uint32_t **out_ptrs, uint32_t *out_count) {
+static int pointerTable_readRaw(Reader *reader, uint32_t **out_ptrs, uint32_t *out_count) {
     if (reader == NULL || out_ptrs == NULL || out_count == NULL) {
         return -1;
     }
@@ -371,7 +371,7 @@ int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_c
     uint32_t *ptrs;
     uint32_t count;
 
-    if (Reader_readPointerTableRaw(reader, &ptrs, &count) != 0) {
+    if (pointerTable_readRaw(reader, &ptrs, &count) != 0) {
         return -1;
     }
 
@@ -398,7 +398,7 @@ int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_c
     return 0;
 }
 
-int Reader_pointerTable_parse(
+int Reader_parsePointerTable(
     Reader *reader, DataWin *dw,
     uint32_t *ptrs, uint32_t count,
     void **items, size_t itemSize,
@@ -436,6 +436,45 @@ int Reader_pointerTable_parse(
     }
 
     return 0;
+}
+
+int Reader_readAndParsePointerTable(
+    Reader *reader,
+    DataWin *dw,
+    void **out,
+    void* extraData,
+    uint32_t *count,
+    size_t elementSize,
+    PointerTableFunction parseHandler,
+    PointerTableFunction missingHandler,
+    PointerTableFunction successHandler
+) {
+    uint32_t *ptrs = NULL;
+
+    if (Reader_readPointerTable(reader, &ptrs, count) != 0)
+        return -1;
+
+    if (*count == 0) {
+        *out = NULL;
+        free(ptrs);
+        return 0;
+    }
+
+    int result = Reader_parsePointerTable(
+        reader,
+        dw,
+        ptrs,
+        *count,
+        out,
+        elementSize,
+        extraData,
+        parseHandler,
+        missingHandler,
+        successHandler
+    );
+
+    free(ptrs);
+    return result;
 }
 
 const uint8_t *Reader_ptr_at(const Reader *reader, size_t offset) {

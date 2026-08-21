@@ -16,28 +16,14 @@ int SPRT_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "SPRT");
 
-    uint32_t *ptrs;
-    if (Reader_readPointerTable(&reader, &ptrs, &s->count) != 0) return -1;
-    s->parsedCount = 0;
-
-    if (s->count == 0) {
-        s->sprites = NULL;
-        free(ptrs);
-        return 0;
-    }
-    
-    int result = Reader_pointerTable_parse(
+    return Reader_readAndParsePointerTable(
         &reader, dw,
-        ptrs, s->count,
-        (void **)&s->sprites, sizeof(Sprite),
-        &s->parsedCount,
+        (void **)&s->sprites, &s->parsedCount,
+        &s->count, sizeof(Sprite), 
         SPRT_pointerTable_parse,
         SPRT_pointerTable_missingHandler,
         SPRT_pointerTable_successHandler
     );
-
-    free(ptrs);
-    return result;
 }
 
 static int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {

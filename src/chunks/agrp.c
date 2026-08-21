@@ -60,7 +60,7 @@ int AGRP_parse(DataWin *dw) {
         }
     }
     
-    int result = Reader_pointerTable_parse(
+    int result = Reader_parsePointerTable(
         &reader, dw,
         ptrs, a->count,
         (void **)&a->audioGroups, sizeof(AudioGroup),
