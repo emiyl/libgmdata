@@ -329,7 +329,7 @@ int Reader_readString(Reader *reader, DataWin *dw, const char **out) {
     return 0;
 }
 
-int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_count) {
+int Reader_readPointerTableRaw(Reader *reader, uint32_t **out_ptrs, uint32_t *out_count) {
     if (reader == NULL || out_ptrs == NULL || out_count == NULL) {
         return -1;
     }
@@ -351,11 +351,32 @@ int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_c
     }
 
     for (uint32_t i = 0; i < count; ++i) {
-        uint32_t absolute;
-        if (Reader_readUInt32(reader, &absolute) != 0) {
+        if (Reader_readUInt32(reader, &ptrs[i]) != 0) {
             free(ptrs);
             return -1;
         }
+    }
+
+    *out_ptrs = ptrs;
+    *out_count = count;
+
+    return 0;
+}
+
+int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_count) {
+    if (reader == NULL || out_ptrs == NULL || out_count == NULL) {
+        return -1;
+    }
+
+    uint32_t *ptrs;
+    uint32_t count;
+
+    if (Reader_readPointerTableRaw(reader, &ptrs, &count) != 0) {
+        return -1;
+    }
+
+    for (uint32_t i = 0; i < count; ++i) {
+        uint32_t absolute = ptrs[i];
 
         if (absolute < reader->offset) {
             ptrs[i] = 0;
@@ -373,6 +394,46 @@ int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_c
 
     *out_ptrs = ptrs;
     *out_count = count;
+
+    return 0;
+}
+
+int Reader_pointerTable_parse(
+    Reader *reader, DataWin *dw,
+    uint32_t *ptrs, uint32_t count,
+    void **items, size_t itemSize,
+    void* extraData,
+    PointerTableFunction parser,
+    PointerTableFunction missingHandler,
+    PointerTableFunction successHandler
+) {
+    if (count == 0) {
+        *items = NULL;
+        return 0;
+    }
+
+    *items = safeCalloc(count, itemSize);
+
+    repeat(count, i) {
+        void *item = (uint8_t *)*items + i * itemSize;
+        
+        if (ptrs[i] == 0) {
+            missingHandler(reader, dw, item, extraData);
+            continue;
+        }
+
+        Reader_seek(reader, ptrs[i]);
+
+        if (parser(reader, dw, item, extraData) != 0) {
+            free(*items);
+            *items = NULL;
+            return -1;
+        } else {
+            if (successHandler != NULL) {
+                successHandler(reader, dw, item, extraData);
+            }
+        }
+    }
 
     return 0;
 }

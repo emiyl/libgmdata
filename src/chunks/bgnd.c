@@ -1,8 +1,8 @@
 #include "common.h"
 #include "../datawin.h"
 
-int Background_parse(Reader *reader, DataWin *dw, Background *bg);
-
+static int BGND_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int BGND_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
 int BGND_parse(DataWin *dw) {
     Chunk chunk = {0};
     BgndChunk *b = &dw->bgnd;
@@ -15,12 +15,10 @@ int BGND_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "BGND");
 
-    uint32_t count;
     uint32_t *ptrs;
-    if (Reader_readPointerTable(&reader, &ptrs, &count) != 0) return -1;
-    b->count = count;
+    if (Reader_readPointerTable(&reader, &ptrs, &b->count) != 0) return -1;
 
-    if (count == 0) {
+    if (b->count == 0) {
         b->backgrounds = NULL;
         free(ptrs);
         return 0;
@@ -30,7 +28,7 @@ int BGND_parse(DataWin *dw) {
     // To detect it, we'll check if the background's end position is at the chunks end position (if there's only one background) or the start of the next background
     // If it isn't at either of those, then that means it is 2024.14.1+
     if (DataWin_isVersionAtLeast(dw, 2024, 13, 0, 0) && !DataWin_isVersionAtLeast(dw, 2024, 14, 1, 0)) {
-        repeat(count, i) {
+        repeat(b->count, i) {
             if (ptrs[i] == 0) continue;
 
             // Skip to where the item per tile count + tile count should be in pre-2024.14.1 versions
@@ -41,7 +39,7 @@ int BGND_parse(DataWin *dw) {
 
             // Get what might be the end position to compare it with the actual end position
             size_t tpos = ptrs[i] + (16 * 4) + (itemsPerTileCount * tileCount * 4);
-            if (count >= 2 && i < count - 1) {
+            if (b->count >= 2 && i < b->count - 1) {
                 // Next thing at end position is a background
 
                 // Align to 8 bytes
@@ -65,22 +63,22 @@ int BGND_parse(DataWin *dw) {
             }
         }
     }
-
-    b->backgrounds = (Background *)safeCalloc(count, sizeof(Background));
-    repeat(count, i) {
-        if (ptrs[i] == 0) continue;
-        Reader_seek(&reader, ptrs[i]);
-        if (Background_parse(&reader, dw, &b->backgrounds[i]) != 0) {
-            free(ptrs);
-            return -1;
-        }
-    }
+    
+    int result = Reader_pointerTable_parse(
+        &reader, dw,
+        ptrs, b->count,
+        (void **)&b->backgrounds, sizeof(Background),
+        NULL,
+        BGND_pointerTable_parse,
+        BGND_pointerTable_missingHandler,
+        NULL
+    );
     
     free(ptrs);
-    return 0;
+    return result;
 }
 
-int Background_parse(Reader *reader, DataWin *dw, Background *bg) {
+static int Background_parse(Reader *reader, DataWin *dw, Background *bg) {
     bg->present = true;
     Reader_readString(reader, dw, &bg->name);
     Reader_readBool32(reader, &bg->smooth);
@@ -113,7 +111,42 @@ int Background_parse(Reader *reader, DataWin *dw, Background *bg) {
     return 0;
 }
 
-int Background_free(Background *bg) {
+static int BGND_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)extraData; // Unused parameter
+    return Background_parse(reader, dw, out);
+}
+
+static int BGND_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)reader; // Unused parameter
+    (void)dw;     // Unused parameter
+    (void)extraData; // Unused parameter
+
+    logWarn("[BGND_pointerTable_missingHandler] Background pointer is missing, initializing default values.\n");
+
+    Background *bg = (Background *)out;
+    bg->present = false;
+    bg->name = NULL;
+    bg->smooth = false;
+    bg->preload = false;
+    bg->tpagIndex = -1;
+    bg->gms2UnknownAlways2 = 0;
+    bg->gms2TileWidth = 0;
+    bg->gms2TileHeight = 0;
+    bg->gms2TileSeparationX = 0;
+    bg->gms2TileSeparationY = 0;
+    bg->gms2OutputBorderX = 0;
+    bg->gms2OutputBorderY = 0;
+    bg->gms2TileColumns = 0;
+    bg->gms2ItemsPerTileCount = 0;
+    bg->gms2TileCount = 0;
+    bg->gms2ExportedSpriteIndex = -1;
+    bg->gms2FrameLength = 0;
+    bg->gms2TileIds = NULL;
+
+    return 0;
+}
+
+static int Background_free(Background *bg) {
     if (bg->name) free((void*)bg->name);
     if (bg->gms2TileIds) free(bg->gms2TileIds);
     return 0;

@@ -1,8 +1,9 @@
 #include "common.h"
 #include "../datawin.h"
 
-int Sprite_parse(Reader *reader, DataWin *dw, Sprite *sprite);
-
+static int SPRT_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int SPRT_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int SPRT_pointerTable_successHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
 int SPRT_parse(DataWin *dw) {
     Chunk chunk = {0};
     SprtChunk *s = &dw->sprt;
@@ -15,39 +16,31 @@ int SPRT_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "SPRT");
 
-    uint32_t count;
     uint32_t *ptrs;
-    if (Reader_readPointerTable(&reader, &ptrs, &count) != 0) return -1;
-    s->count = count;
+    if (Reader_readPointerTable(&reader, &ptrs, &s->count) != 0) return -1;
     s->parsedCount = 0;
 
-    if (count == 0) {
+    if (s->count == 0) {
         s->sprites = NULL;
         free(ptrs);
         return 0;
     }
-
-    s->sprites = (Sprite *)calloc(count, sizeof(Sprite));
-    if (s->sprites == NULL) {
-        free(ptrs);
-        return -1;
-    }
-    repeat (count, i) {
-        if (ptrs[i] == 0 || ptrs[i] >= reader.size) continue;
-        Reader_seek(&reader, ptrs[i]);
-        if (Sprite_parse(&reader, dw, &s->sprites[i]) != 0) {
-            free(ptrs);
-            free(s->sprites);
-            return -1;
-        }
-        s->parsedCount++;
-    }
     
+    int result = Reader_pointerTable_parse(
+        &reader, dw,
+        ptrs, s->count,
+        (void **)&s->sprites, sizeof(Sprite),
+        &s->parsedCount,
+        SPRT_pointerTable_parse,
+        SPRT_pointerTable_missingHandler,
+        SPRT_pointerTable_successHandler
+    );
+
     free(ptrs);
-    return 0;
+    return result;
 }
 
-int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
+static int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
     if (reader == NULL || dw == NULL || spr == NULL) {
         return -1;
     }
@@ -199,7 +192,76 @@ int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
     return 0;
 }
 
-void Sprite_free(Sprite *spr) {
+static int SPRT_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)extraData; // Unused parameter
+    return Sprite_parse(reader, dw, (Sprite *)out);
+}
+
+static int SPRT_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)reader; // Unused parameter
+    (void)dw;     // Unused parameter
+    (void)extraData; // Unused parameter
+
+    logWarn("[SPRT_pointerTable_missingHandler] Sprite pointer is missing, initializing default values.\n");
+
+    Sprite *spr = (Sprite *)out;
+    spr->present = false;
+    spr->name = NULL;
+    spr->width = 0;
+    spr->height = 0;
+    spr->marginLeft = 0;
+    spr->marginRight = 0;
+    spr->marginBottom = 0;
+    spr->marginTop = 0;
+    spr->transparent = false;
+    spr->smooth = false;
+    spr->preload = false;
+    spr->bboxMode = 0;
+    spr->sepMasks = 0;
+    spr->originX = 0;
+    spr->originY = 0;
+    spr->specialType = false;
+    spr->sVersion = 0;
+    spr->sSpriteType = 0;
+    spr->gms2PlaybackSpeed = 1.0f;
+    spr->gms2PlaybackSpeedType = false;
+    spr->textureCount = 0;
+    spr->tpagIndices = NULL;
+    spr->maskCount = 0;
+    spr->masks = NULL;
+    spr->maskWidth = 0;
+    spr->maskHeight = 0;
+    spr->maskOffsetX = 0;
+    spr->maskOffsetY = 0;
+    spr->nineSliceEnabled = false;
+    spr->nsLeft = 0;
+    spr->nsTop = 0;
+    spr->nsRight = 0;
+    spr->nsBottom = 0;
+    repeat(5, j) {
+        spr->nsTileModes[j] = 0;
+    }
+
+    return 0;
+}
+
+static int SPRT_pointerTable_successHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)reader; // Unused parameter
+    (void)dw;     // Unused parameter
+    (void)out;    // Unused parameter
+
+    if (extraData == NULL) {
+        logWarn("[SPRT_pointerTable_successHandler] extraData is NULL, cannot increment parsedCount.\n");
+        return -1;
+    }
+
+    uint32_t *parsedCountPtr = (uint32_t *)(uintptr_t)extraData;
+    (*parsedCountPtr)++;
+
+    return 0;
+}
+
+static void Sprite_free(Sprite *spr) {
     if (spr == NULL) return;
 
     free((void *)spr->name);

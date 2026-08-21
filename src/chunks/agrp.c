@@ -1,8 +1,8 @@
 #include "common.h"
 #include "../datawin.h"
 
-int AudioGroup_parse(Reader *reader, DataWin *dw, AudioGroup *ag);
-
+static int AGRP_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int AGRP_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
 int AGRP_parse(DataWin *dw) {
     Chunk chunk = {0};
     AgrpChunk *a = &dw->agrp;
@@ -15,12 +15,11 @@ int AGRP_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "AGRP");
 
-    uint32_t count;
-    uint32_t* ptrs;
-    if (Reader_readPointerTable(&reader, &ptrs, &count) != 0) return -1;
-    a->count = count;
-
-    if (count == 0) {
+    uint32_t* ptrs = NULL;
+    if (Reader_readPointerTable(&reader, &ptrs, &a->count) != 0)
+        return -1;
+    
+    if (a->count == 0) {
         a->audioGroups = NULL;
         free(ptrs);
         return 0; // Success
@@ -31,13 +30,13 @@ int AGRP_parse(DataWin *dw) {
     // We CAN'T figure out if there aren't at least two AudioGroups, but for any meaningful purposes any game that has external AudioGroups WILL have
     // at least two entries, one for the default AudioGroup and another for the external AudioGroup
     if (DataWin_isVersionAtLeast(dw, 2024, 13, 0, 0)) {
-        if (count >= 2) {
+        if (a->count >= 2) {
             uint32_t diff = ptrs[1] - ptrs[0];
 
             if (diff >= 8) {
                 DataWin_bumpVersionTo(dw, 2024, 14, 0, 0);
             }
-        } else if (count == 1) {
+        } else if (a->count == 1) {
             // If there's only one entry, we CAN'T figure out easily based on the pointer diffs
             // But here's the trick: We can read it twice, if the path is null for the FIRST audiogroup, then it is NOT 2024.14
             if (ptrs[0] == 0) {
@@ -60,23 +59,22 @@ int AGRP_parse(DataWin *dw) {
             }
         }
     }
+    
+    int result = Reader_pointerTable_parse(
+        &reader, dw,
+        ptrs, a->count,
+        (void **)&a->audioGroups, sizeof(AudioGroup),
+        NULL,
+        AGRP_pointerTable_parse,
+        AGRP_pointerTable_missingHandler,
+        NULL
+    );
 
-    a->audioGroups = (AudioGroup *)safeCalloc(count, sizeof(AudioGroup));
-
-    repeat(count, i) {
-        if (ptrs[i] == 0) continue;
-        Reader_seek(&reader, ptrs[i]);
-        if (AudioGroup_parse(&reader, dw, &a->audioGroups[i]) != 0) {
-            free(ptrs);
-            return -1;
-        }
-    }
     free(ptrs);
-
-    return 0;
+    return result;
 }
 
-int AudioGroup_parse(Reader *reader, DataWin *dw, AudioGroup *ag) {
+static int AudioGroup_parse(Reader *reader, DataWin *dw, AudioGroup *ag) {
     ag->present = true;
     if (Reader_readString(reader, dw, &ag->name) != 0) return -1;
     if (DataWin_isVersionAtLeast(dw, 2024, 14, 0, 0)) {
@@ -85,7 +83,26 @@ int AudioGroup_parse(Reader *reader, DataWin *dw, AudioGroup *ag) {
     return 0;
 }
 
-void AudioGroup_free(AudioGroup *ag) {
+static int AGRP_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)extraData; // Unused parameter
+    return AudioGroup_parse(reader, dw, out);
+}
+
+static int AGRP_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)reader; // Unused parameter
+    (void)dw; // Unused parameter
+    (void)extraData; // Unused parameter
+
+    logWarn("[AGRP_pointerTable_missingHandler] Audio group pointer is missing, initializing default values.\n");
+
+    AudioGroup *ag = (AudioGroup *)out;
+    ag->present = false;
+    ag->name = NULL;
+    ag->path = NULL;
+    return 0;
+}
+
+static void AudioGroup_free(AudioGroup *ag) {
     if (ag->name) free((void*)ag->name);
     if (ag->path) free((void*)ag->path);
 }

@@ -1,9 +1,10 @@
 #include "common.h"
 #include <math.h>
 
-int GamePath_parse(Reader *reader, DataWin *dw, GamePath *path);
-int PathPoint_parse(Reader *reader, PathPoint *point);
-void GamePath_computeInternal(GamePath* path);
+static int PATH_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int PATH_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int PathPoint_parse(Reader *reader, PathPoint *point);
+static void GamePath_computeInternal(GamePath* path);
 
 int PATH_parse(DataWin *dw) {
     Chunk chunk = {0};
@@ -17,33 +18,30 @@ int PATH_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "PATH");
 
-    uint32_t count;
     uint32_t *ptrs;
-    Reader_readPointerTable(&reader, &ptrs, &count);
-    p->count = count;
+    Reader_readPointerTable(&reader, &ptrs, &p->count);
     
-    if (count == 0) {
+    if (p->count == 0) {
         p->paths = NULL;
         free(ptrs);
         return 0;
     }
 
-    p->paths = (GamePath*)safeMalloc(sizeof(GamePath) * count);
-    repeat(count, i) {
-        if (ptrs[i] == 0) continue;
-        Reader_seek(&reader, ptrs[i]);
-        if (GamePath_parse(&reader, dw, &p->paths[i]) != 0) {
-            free(ptrs);
-            free(p->paths);
-            return -1;
-        }
-    }
+    int result = Reader_pointerTable_parse(
+        &reader, dw,
+        ptrs, p->count,
+        (void **)&p->paths, sizeof(GamePath),
+        NULL,
+        PATH_pointerTable_parse,
+        PATH_pointerTable_missingHandler,
+        NULL
+    );
 
     free(ptrs);
-    return 0;
+    return result;
 }
 
-int GamePath_parse(Reader *reader, DataWin *dw, GamePath *path) {
+static int GamePath_parse(Reader *reader, DataWin *dw, GamePath *path) {
     path->present = true;
     path->internalPoints = NULL;
     path->internalPointCount = 0;
@@ -73,14 +71,42 @@ int GamePath_parse(Reader *reader, DataWin *dw, GamePath *path) {
     return 0;
 }
 
-int PathPoint_parse(Reader *reader, PathPoint *point) {
+static int PathPoint_parse(Reader *reader, PathPoint *point) {
     Reader_readFloat32(reader, &point->x);
     Reader_readFloat32(reader, &point->y);
     Reader_readFloat32(reader, &point->speed);
     return 0;
 }
 
-int GamePath_free(GamePath *path) {
+static int PATH_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)extraData; // Unused parameter
+    return GamePath_parse(reader, dw, (GamePath *)out);
+}
+
+static int PATH_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)reader; // Unused parameter
+    (void)dw;     // Unused parameter
+    (void)extraData; // Unused parameter
+
+    logWarn("[PATH_pointerTable_missingHandler] Path pointer is missing, initializing default values.\n");
+
+    GamePath *path = (GamePath *)out;
+    path->present = false;
+    path->name = NULL;
+    path->isSmooth = false;
+    path->isClosed = false;
+    path->precision = 0;
+    path->exists = false;
+    path->pointCount = 0;
+    path->points = NULL;
+    path->internalPoints = NULL;
+    path->internalPointCount = 0;
+    path->length = 0.0;
+
+    return 0;
+}
+
+static int GamePath_free(GamePath *path) {
     free(path->points);
     path->points = NULL;
     path->pointCount = 0;
@@ -161,7 +187,7 @@ static void handlePiece(int depth, float x1, float y1, float s1, float x2, float
     }
 }
 
-void GamePath_computeInternal(GamePath* path) {
+static void GamePath_computeInternal(GamePath* path) {
     // Reset temp state
     tempIntPoints_free();
 
@@ -235,7 +261,7 @@ void GamePath_computeInternal(GamePath* path) {
 }
 
 // Get interpolated position at t in [0,1] (yyPath.js:362-409)
-PathPositionResult GamePath_getPosition(GamePath* path, float t) {
+static PathPositionResult GamePath_getPosition(GamePath* path, float t) {
     PathPositionResult result = {0};
     result.speed = 100.0f;
 

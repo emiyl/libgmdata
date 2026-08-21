@@ -1,7 +1,7 @@
 #include "common.h"
 
-int Shader_parse(Reader *reader, DataWin *dw, Shader *shader);
-
+static int SHDR_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int SHDR_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
 int SHDR_parse(DataWin *dw) {
     Chunk chunk = {0};
     ShdrChunk *s = &dw->shdr;
@@ -14,26 +14,21 @@ int SHDR_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "SHDR");
 
-    uint32_t count;
     uint32_t *ptrs;
-    if (Reader_readPointerTable(&reader, &ptrs, &count) != 0) return -1;
-    s->count = count;
+    if (Reader_readPointerTable(&reader, &ptrs, &s->count) != 0) return -1;
 
-    s->shaders = (Shader *)safeCalloc(count, sizeof(Shader));
-    repeat(count, i) {
-        if (ptrs[i] == 0) {
-            s->shaders[i].present = false;
-            continue;
-        }
-        Reader_seek(&reader, ptrs[i]);
-        if (Shader_parse(&reader, dw, &s->shaders[i]) != 0) {
-            free(ptrs);
-            logError("[SHDR_parse] Failed to parse shader at index %u\n", i);
-            return -1;
-        }
-    }
+    int result = Reader_pointerTable_parse(
+        &reader, dw,
+        ptrs, s->count,
+        (void **)&s->shaders, sizeof(Shader),
+        NULL,
+        SHDR_pointerTable_parse,
+        SHDR_pointerTable_missingHandler,
+        NULL
+    );
 
-    return 0;
+    free(ptrs);
+    return result;
 }
 
 int Shader_parse(Reader *reader, DataWin *dw, Shader *sh) {
@@ -56,18 +51,13 @@ int Shader_parse(Reader *reader, DataWin *dw, Shader *sh) {
 
     // Vertex attributes SimpleList
     Reader_readUInt32(reader, &sh->vertexAttributeCount);
-    if (sh->vertexAttributeCount > 0) {
-        sh->vertexAttributes = (const char **)safeCalloc(sh->vertexAttributeCount, sizeof(const char *));
-        repeat(sh->vertexAttributeCount, i) {
-            Reader_readString(reader, dw, &sh->vertexAttributes[i]);
-        }
-    } else {
-        sh->vertexAttributes = NULL;
+    sh->vertexAttributes = (const char **)safeCalloc(sh->vertexAttributeCount, sizeof(const char *));
+    repeat(sh->vertexAttributeCount, i) {
+        Reader_readString(reader, dw, &sh->vertexAttributes[i]);
     }
 
     // Version field and console shader variants only exist on wadVersion > 13.
     if (dw->gen8.wadVersion > 13) {
-
         Reader_readInt32(reader, &sh->version);
         Reader_readUInt32(reader, &sh->pssl_VertexOffset);
         Reader_readUInt32(reader, &sh->pssl_VertexLen);
@@ -109,7 +99,37 @@ int Shader_parse(Reader *reader, DataWin *dw, Shader *sh) {
     return 0;
 }
 
-void Shader_free(Shader *sh) {
+static int SHDR_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)extraData; // Unused parameter
+    return Shader_parse(reader, dw, (Shader *)out);
+}
+
+static int SHDR_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)reader; // Unused parameter
+    (void)dw;     // Unused parameter
+    (void)extraData; // Unused parameter
+
+    logWarn("[SHDR_pointerTable_missingHandler] Shader pointer is missing, initializing default values.\n");
+
+    Shader *sh = (Shader *)out;
+    sh->present = false;
+    sh->name = NULL;
+    sh->type = 0;
+    sh->glslES_Vertex = NULL;
+    sh->glslES_Fragment = NULL;
+    sh->glsl_Vertex = NULL;
+    sh->glsl_Fragment = NULL;
+    sh->hlsl9_Vertex = NULL;
+    sh->hlsl9_Fragment = NULL;
+    sh->hlsl11_VertexOffset = 0;
+    sh->hlsl11_PixelOffset = 0;
+    sh->vertexAttributeCount = 0;
+    sh->vertexAttributes = NULL;
+
+    return 0;
+}
+
+static void Shader_free(Shader *sh) {
     if (sh == NULL) return;
 
     free((void *)sh->name);

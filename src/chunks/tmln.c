@@ -1,9 +1,7 @@
 #include "common.h"
 
-int Timeline_parse(Reader *reader, DataWin *dw, Timeline *timeline);
-int TimelineMoment_parse(Reader *reader, DataWin *dw, TimelineMoment *moment);
-int EventAction_parse(Reader *reader, DataWin *dw, EventAction *action);
-
+static int TMLN_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int TMLN_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
 int TMLN_parse(DataWin *dw) {
     Chunk chunk = {0};
     TmlnChunk *t = &dw->tmln;
@@ -16,33 +14,34 @@ int TMLN_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "TMLN");
 
-    uint32_t count;
     uint32_t *ptrs;
-    Reader_readPointerTable(&reader, &ptrs, &count);
-    t->count = count;
+    Reader_readPointerTable(&reader, &ptrs, &t->count);
 
-    if (count == 0) {
+    if (t->count == 0) {
         t->timelines = NULL;
         free(ptrs);
         return 0;
     }
 
-    t->timelines = (Timeline*)safeCalloc(count, sizeof(Timeline));
-    repeat(count, i) {
-        if (ptrs[i] == 0) continue;
-        Reader_seek(&reader, ptrs[i]);
-        if (Timeline_parse(&reader, dw, &t->timelines[i]) != 0) {
-            free(ptrs);
-            free(t->timelines);
-            return -1;
-        }
-    }
+    t->timelines = (Timeline*)safeCalloc(t->count, sizeof(Timeline));
+    
+    int result = Reader_pointerTable_parse(
+        &reader, dw,
+        ptrs, t->count,
+        (void **)&t->timelines, sizeof(Timeline),
+        NULL,
+        TMLN_pointerTable_parse,
+        TMLN_pointerTable_missingHandler,
+        NULL
+    );
 
     free(ptrs);
-    return 0;
+    return result;
 }
 
-int Timeline_parse(Reader *reader, DataWin *dw, Timeline *tl) {
+static int Timeline_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int Timeline_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int Timeline_parse(Reader *reader, DataWin *dw, Timeline *tl) {
     tl->present = true;
     Reader_readString(reader, dw, &tl->name);
     Reader_readUInt32(reader, &tl->momentCount);
@@ -75,13 +74,22 @@ int Timeline_parse(Reader *reader, DataWin *dw, Timeline *tl) {
                 free(ptrs);
                 tl->moments[j].actions = NULL;
             }
+            
+            int result = Reader_pointerTable_parse(
+                reader, dw,
+                ptrs, count,
+                (void **)&tl->moments[j].actions, sizeof(EventAction),
+                NULL,
+                Timeline_pointerTable_parse,
+                Timeline_pointerTable_missingHandler,
+                NULL
+            );
 
-            tl->moments[j].actions = (EventAction *)safeMalloc(count * sizeof(EventAction));
-            repeat(count, k) {
-                Reader_seek(reader, ptrs[k]);
-                EventAction_parse(reader, dw, &tl->moments[j].actions[k]);
-            }
             free(ptrs);
+            if (result != 0) {
+                free(eventPtrs);
+                return result;
+            }
         }
         }
     }
@@ -89,7 +97,7 @@ int Timeline_parse(Reader *reader, DataWin *dw, Timeline *tl) {
     return 0;
 }
 
-int EventAction_parse(Reader *reader, DataWin *dw, EventAction *action) {
+static int EventAction_parse(Reader *reader, DataWin *dw, EventAction *action) {
     Reader_readUInt32(reader, &action->libID);
     Reader_readUInt32(reader, &action->id);
     Reader_readUInt32(reader, &action->kind);
@@ -107,12 +115,52 @@ int EventAction_parse(Reader *reader, DataWin *dw, EventAction *action) {
     return 0;
 }
 
-int EventAction_free(EventAction *action) {
+static int TMLN_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)extraData; // Unused parameter
+    return Timeline_parse(reader, dw, (Timeline *)out);
+}
+
+static int TMLN_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)reader; // Unused parameter
+    (void)dw;     // Unused parameter
+    (void)extraData; // Unused parameter
+
+    logWarn("[TMLN_pointerTable_missingHandler] Timeline pointer is missing, initializing default values.\n");
+
+    Timeline *timeline = (Timeline *)out;
+    timeline->present = false;
+    timeline->name = NULL;
+    timeline->momentCount = 0;
+    timeline->moments = NULL;
+
+    return 0;
+}
+
+static int Timeline_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)extraData; // Unused parameter
+    return EventAction_parse(reader, dw, (EventAction *)out);
+}
+
+static int Timeline_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)reader; // Unused parameter
+    (void)dw;     // Unused parameter
+    (void)extraData; // Unused parameter
+
+    logWarn("[Timeline_pointerTable_missingHandler] Timeline moment pointer is missing, initializing default values.\n");
+
+    TimelineMoment *moment = (TimelineMoment *)out;
+    moment->actionCount = 0;
+    moment->actions = NULL;
+
+    return 0;
+}
+
+static int EventAction_free(EventAction *action) {
     action->actionName = NULL;
     return 0;
 }
 
-int TimelineMoment_free(TimelineMoment *moment) {
+static int TimelineMoment_free(TimelineMoment *moment) {
     repeat(moment->actionCount, i) {
         EventAction_free(&moment->actions[i]);
     }
@@ -122,7 +170,7 @@ int TimelineMoment_free(TimelineMoment *moment) {
     return 0;
 }
 
-int Timeline_free(Timeline *timeline) {
+static int Timeline_free(Timeline *timeline) {
     free((void *)timeline->name);
     timeline->name = NULL;
 

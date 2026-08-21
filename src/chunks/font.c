@@ -1,9 +1,7 @@
 #include "common.h"
 
-int Font_parse(Reader *reader, DataWin *dw, Font *font, uint32_t fontOptionalCount);
-int FontGlyph_parse(Reader *reader, DataWin *dw, FontGlyph *glyph, uint32_t *maxGlyphHeight);
-int FontKerningPair_parse(Reader *reader, DataWin *dw, KerningPair *kerningPair);
-
+static int FONT_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int FONT_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
 int FONT_parse(DataWin *dw) {
     Chunk chunk = {0};
     FontChunk *f = &dw->font;
@@ -16,12 +14,10 @@ int FONT_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "FONT");
 
-    uint32_t count;
     uint32_t *ptrs;
-    Reader_readPointerTable(&reader, &ptrs, &count);
-    f->count = count;
+    Reader_readPointerTable(&reader, &ptrs, &f->count);
 
-    if (count == 0) {
+    if (f->count == 0) {
         f->fonts = NULL;
         free(ptrs);
         return 0;
@@ -46,23 +42,24 @@ int FONT_parse(DataWin *dw) {
             fontOptionalCount = trial;
         }
     }
-
-    f->fonts = (Font*)safeCalloc(count, sizeof(Font));
-    repeat(count, i) {
-        if (ptrs[i] == 0) continue;
-        Reader_seek(&reader, ptrs[i]);
-        if (Font_parse(&reader, dw, &f->fonts[i], fontOptionalCount) != 0) {
-            free(ptrs);
-            free(f->fonts);
-            return -1;
-        }
-    }
+    
+    int result = Reader_pointerTable_parse(
+        &reader, dw,
+        ptrs, f->count,
+        (void **)&f->fonts, sizeof(Font),
+        NULL,
+        FONT_pointerTable_parse,
+        FONT_pointerTable_missingHandler,
+        NULL
+    );
 
     free(ptrs);
-    return 0;
+    return result;
 }
 
-int Font_parse(Reader *reader, DataWin *dw, Font *f, uint32_t fontOptionalCount) {
+static int Font_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int Font_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int Font_parse(Reader *reader, DataWin *dw, Font *f, uint32_t fontOptionalCount) {
     f->present = true;
     Reader_readString(reader, dw, &f->name);
     Reader_readString(reader, dw, &f->displayName);
@@ -119,29 +116,26 @@ int Font_parse(Reader *reader, DataWin *dw, Font *f, uint32_t fontOptionalCount)
     f->spriteIndex = -1;
     f->spriteOriginYAdjust = 0;
 
-    uint32_t count;
     uint32_t *ptrs;
-    Reader_readPointerTable(reader, &ptrs, &count);
-    f->glyphCount = count;
+    Reader_readPointerTable(reader, &ptrs, &f->glyphCount);
     uint32_t maxGlyphHeight = 0;
 
-    if (count == 0) {
+    if (f->glyphCount == 0) {
         f->glyphs = NULL;
         f->maxGlyphHeight = maxGlyphHeight;
         free(ptrs);
         return 0;
     }
-
-    f->glyphs = (FontGlyph*)safeCalloc(count, sizeof(FontGlyph));
-    repeat(count, i) {
-        if (ptrs[i] == 0) continue;
-        Reader_seek(reader, ptrs[i]);
-        if (FontGlyph_parse(reader, dw, &f->glyphs[i], &maxGlyphHeight) != 0) {
-            free(ptrs);
-            free(f->glyphs);
-            return -1;
-        }
-    }
+    
+    int result = Reader_pointerTable_parse(
+        reader, dw,
+        ptrs, f->glyphCount,
+        (void **)&f->glyphs, sizeof(FontGlyph),
+        NULL,
+        Font_pointerTable_parse,
+        Font_pointerTable_missingHandler,
+        NULL
+    );
 
     free(ptrs);
     f->maxGlyphHeight = maxGlyphHeight;
@@ -159,10 +153,11 @@ int Font_parse(Reader *reader, DataWin *dw, Font *f, uint32_t fontOptionalCount)
 
     // 512 bytes of trailing padding
 
-    return 0;
+    return result;
 }
 
-int FontGlyph_parse(Reader *reader, DataWin *dw, FontGlyph *g, uint32_t *maxGlyphHeight) {
+static int FontKerningPair_parse(Reader *reader, KerningPair *kerningPair);
+static int FontGlyph_parse(Reader *reader, FontGlyph *g, uint32_t *maxGlyphHeight) {
     Reader_readUInt16(reader, &g->character);
     Reader_readUInt16(reader, &g->sourceX);
     Reader_readUInt16(reader, &g->sourceY);
@@ -175,36 +170,107 @@ int FontGlyph_parse(Reader *reader, DataWin *dw, FontGlyph *g, uint32_t *maxGlyp
 
     // Kerning SimpleShortList (uint16 count)
     Reader_readUInt16(reader, &g->kerningCount);
-    if (g->kerningCount > 0) {
-        g->kerning = (KerningPair*)safeMalloc(g->kerningCount * sizeof(KerningPair));
-        for (uint16_t i = 0; i < g->kerningCount; ++i) {
-            if (FontKerningPair_parse(reader, dw, &g->kerning[i]) != 0) {
-                free(g->kerning);
-                g->kerning = NULL;
-                return -1;
-            }
-        }
-    }    else {
+
+    if (g->kerningCount == 0) {
         g->kerning = NULL;
+        return 0;
+    }
+    
+    g->kerning = (KerningPair*)safeMalloc(g->kerningCount * sizeof(KerningPair));
+
+    repeat(g->kerningCount, i) {
+        if (FontKerningPair_parse(reader, &g->kerning[i]) != 0) {
+            free(g->kerning);
+            g->kerning = NULL;
+            return -1;
+        }
     }
     
     return 0;
 }
 
-int FontKerningPair_parse(Reader *reader, DataWin *dw, KerningPair *kerningPair) {
+static int FontKerningPair_parse(Reader *reader, KerningPair *kerningPair) {
     Reader_readInt16(reader, &kerningPair->character);
     Reader_readInt16(reader, &kerningPair->shiftModifier);
     return 0;
 }
 
-int FontGlyph_free(FontGlyph *g) {
+static int FONT_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)extraData; // Unused parameter
+    return Font_parse(reader, dw, (Font *)out, 0);
+}
+
+static int FONT_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)reader; // Unused parameter
+    (void)dw;     // Unused parameter
+    (void)extraData; // Unused parameter
+
+    logWarn("[FONT_pointerTable_missingHandler] Font pointer is missing, initializing default values.\n");
+
+    Font *f = (Font *)out;
+    f->present = false;
+    f->name = NULL;
+    f->displayName = NULL;
+    f->emSize = 0.0f;
+    f->bold = false;
+    f->italic = false;
+    f->rangeStart = 0;
+    f->charset = 0;
+    f->antiAliasing = 0;
+    f->rangeEnd = 0;
+    f->tpagIndex = -1;
+    f->scaleX = 1.0f;
+    f->scaleY = 1.0f;
+    f->ascenderOffset = 0;
+    f->ascender = 0;
+    f->sdfSpread = 0;
+    f->lineHeight = 0;
+    f->hasAscender = false;
+    f->hasSDFSpread = false;
+    f->hasLineHeight = false;
+    f->glyphCount = 0;
+    f->glyphs = NULL;
+    memset(f->glyphLUT, 0, sizeof(f->glyphLUT));
+    f->maxGlyphHeight = 0;
+
+    return 0;
+}
+
+static int Font_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)dw; // Unused parameter
+    (void)extraData; // Unused parameter
+    return FontGlyph_parse(reader, (FontGlyph *)out, NULL);
+}
+
+static int Font_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)reader; // Unused parameter
+    (void)dw;     // Unused parameter
+    (void)extraData; // Unused parameter
+
+    logWarn("[Font_pointerTable_missingHandler] Font glyph pointer is missing, initializing default values.\n");
+
+    FontGlyph *g = (FontGlyph *)out;
+    g->character = 0;
+    g->sourceX = 0;
+    g->sourceY = 0;
+    g->sourceWidth = 0;
+    g->sourceHeight = 0;
+    g->shift = 0;
+    g->offset = 0;
+    g->kerningCount = 0;
+    g->kerning = NULL;
+
+    return 0;
+}
+
+static int FontGlyph_free(FontGlyph *g) {
     if (g == NULL) return 0;
     free(g->kerning);
     g->kerning = NULL;
     return 0;
 }
 
-int Font_free(Font *f) {
+static int Font_free(Font *f) {
     if (f == NULL) return 0;
     free((void *)f->name);
     f->name = NULL;

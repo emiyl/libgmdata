@@ -1,7 +1,7 @@
 #include "common.h"
 
-int Script_parse(Reader *reader, DataWin *dw, Script *script);
-
+static int SCPT_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int SCPT_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
 int SCPT_parse(DataWin *dw) {
     Chunk chunk = {0};
     ScptChunk *s = &dw->scpt;
@@ -14,40 +14,58 @@ int SCPT_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "SCPT");
 
-    uint32_t count;
-    uint32_t *ptrs;
-    Reader_readPointerTable(&reader, &ptrs, &count);
-    s->count = count;
+    uint32_t *ptrs = NULL;
+    if (Reader_readPointerTable(&reader, &ptrs, &s->count) != 0)
+        return -1;
 
-    if (count == 0) {
+    if (s->count == 0) {
         s->scripts = NULL;
         free(ptrs);
         return 0;
     }
-
-    s->scripts = (Script*)safeCalloc(count, sizeof(Script));
-    repeat(count, i) {
-        if (ptrs[i] == 0) continue;
-        Reader_seek(&reader, ptrs[i]);
-        if (Script_parse(&reader, dw, &s->scripts[i]) != 0) {
-            free(ptrs);
-            free(s->scripts);
-            return -1;
-        }
-    }
+    
+    int result = Reader_pointerTable_parse(
+        &reader, dw,
+        ptrs, s->count,
+        (void **)&s->scripts, sizeof(Script),
+        NULL,
+        SCPT_pointerTable_parse,
+        SCPT_pointerTable_missingHandler,
+        NULL
+    );
 
     free(ptrs);
-    return 0;
+    return result;
 }
 
-int Script_parse(Reader *reader, DataWin *dw, Script *script) {
+static int Script_parse(Reader *reader, DataWin *dw, Script *script) {
     script->present = true;
     Reader_readString(reader, dw, &script->name);
     Reader_readInt32(reader, &script->codeId);
     return 0;
 }
 
-int Script_free(Script *script) {
+static int SCPT_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)extraData; // Unused parameter
+    return Script_parse(reader, dw, (Script *)out);
+}
+
+static int SCPT_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)reader; // Unused parameter
+    (void)dw;     // Unused parameter
+    (void)extraData; // Unused parameter
+
+    logWarn("[SCPT_pointerTable_missingHandler] Script pointer is missing, initializing default values.\n");
+
+    Script *script = (Script *)out;
+    script->present = false;
+    script->name = NULL;
+    script->codeId = 0;
+
+    return 0;
+}
+
+static int Script_free(Script *script) {
     script->name = NULL;
     return 0;
 }

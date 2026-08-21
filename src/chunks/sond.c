@@ -1,8 +1,8 @@
 #include "common.h"
 #include "../datawin.h"
 
-int Sound_parse(Reader *reader, DataWin *dw, Sound *sound);
-
+static int SOND_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
+static int SOND_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
 int SOND_parse(DataWin *dw) {
     Chunk chunk = {0};
     SondChunk *s = &dw->sond;
@@ -15,12 +15,10 @@ int SOND_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "SOND");
 
-    uint32_t count;
     uint32_t* ptrs;
-    if (Reader_readPointerTable(&reader, &ptrs, &count) != 0) return -1;
-    s->count = count;
+    if (Reader_readPointerTable(&reader, &ptrs, &s->count) != 0) return -1;
 
-    if (count == 0) {
+    if (s->count == 0) {
         s->sounds = NULL;
         free(ptrs);
         return 0;
@@ -32,7 +30,7 @@ int SOND_parse(DataWin *dw) {
     ) {
         uint32_t soundPtrs[2];
         uint32_t soundCount = 0;
-        repeat(count, i) {
+        repeat(s->count, i) {
             if (ptrs[i] == 0) continue;
             soundPtrs[soundCount++] = ptrs[i];
             if (soundCount >= 2) break;
@@ -54,25 +52,22 @@ int SOND_parse(DataWin *dw) {
             Reader_seek(&reader, savedPos);
         }
     }
-
-    s->sounds = (Sound*) safeMalloc(sizeof(Sound) * count);
-    repeat(count, i) {
-        if (ptrs[i] == 0) {
-            memset(&s->sounds[i], 0, sizeof(Sound));
-            continue;
-        }
-
-        Reader_seek(&reader, ptrs[i]);
-        if (Sound_parse(&reader, dw, &s->sounds[i]) != 0) {
-            free(ptrs);
-            return -1;
-        }
-    }
     
+    Reader_pointerTable_parse(
+        &reader, dw,
+        ptrs, s->count,
+        (void **)&s->sounds, sizeof(Sound),
+        NULL,
+        SOND_pointerTable_parse,
+        SOND_pointerTable_missingHandler,
+        NULL
+    );
+
+    free(ptrs);
     return 0;
 }
 
-int Sound_parse(Reader *reader, DataWin *dw, Sound *snd) {
+static int Sound_parse(Reader *reader, DataWin *dw, Sound *snd) {
     snd->present = true;
     Reader_readString(reader, dw, &snd->name);
     Reader_readUInt32(reader, &snd->flags);
@@ -120,7 +115,34 @@ int Sound_parse(Reader *reader, DataWin *dw, Sound *snd) {
     return 0;
 }
 
-void Sound_free(Sound *snd) {
+static int SOND_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)extraData; // Unused parameter
+    return Sound_parse(reader, dw, (Sound *)out);
+}
+static int SOND_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {
+    (void)reader; // Unused parameter
+    (void)dw;     // Unused parameter
+    (void)extraData; // Unused parameter
+
+    logWarn("[SOND_pointerTable_missingHandler] Sound pointer is missing, initializing default values.\n");
+
+    Sound *snd = (Sound *)out;
+    snd->present = false;
+    snd->name = NULL;
+    snd->type = NULL;
+    snd->file = NULL;
+    snd->flags = 0;
+    snd->effects = 0;
+    snd->volume = 1.0f;
+    snd->pan = 0.0f;
+    snd->pitch = 1.0f;
+    snd->audioGroup = 0;
+    snd->audioFile = 0;
+
+    return 0;
+}
+
+static void Sound_free(Sound *snd) {
     if (snd == NULL) {
         return;
     }
