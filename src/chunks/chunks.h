@@ -27,6 +27,9 @@ int SPRT_free(SprtChunk *s);
 int BGND_parse(DataWin *dw);
 int BGND_free(BgndChunk *b);
 
+int TPAG_parse(DataWin *dw);
+int TPAG_free(TpagChunk *t);
+
 int PATH_parse(DataWin *dw);
 int PATH_free(PathChunk *p);
 

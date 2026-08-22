@@ -117,6 +117,10 @@ int DataWin_parse(DataWin *dw) {
     logInfo("Parsed chunk SPRT\n");
     assert(BGND_parse(dw) == 0);
     logInfo("Parsed chunk BGND\n");
+    assert(FONT_parse(dw) == 0);
+    logInfo("Parsed chunk FONT\n");
+    assert(TPAG_parse(dw) == 0);
+    logInfo("Parsed chunk TPAG\n");
     assert(PATH_parse(dw) == 0);
     logInfo("Parsed chunk PATH\n");
     assert(SCPT_parse(dw) == 0);
@@ -125,8 +129,6 @@ int DataWin_parse(DataWin *dw) {
     logInfo("Parsed chunk GLOB\n");
     assert(SHDR_parse(dw) == 0);
     logInfo("Parsed chunk SHDR\n");
-    assert(FONT_parse(dw) == 0);
-    logInfo("Parsed chunk FONT\n");
     assert(TMLN_parse(dw) == 0);
     logInfo("Parsed chunk TMLN\n");
     assert(OBJT_parse(dw) == 0);
@@ -183,6 +185,10 @@ int DataWin_free(DataWin *dw) {
     }
     if (BGND_free(&dw->bgnd)) {
         logWarn("[DataWin_free] Failed to free BGND chunk\n");
+        result = -1;
+    }
+    if (TPAG_free(&dw->tpag)) {
+        logWarn("[DataWin_free] Failed to free TPAG chunk\n");
         result = -1;
     }
     if (PATH_free(&dw->path)) {

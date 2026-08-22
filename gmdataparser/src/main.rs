@@ -325,6 +325,32 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
                 });
             }
         }
+        "TPAG" => {
+            let count = dw.tpag.count as usize;
+            if count == 0 || dw.tpag.items.is_null() {
+                return items;
+            }
+            let items_ptr = unsafe { std::slice::from_raw_parts(dw.tpag.items, count) };
+            for (idx, item) in items_ptr.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "present", item.present);
+                push_field(&mut fields, "sourceX", item.sourceX);
+                push_field(&mut fields, "sourceY", item.sourceY);
+                push_field(&mut fields, "sourceWidth", item.sourceWidth);
+                push_field(&mut fields, "sourceHeight", item.sourceHeight);
+                push_field(&mut fields, "targetX", item.targetX);
+                push_field(&mut fields, "targetY", item.targetY);
+                push_field(&mut fields, "targetWidth", item.targetWidth);
+                push_field(&mut fields, "targetHeight", item.targetHeight);
+                push_field(&mut fields, "boundingWidth", item.boundingWidth);
+                push_field(&mut fields, "boundingHeight", item.boundingHeight);
+                push_field(&mut fields, "texturePageId", item.texturePageId);
+                items.push(ChunkItem {
+                    name: format!("Texture page {}", idx),
+                    fields,
+                });
+            }
+        }
         "OBJT" => {
             let count = dw.objt.count as usize;
             if count == 0 || dw.objt.objects.is_null() {
@@ -511,6 +537,11 @@ fn build_chunk_fields(name: &str, dw: &DataWin) -> Vec<ChunkField> {
             push_field(&mut fields, "count", t.count);
             add_count_field(&mut fields, "timelines", t.timelines as *mut std::ffi::c_void, t.count as usize);
         }
+        "TPAG" => {
+            let t = &dw.tpag;
+            push_field(&mut fields, "count", t.count);
+            add_count_field(&mut fields, "items", t.items as *mut std::ffi::c_void, t.count as usize);
+        }
         "OBJT" => {
             let o = &dw.objt;
             push_field(&mut fields, "count", o.count);
@@ -571,6 +602,7 @@ impl eframe::App for App {
                             "SHDR" => "Shaders",
                             "FONT" => "Fonts",
                             "TMLN" => "Timelines",
+                            "TPAG" => "Texture Pages",
                             "OBJT" => "Objects",
                             "ROOM" => "Rooms",
                             name => name,

@@ -19,6 +19,7 @@ void GLOB_Print(const GlobChunk *g);
 void SHDR_Print(const ShdrChunk *s);
 void FONT_Print(const FontChunk *f);
 void TMLN_Print(const TmlnChunk *t);
+void TPAG_Print(const TpagChunk *t);
 void OBJT_Print(const ObjtChunk *o);
 void ROOM_Print(const RoomChunk *r);
 
@@ -49,6 +50,7 @@ int main(int argc, char **argv) {
     bool printShdr = false;
     bool printFont = false;
     bool printTmln = false;
+    bool printTpag = false;
     bool printObjt = false;
     bool printRoom = false;
 
@@ -78,6 +80,7 @@ int main(int argc, char **argv) {
                 printShdr = true;
                 printFont = true;
                 printTmln = true;
+                printTpag = true;
                 printObjt = true;
                 printRoom = true;
             } else if (strcmp(name, "gen8") == 0) {
@@ -108,6 +111,8 @@ int main(int argc, char **argv) {
                 printFont = true;
             } else if (strcmp(name, "tmln") == 0) {
                 printTmln = true;
+            } else if (strcmp(name, "tpag") == 0) {
+                printTpag = true;
             } else if (strcmp(name, "objt") == 0) {
                 printObjt = true;
             } else if (strcmp(name, "room") == 0) {
@@ -169,6 +174,7 @@ int main(int argc, char **argv) {
     if (printShdr) SHDR_Print(&dw.shdr);
     if (printFont) FONT_Print(&dw.font);
     if (printTmln) TMLN_Print(&dw.tmln);
+    if (printTpag) TPAG_Print(&dw.tpag);
     if (printObjt) OBJT_Print(&dw.objt);
     if (printRoom) ROOM_Print(&dw.room);
 
@@ -878,151 +884,6 @@ void FONT_Print(const FontChunk *f) {
     }
 }
 
-void ROOM_Print(const RoomChunk *r) {
-    printf("ROOM:\n");
-    if (r == NULL || r->rooms == NULL || r->count == 0) {
-        printf("  (none)\n");
-        return;
-    }
-
-    for (uint32_t i = 0; i < r->count; i++) {
-        const Room *room = &r->rooms[i];
-
-        printf("  room[%" PRIu32 "]:\n", i);
-        printf("    present: %s\n", room->present ? "true" : "false");
-        if (!room->present) {
-            continue;
-        }
-
-        printf("    name: %s\n", room->name ? room->name : "(null)");
-        printf("    caption: %s\n", room->caption ? room->caption : "(null)");
-        printf("    size: %" PRIu32 "x%" PRIu32 "\n", room->width, room->height);
-        printf("    speed: %" PRIu32 "\n", room->speed);
-        printf("    persistent: %s\n", room->persistent ? "true" : "false");
-        printf("    backgroundColor: 0x%08" PRIx32 "\n", room->backgroundColor);
-        printf("    drawBackgroundColor: %s\n", room->drawBackgroundColor ? "true" : "false");
-        printf("    creationCodeId: %" PRId32 "\n", room->creationCodeId);
-        printf("    flags: 0x%08" PRIx32 "\n", room->flags);
-        printf("    world: %s\n", room->world ? "true" : "false");
-        printf("    bounds: (%" PRIu32 ", %" PRIu32 ", %" PRIu32 ", %" PRIu32 ")\n",
-               room->top,
-               room->left,
-               room->right,
-               room->bottom);
-        printf("    gravity: (%f, %f)\n", room->gravityX, room->gravityY);
-        printf("    metersPerPixel: %f\n", room->metersPerPixel);
-        printf("    payloadLoaded: %s\n", room->payloadLoaded ? "true" : "false");
-        printf("    layerCount: %" PRIu32 "\n", room->layerCount);
-        printf("    backgroundCount: %" PRIu32 "\n", room->backgrounds != NULL ? 8u : 0u);
-        printf("    viewCount: %" PRIu32 "\n", room->views != NULL ? 8u : 0u);
-        printf("    gameObjectCount: %" PRIu32 "\n", room->gameObjectCount);
-        printf("    tileCount: %" PRIu32 "\n", room->tileCount);
-
-        if (room->backgrounds != NULL) {
-            printf("    backgrounds:\n");
-            for (uint32_t j = 0; j < 8; j++) {
-                const RoomBackground *bg = &room->backgrounds[j];
-                printf("      [%" PRIu32 "] enabled=%s foreground=%s def=%" PRId32 " pos=(%" PRId32 ", %" PRId32 ") tile=(%" PRId32 ", %" PRId32 ") speed=(%" PRId32 ", %" PRId32 ") stretch=%s\n",
-                       j,
-                       bg->enabled ? "true" : "false",
-                       bg->foreground ? "true" : "false",
-                       bg->backgroundDefinition,
-                       bg->x,
-                       bg->y,
-                       bg->tileX,
-                       bg->tileY,
-                       bg->speedX,
-                       bg->speedY,
-                       bg->stretch ? "true" : "false");
-            }
-        }
-
-        if (room->views != NULL) {
-            printf("    views:\n");
-            for (uint32_t j = 0; j < 8; j++) {
-                const RoomView *view = &room->views[j];
-                printf("      [%" PRIu32 "] enabled=%s view=(%" PRId32 ", %" PRId32 ") size=(%" PRId32 ", %" PRId32 ") port=(%" PRId32 ", %" PRId32 ") portSize=(%" PRId32 ", %" PRId32 ") border=(%" PRIu32 ", %" PRIu32 ") speed=(%" PRId32 ", %" PRId32 ") objectId=%" PRId32 "\n",
-                       j,
-                       view->enabled ? "true" : "false",
-                       view->viewX,
-                       view->viewY,
-                       view->viewWidth,
-                       view->viewHeight,
-                       view->portX,
-                       view->portY,
-                       view->portWidth,
-                       view->portHeight,
-                       view->borderX,
-                       view->borderY,
-                       view->speedX,
-                       view->speedY,
-                       view->objectId);
-            }
-        }
-
-        if (room->gameObjects != NULL && room->gameObjectCount > 0) {
-            printf("    gameObjects:\n");
-            for (uint32_t j = 0; j < room->gameObjectCount; j++) {
-                const RoomGameObject *go = &room->gameObjects[j];
-                printf("      [%" PRIu32 "] pos=(%" PRId32 ", %" PRId32 ") object=%" PRId32 " instance=%" PRIu32 " creationCode=%" PRId32 " scale=(%f, %f) imageSpeed=%f imageIndex=%" PRId32 " color=0x%08" PRIx32 " rotation=%f preCreateCode=%" PRId32 "\n",
-                       j,
-                       go->x,
-                       go->y,
-                       go->objectDefinition,
-                       go->instanceID,
-                       go->creationCode,
-                       go->scaleX,
-                       go->scaleY,
-                       go->imageSpeed,
-                       go->imageIndex,
-                       go->color,
-                       go->rotation,
-                       go->preCreateCode);
-            }
-        }
-
-        if (room->tiles != NULL && room->tileCount > 0) {
-            printf("    tiles:\n");
-            for (uint32_t j = 0; j < room->tileCount; j++) {
-                const RoomTile *tile = &room->tiles[j];
-                printf("      [%" PRIu32 "] pos=(%" PRId32 ", %" PRId32 ") bg=%" PRId32 " src=(%" PRId32 ", %" PRId32 ") size=(%" PRIu32 ", %" PRIu32 ") depth=%" PRId32 " instance=%" PRIu32 " scale=(%f, %f) color=0x%08" PRIx32 " alpha=%f\n",
-                       j,
-                       tile->x,
-                       tile->y,
-                       tile->backgroundDefinition,
-                       tile->sourceX,
-                       tile->sourceY,
-                       tile->width,
-                       tile->height,
-                       tile->tileDepth,
-                       tile->instanceID,
-                       tile->scaleX,
-                       tile->scaleY,
-                       tile->color,
-                       tile->alpha);
-            }
-        }
-
-        if (room->layers != NULL && room->layerCount > 0) {
-            printf("    layers:\n");
-            for (uint32_t j = 0; j < room->layerCount; j++) {
-                const RoomLayer *layer = &room->layers[j];
-                printf("      [%" PRIu32 "] name=%s id=%" PRIu32 " type=%" PRIu32 " depth=%" PRId32 " offset=(%f, %f) speed=(%f, %f) visible=%s\n",
-                       j,
-                       layer->name ? layer->name : "(null)",
-                       layer->id,
-                       layer->type,
-                       layer->depth,
-                       layer->xOffset,
-                       layer->yOffset,
-                       layer->hSpeed,
-                       layer->vSpeed,
-                       layer->visible ? "true" : "false");
-            }
-        }
-    }
-}
-
 void TMLN_Print(const TmlnChunk *t) {
     printf("TMLN:\n");
     printf("  count: %" PRIu32 "\n", t->count);
@@ -1200,5 +1061,176 @@ void OBJT_Print(const ObjtChunk *o) {
                 }
             }
         }
+    }
+}
+
+void ROOM_Print(const RoomChunk *r) {
+    printf("ROOM:\n");
+    if (r == NULL || r->rooms == NULL || r->count == 0) {
+        printf("  (none)\n");
+        return;
+    }
+
+    for (uint32_t i = 0; i < r->count; i++) {
+        const Room *room = &r->rooms[i];
+
+        printf("  room[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n", room->present ? "true" : "false");
+        if (!room->present) {
+            continue;
+        }
+
+        printf("    name: %s\n", room->name ? room->name : "(null)");
+        printf("    caption: %s\n", room->caption ? room->caption : "(null)");
+        printf("    size: %" PRIu32 "x%" PRIu32 "\n", room->width, room->height);
+        printf("    speed: %" PRIu32 "\n", room->speed);
+        printf("    persistent: %s\n", room->persistent ? "true" : "false");
+        printf("    backgroundColor: 0x%08" PRIx32 "\n", room->backgroundColor);
+        printf("    drawBackgroundColor: %s\n", room->drawBackgroundColor ? "true" : "false");
+        printf("    creationCodeId: %" PRId32 "\n", room->creationCodeId);
+        printf("    flags: 0x%08" PRIx32 "\n", room->flags);
+        printf("    world: %s\n", room->world ? "true" : "false");
+        printf("    bounds: (%" PRIu32 ", %" PRIu32 ", %" PRIu32 ", %" PRIu32 ")\n",
+               room->top,
+               room->left,
+               room->right,
+               room->bottom);
+        printf("    gravity: (%f, %f)\n", room->gravityX, room->gravityY);
+        printf("    metersPerPixel: %f\n", room->metersPerPixel);
+        printf("    payloadLoaded: %s\n", room->payloadLoaded ? "true" : "false");
+        printf("    layerCount: %" PRIu32 "\n", room->layerCount);
+        printf("    backgroundCount: %" PRIu32 "\n", room->backgrounds != NULL ? 8u : 0u);
+        printf("    viewCount: %" PRIu32 "\n", room->views != NULL ? 8u : 0u);
+        printf("    gameObjectCount: %" PRIu32 "\n", room->gameObjectCount);
+        printf("    tileCount: %" PRIu32 "\n", room->tileCount);
+
+        if (room->backgrounds != NULL) {
+            printf("    backgrounds:\n");
+            for (uint32_t j = 0; j < 8; j++) {
+                const RoomBackground *bg = &room->backgrounds[j];
+                printf("      [%" PRIu32 "] enabled=%s foreground=%s def=%" PRId32 " pos=(%" PRId32 ", %" PRId32 ") tile=(%" PRId32 ", %" PRId32 ") speed=(%" PRId32 ", %" PRId32 ") stretch=%s\n",
+                       j,
+                       bg->enabled ? "true" : "false",
+                       bg->foreground ? "true" : "false",
+                       bg->backgroundDefinition,
+                       bg->x,
+                       bg->y,
+                       bg->tileX,
+                       bg->tileY,
+                       bg->speedX,
+                       bg->speedY,
+                       bg->stretch ? "true" : "false");
+            }
+        }
+
+        if (room->views != NULL) {
+            printf("    views:\n");
+            for (uint32_t j = 0; j < 8; j++) {
+                const RoomView *view = &room->views[j];
+                printf("      [%" PRIu32 "] enabled=%s view=(%" PRId32 ", %" PRId32 ") size=(%" PRId32 ", %" PRId32 ") port=(%" PRId32 ", %" PRId32 ") portSize=(%" PRId32 ", %" PRId32 ") border=(%" PRIu32 ", %" PRIu32 ") speed=(%" PRId32 ", %" PRId32 ") objectId=%" PRId32 "\n",
+                       j,
+                       view->enabled ? "true" : "false",
+                       view->viewX,
+                       view->viewY,
+                       view->viewWidth,
+                       view->viewHeight,
+                       view->portX,
+                       view->portY,
+                       view->portWidth,
+                       view->portHeight,
+                       view->borderX,
+                       view->borderY,
+                       view->speedX,
+                       view->speedY,
+                       view->objectId);
+            }
+        }
+
+        if (room->gameObjects != NULL && room->gameObjectCount > 0) {
+            printf("    gameObjects:\n");
+            for (uint32_t j = 0; j < room->gameObjectCount; j++) {
+                const RoomGameObject *go = &room->gameObjects[j];
+                printf("      [%" PRIu32 "] pos=(%" PRId32 ", %" PRId32 ") object=%" PRId32 " instance=%" PRIu32 " creationCode=%" PRId32 " scale=(%f, %f) imageSpeed=%f imageIndex=%" PRId32 " color=0x%08" PRIx32 " rotation=%f preCreateCode=%" PRId32 "\n",
+                       j,
+                       go->x,
+                       go->y,
+                       go->objectDefinition,
+                       go->instanceID,
+                       go->creationCode,
+                       go->scaleX,
+                       go->scaleY,
+                       go->imageSpeed,
+                       go->imageIndex,
+                       go->color,
+                       go->rotation,
+                       go->preCreateCode);
+            }
+        }
+
+        if (room->tiles != NULL && room->tileCount > 0) {
+            printf("    tiles:\n");
+            for (uint32_t j = 0; j < room->tileCount; j++) {
+                const RoomTile *tile = &room->tiles[j];
+                printf("      [%" PRIu32 "] pos=(%" PRId32 ", %" PRId32 ") bg=%" PRId32 " src=(%" PRId32 ", %" PRId32 ") size=(%" PRIu32 ", %" PRIu32 ") depth=%" PRId32 " instance=%" PRIu32 " scale=(%f, %f) color=0x%08" PRIx32 " alpha=%f\n",
+                       j,
+                       tile->x,
+                       tile->y,
+                       tile->backgroundDefinition,
+                       tile->sourceX,
+                       tile->sourceY,
+                       tile->width,
+                       tile->height,
+                       tile->tileDepth,
+                       tile->instanceID,
+                       tile->scaleX,
+                       tile->scaleY,
+                       tile->color,
+                       tile->alpha);
+            }
+        }
+
+        if (room->layers != NULL && room->layerCount > 0) {
+            printf("    layers:\n");
+            for (uint32_t j = 0; j < room->layerCount; j++) {
+                const RoomLayer *layer = &room->layers[j];
+                printf("      [%" PRIu32 "] name=%s id=%" PRIu32 " type=%" PRIu32 " depth=%" PRId32 " offset=(%f, %f) speed=(%f, %f) visible=%s\n",
+                       j,
+                       layer->name ? layer->name : "(null)",
+                       layer->id,
+                       layer->type,
+                       layer->depth,
+                       layer->xOffset,
+                       layer->yOffset,
+                       layer->hSpeed,
+                       layer->vSpeed,
+                       layer->visible ? "true" : "false");
+            }
+        }
+    }
+}
+
+void TPAG_Print(const TpagChunk *t) {
+    printf("TPAG:\n");
+    printf("  count: %" PRIu32 "\n", t->count);
+
+    if (t == NULL || t->items == NULL || t->count == 0) {
+        printf("  (none)\n");
+        return;
+    }
+
+    for (uint32_t i = 0; i < t->count; i++) {
+        const TexturePageItem *item = &t->items[i];
+        printf("  item[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n", item->present ? "true" : "false");
+        if (!item->present) {
+            continue;
+        }
+        printf("    source: (%" PRIu16 ", %" PRIu16 ") size=(%" PRIu16 "x%" PRIu16 ")\n",
+               item->sourceX, item->sourceY, item->sourceWidth, item->sourceHeight);
+        printf("    target: (%" PRIu16 ", %" PRIu16 ") size=(%" PRIu16 "x%" PRIu16 ")\n",
+               item->targetX, item->targetY, item->targetWidth, item->targetHeight);
+        printf("    bounding: (%" PRIu16 "x%" PRIu16 ")\n",
+               item->boundingWidth, item->boundingHeight);
+        printf("    texturePageId: %" PRId16 "\n", item->texturePageId);
     }
 }

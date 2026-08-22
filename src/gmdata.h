@@ -689,6 +689,26 @@ typedef struct {
 } RoomChunk;
 
 typedef struct {
+    bool present;
+    uint16_t sourceX;
+    uint16_t sourceY;
+    uint16_t sourceWidth;
+    uint16_t sourceHeight;
+    uint16_t targetX;
+    uint16_t targetY;
+    uint16_t targetWidth;
+    uint16_t targetHeight;
+    uint16_t boundingWidth;
+    uint16_t boundingHeight;
+    int16_t texturePageId;
+} TexturePageItem;
+
+typedef struct {
+    uint32_t count;
+    TexturePageItem* items;
+} TpagChunk;
+
+typedef struct {
     uint8_t *file_data;
     size_t file_size;
     StringTable strings;
@@ -702,6 +722,7 @@ typedef struct {
     AgrpChunk agrp;
     SprtChunk sprt;
     BgndChunk bgnd;
+    TpagChunk tpag;
     PathChunk path;
     ScptChunk scpt;
     GlobChunk glob;
