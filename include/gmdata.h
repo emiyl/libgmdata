@@ -512,6 +512,182 @@ typedef struct {
     GameObject* objects;
 } ObjtChunk;
 
+enum {
+    RoomLayerType_Background = 0,
+    RoomLayerType_Instances = 1,
+    RoomLayerType_Tiles = 2,
+    RoomLayerType_Path = 3,
+    RoomLayerType_Assets = 4,
+    RoomLayerType_Effect = 5,
+    RoomLayerType_Path2 = 6
+};
+
+typedef struct {
+    bool enabled;
+    bool foreground;
+    int32_t backgroundDefinition;
+    int32_t x;
+    int32_t y;
+    int32_t tileX;
+    int32_t tileY;
+    int32_t speedX;
+    int32_t speedY;
+    bool stretch;
+} RoomBackground;
+
+typedef struct {
+    bool enabled;
+    int32_t viewX;
+    int32_t viewY;
+    int32_t viewWidth;
+    int32_t viewHeight;
+    int32_t portX;
+    int32_t portY;
+    int32_t portWidth;
+    int32_t portHeight;
+    uint32_t borderX;
+    uint32_t borderY;
+    int32_t speedX;
+    int32_t speedY;
+    int32_t objectId;
+} RoomView;
+
+typedef struct {
+    int32_t x;
+    int32_t y;
+    int32_t objectDefinition;
+    uint32_t instanceID;
+    int32_t creationCode;
+    float scaleX;
+    float scaleY;
+    float imageSpeed;
+    int32_t imageIndex;
+    uint32_t color;
+    float rotation;
+    int32_t preCreateCode;
+} RoomGameObject;
+
+typedef struct {
+    int32_t x;
+    int32_t y;
+    bool useSpriteDefinition;
+    int32_t backgroundDefinition;
+    int32_t sourceX;
+    int32_t sourceY;
+    uint32_t width;
+    uint32_t height;
+    int32_t tileDepth;
+    uint32_t instanceID;
+    float scaleX;
+    float scaleY;
+    uint32_t color;
+    float alpha;
+} RoomTile;
+
+typedef struct {
+    const char* name;
+    int32_t spriteIndex;
+    int32_t x;
+    int32_t y;
+    float scaleX;
+    float scaleY;
+    uint32_t color;
+    float animationSpeed;
+    uint32_t animationSpeedType;
+    float frameIndex;
+    float rotation;
+} SpriteInstance;
+
+typedef struct {
+    uint32_t legacyTileCount;
+    RoomTile* legacyTiles;
+    uint32_t spriteCount;
+    SpriteInstance* sprites;
+} RoomLayerAssetsData;
+
+typedef struct {
+    bool visible;
+    bool foreground;
+    int32_t spriteIndex;
+    bool hTiled;
+    bool vTiled;
+    bool stretch;
+    uint32_t color;
+    float firstFrame;
+    float animSpeed;
+    uint32_t animSpeedType;
+} RoomLayerBackgroundData;
+
+typedef struct {
+    uint32_t instanceCount;
+    uint32_t* instanceIds;
+} RoomLayerInstancesData;
+
+typedef struct {
+    int32_t backgroundIndex;
+    uint32_t tilesX;
+    uint32_t tilesY;
+    uint32_t* tileData;
+} RoomLayerTilesData;
+
+typedef struct {
+    const char* name;
+    uint32_t id;
+    uint32_t type;
+    int32_t depth;
+    float xOffset;
+    float yOffset;
+    float hSpeed;
+    float vSpeed;
+    bool visible;
+    RoomLayerAssetsData* assetsData;
+    RoomLayerBackgroundData* backgroundData;
+    RoomLayerInstancesData* instancesData;
+    RoomLayerTilesData* tilesData;
+} RoomLayer;
+
+typedef struct {
+    bool present;
+    const char* name;
+    const char* caption;
+    uint32_t width;
+    uint32_t height;
+    uint32_t speed;
+    bool persistent;
+    uint32_t backgroundColor;
+    bool drawBackgroundColor;
+    int32_t creationCodeId;
+    uint32_t flags;
+    uint32_t backgroundsFileOffset;
+    uint32_t viewsFileOffset;
+    uint32_t gameObjectsFileOffset;
+    uint32_t tilesFileOffset;
+    bool world;
+    uint32_t top;
+    uint32_t left;
+    uint32_t right;
+    uint32_t bottom;
+    float gravityX;
+    float gravityY;
+    float metersPerPixel;
+    uint32_t layersFileOffset;
+    bool payloadLoaded;
+    bool eagerlyLoaded;
+    RoomBackground* backgrounds;
+    RoomView* views;
+    RoomGameObject* gameObjects;
+    uint32_t gameObjectCount;
+    RoomTile* tiles;
+    uint32_t tileCount;
+    RoomLayer* layers;
+    uint32_t layerCount;
+} Room;
+
+typedef struct {
+    uint32_t count;
+    Room* rooms;
+} RoomChunk;
+
 typedef struct {
     uint8_t *file_data;
     size_t file_size;
@@ -533,6 +709,7 @@ typedef struct {
     FontChunk font;
     TmlnChunk tmln;
     ObjtChunk objt;
+    RoomChunk room;
 
     DetectedFormat detectedFormat;
     uint8_t* mappedFile;

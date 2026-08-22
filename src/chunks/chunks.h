@@ -48,4 +48,7 @@ int TMLN_free(TmlnChunk *t);
 int OBJT_parse(DataWin *dw);
 int OBJT_free(ObjtChunk *o);
 
+int ROOM_parse(DataWin *dw);
+int ROOM_free(RoomChunk *r);
+
 #endif

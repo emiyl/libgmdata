@@ -131,6 +131,8 @@ int DataWin_parse(DataWin *dw) {
     logInfo("Parsed chunk TMLN\n");
     assert(OBJT_parse(dw) == 0);
     logInfo("Parsed chunk OBJT\n");
+    assert(ROOM_parse(dw) == 0);
+    logInfo("Parsed chunk ROOM\n");
 
     return 0;
 }
@@ -209,6 +211,10 @@ int DataWin_free(DataWin *dw) {
     }
     if (OBJT_free(&dw->objt)) {
         logWarn("[DataWin_free] Failed to free OBJT chunk\n");
+        result = -1;
+    }
+    if (ROOM_free(&dw->room)) {
+        logWarn("[DataWin_free] Failed to free ROOM chunk\n");
         result = -1;
     }
 

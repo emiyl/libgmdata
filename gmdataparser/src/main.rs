@@ -349,6 +349,50 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
                 });
             }
         }
+        "ROOM" => {
+            let count = dw.room.count as usize;
+            if count == 0 || dw.room.rooms.is_null() {
+                return items;
+            }
+            let rooms = unsafe { std::slice::from_raw_parts(dw.room.rooms, count) };
+            for (idx, room) in rooms.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "present", room.present);
+                push_field(&mut fields, "name", cstr_or_null(room.name));
+                push_field(&mut fields, "caption", cstr_or_null(room.caption));
+                push_field(&mut fields, "width", room.width);
+                push_field(&mut fields, "height", room.height);
+                push_field(&mut fields, "speed", room.speed);
+                push_field(&mut fields, "persistent", room.persistent);
+                push_field(&mut fields, "backgroundColor", room.backgroundColor);
+                push_field(&mut fields, "drawBackgroundColor", room.drawBackgroundColor);
+                push_field(&mut fields, "creationCodeId", room.creationCodeId);
+                push_field(&mut fields, "flags", room.flags);
+                push_field(&mut fields, "backgroundsFileOffset", room.backgroundsFileOffset);
+                push_field(&mut fields, "viewsFileOffset", room.viewsFileOffset);
+                push_field(&mut fields, "gameObjectsFileOffset", room.gameObjectsFileOffset);
+                push_field(&mut fields, "tilesFileOffset", room.tilesFileOffset);
+                push_field(&mut fields, "world", room.world);
+                push_field(&mut fields, "top", room.top);
+                push_field(&mut fields, "left", room.left);
+                push_field(&mut fields, "right", room.right);
+                push_field(&mut fields, "bottom", room.bottom);
+                push_field(&mut fields, "gravityX", room.gravityX);
+                push_field(&mut fields, "gravityY", room.gravityY);
+                push_field(&mut fields, "metersPerPixel", room.metersPerPixel);
+                push_field(&mut fields, "layersFileOffset", room.layersFileOffset);
+                push_field(&mut fields, "payloadLoaded", room.payloadLoaded);
+                push_field(&mut fields, "backgroundCount", if room.backgrounds.is_null() { 0usize } else { 8usize });
+                push_field(&mut fields, "viewCount", if room.views.is_null() { 0usize } else { 8usize });
+                push_field(&mut fields, "gameObjectCount", room.gameObjectCount);
+                push_field(&mut fields, "tileCount", room.tileCount);
+                push_field(&mut fields, "layerCount", room.layerCount);
+                items.push(ChunkItem {
+                    name: item_label(&cstr_or_null(room.name), idx),
+                    fields,
+                });
+            }
+        }
         _ => {}
     }
 
@@ -472,6 +516,11 @@ fn build_chunk_fields(name: &str, dw: &DataWin) -> Vec<ChunkField> {
             push_field(&mut fields, "count", o.count);
             add_count_field(&mut fields, "objects", o.objects as *mut std::ffi::c_void, o.count as usize);
         }
+        "ROOM" => {
+            let r = &dw.room;
+            push_field(&mut fields, "count", r.count);
+            add_count_field(&mut fields, "rooms", r.rooms as *mut std::ffi::c_void, r.count as usize);
+        }
         _ => {}
     }
 
@@ -507,7 +556,26 @@ impl eframe::App for App {
                 ui.separator();
                 ui.horizontal_wrapped(|ui| {
                     for idx in 0..self.chunks.len() {
-                        let chunk_name = self.chunks[idx].name.clone();
+                        let chunk_name = match self.chunks[idx].name.as_str() {
+                            "GEN8" => "Info",
+                            "OPTN" => "Options",
+                            "LANG" => "Languages",
+                            "EXTN" => "Extensions",
+                            "SOND" => "Sounds",
+                            "AGRP" => "Audio Groups",
+                            "SPRT" => "Sprites",
+                            "BGND" => "Backgrounds",
+                            "PATH" => "Paths",
+                            "SCPT" => "Scripts",
+                            "GLOB" => "Global Code IDs",
+                            "SHDR" => "Shaders",
+                            "FONT" => "Fonts",
+                            "TMLN" => "Timelines",
+                            "OBJT" => "Objects",
+                            "ROOM" => "Rooms",
+                            name => name,
+                        };
+
                         let selected = self.active_chunk == idx;
                         if ui
                             .selectable_label(selected, chunk_name)

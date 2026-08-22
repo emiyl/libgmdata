@@ -1591,6 +1591,452 @@ const _: () = {
     ["Offset of field: ObjtChunk::count"][::std::mem::offset_of!(ObjtChunk, count) - 0usize];
     ["Offset of field: ObjtChunk::objects"][::std::mem::offset_of!(ObjtChunk, objects) - 8usize];
 };
+pub const RoomLayerType_Background: _bindgen_ty_1 = 0;
+pub const RoomLayerType_Instances: _bindgen_ty_1 = 1;
+pub const RoomLayerType_Tiles: _bindgen_ty_1 = 2;
+pub const RoomLayerType_Path: _bindgen_ty_1 = 3;
+pub const RoomLayerType_Assets: _bindgen_ty_1 = 4;
+pub const RoomLayerType_Effect: _bindgen_ty_1 = 5;
+pub const RoomLayerType_Path2: _bindgen_ty_1 = 6;
+pub type _bindgen_ty_1 = ::std::os::raw::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RoomBackground {
+    pub enabled: bool,
+    pub foreground: bool,
+    pub backgroundDefinition: i32,
+    pub x: i32,
+    pub y: i32,
+    pub tileX: i32,
+    pub tileY: i32,
+    pub speedX: i32,
+    pub speedY: i32,
+    pub stretch: bool,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RoomBackground"][::std::mem::size_of::<RoomBackground>() - 36usize];
+    ["Alignment of RoomBackground"][::std::mem::align_of::<RoomBackground>() - 4usize];
+    ["Offset of field: RoomBackground::enabled"]
+        [::std::mem::offset_of!(RoomBackground, enabled) - 0usize];
+    ["Offset of field: RoomBackground::foreground"]
+        [::std::mem::offset_of!(RoomBackground, foreground) - 1usize];
+    ["Offset of field: RoomBackground::backgroundDefinition"]
+        [::std::mem::offset_of!(RoomBackground, backgroundDefinition) - 4usize];
+    ["Offset of field: RoomBackground::x"][::std::mem::offset_of!(RoomBackground, x) - 8usize];
+    ["Offset of field: RoomBackground::y"][::std::mem::offset_of!(RoomBackground, y) - 12usize];
+    ["Offset of field: RoomBackground::tileX"]
+        [::std::mem::offset_of!(RoomBackground, tileX) - 16usize];
+    ["Offset of field: RoomBackground::tileY"]
+        [::std::mem::offset_of!(RoomBackground, tileY) - 20usize];
+    ["Offset of field: RoomBackground::speedX"]
+        [::std::mem::offset_of!(RoomBackground, speedX) - 24usize];
+    ["Offset of field: RoomBackground::speedY"]
+        [::std::mem::offset_of!(RoomBackground, speedY) - 28usize];
+    ["Offset of field: RoomBackground::stretch"]
+        [::std::mem::offset_of!(RoomBackground, stretch) - 32usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RoomView {
+    pub enabled: bool,
+    pub viewX: i32,
+    pub viewY: i32,
+    pub viewWidth: i32,
+    pub viewHeight: i32,
+    pub portX: i32,
+    pub portY: i32,
+    pub portWidth: i32,
+    pub portHeight: i32,
+    pub borderX: u32,
+    pub borderY: u32,
+    pub speedX: i32,
+    pub speedY: i32,
+    pub objectId: i32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RoomView"][::std::mem::size_of::<RoomView>() - 56usize];
+    ["Alignment of RoomView"][::std::mem::align_of::<RoomView>() - 4usize];
+    ["Offset of field: RoomView::enabled"][::std::mem::offset_of!(RoomView, enabled) - 0usize];
+    ["Offset of field: RoomView::viewX"][::std::mem::offset_of!(RoomView, viewX) - 4usize];
+    ["Offset of field: RoomView::viewY"][::std::mem::offset_of!(RoomView, viewY) - 8usize];
+    ["Offset of field: RoomView::viewWidth"][::std::mem::offset_of!(RoomView, viewWidth) - 12usize];
+    ["Offset of field: RoomView::viewHeight"]
+        [::std::mem::offset_of!(RoomView, viewHeight) - 16usize];
+    ["Offset of field: RoomView::portX"][::std::mem::offset_of!(RoomView, portX) - 20usize];
+    ["Offset of field: RoomView::portY"][::std::mem::offset_of!(RoomView, portY) - 24usize];
+    ["Offset of field: RoomView::portWidth"][::std::mem::offset_of!(RoomView, portWidth) - 28usize];
+    ["Offset of field: RoomView::portHeight"]
+        [::std::mem::offset_of!(RoomView, portHeight) - 32usize];
+    ["Offset of field: RoomView::borderX"][::std::mem::offset_of!(RoomView, borderX) - 36usize];
+    ["Offset of field: RoomView::borderY"][::std::mem::offset_of!(RoomView, borderY) - 40usize];
+    ["Offset of field: RoomView::speedX"][::std::mem::offset_of!(RoomView, speedX) - 44usize];
+    ["Offset of field: RoomView::speedY"][::std::mem::offset_of!(RoomView, speedY) - 48usize];
+    ["Offset of field: RoomView::objectId"][::std::mem::offset_of!(RoomView, objectId) - 52usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RoomGameObject {
+    pub x: i32,
+    pub y: i32,
+    pub objectDefinition: i32,
+    pub instanceID: u32,
+    pub creationCode: i32,
+    pub scaleX: f32,
+    pub scaleY: f32,
+    pub imageSpeed: f32,
+    pub imageIndex: i32,
+    pub color: u32,
+    pub rotation: f32,
+    pub preCreateCode: i32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RoomGameObject"][::std::mem::size_of::<RoomGameObject>() - 48usize];
+    ["Alignment of RoomGameObject"][::std::mem::align_of::<RoomGameObject>() - 4usize];
+    ["Offset of field: RoomGameObject::x"][::std::mem::offset_of!(RoomGameObject, x) - 0usize];
+    ["Offset of field: RoomGameObject::y"][::std::mem::offset_of!(RoomGameObject, y) - 4usize];
+    ["Offset of field: RoomGameObject::objectDefinition"]
+        [::std::mem::offset_of!(RoomGameObject, objectDefinition) - 8usize];
+    ["Offset of field: RoomGameObject::instanceID"]
+        [::std::mem::offset_of!(RoomGameObject, instanceID) - 12usize];
+    ["Offset of field: RoomGameObject::creationCode"]
+        [::std::mem::offset_of!(RoomGameObject, creationCode) - 16usize];
+    ["Offset of field: RoomGameObject::scaleX"]
+        [::std::mem::offset_of!(RoomGameObject, scaleX) - 20usize];
+    ["Offset of field: RoomGameObject::scaleY"]
+        [::std::mem::offset_of!(RoomGameObject, scaleY) - 24usize];
+    ["Offset of field: RoomGameObject::imageSpeed"]
+        [::std::mem::offset_of!(RoomGameObject, imageSpeed) - 28usize];
+    ["Offset of field: RoomGameObject::imageIndex"]
+        [::std::mem::offset_of!(RoomGameObject, imageIndex) - 32usize];
+    ["Offset of field: RoomGameObject::color"]
+        [::std::mem::offset_of!(RoomGameObject, color) - 36usize];
+    ["Offset of field: RoomGameObject::rotation"]
+        [::std::mem::offset_of!(RoomGameObject, rotation) - 40usize];
+    ["Offset of field: RoomGameObject::preCreateCode"]
+        [::std::mem::offset_of!(RoomGameObject, preCreateCode) - 44usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RoomTile {
+    pub x: i32,
+    pub y: i32,
+    pub useSpriteDefinition: bool,
+    pub backgroundDefinition: i32,
+    pub sourceX: i32,
+    pub sourceY: i32,
+    pub width: u32,
+    pub height: u32,
+    pub tileDepth: i32,
+    pub instanceID: u32,
+    pub scaleX: f32,
+    pub scaleY: f32,
+    pub color: u32,
+    pub alpha: f32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RoomTile"][::std::mem::size_of::<RoomTile>() - 56usize];
+    ["Alignment of RoomTile"][::std::mem::align_of::<RoomTile>() - 4usize];
+    ["Offset of field: RoomTile::x"][::std::mem::offset_of!(RoomTile, x) - 0usize];
+    ["Offset of field: RoomTile::y"][::std::mem::offset_of!(RoomTile, y) - 4usize];
+    ["Offset of field: RoomTile::useSpriteDefinition"]
+        [::std::mem::offset_of!(RoomTile, useSpriteDefinition) - 8usize];
+    ["Offset of field: RoomTile::backgroundDefinition"]
+        [::std::mem::offset_of!(RoomTile, backgroundDefinition) - 12usize];
+    ["Offset of field: RoomTile::sourceX"][::std::mem::offset_of!(RoomTile, sourceX) - 16usize];
+    ["Offset of field: RoomTile::sourceY"][::std::mem::offset_of!(RoomTile, sourceY) - 20usize];
+    ["Offset of field: RoomTile::width"][::std::mem::offset_of!(RoomTile, width) - 24usize];
+    ["Offset of field: RoomTile::height"][::std::mem::offset_of!(RoomTile, height) - 28usize];
+    ["Offset of field: RoomTile::tileDepth"][::std::mem::offset_of!(RoomTile, tileDepth) - 32usize];
+    ["Offset of field: RoomTile::instanceID"]
+        [::std::mem::offset_of!(RoomTile, instanceID) - 36usize];
+    ["Offset of field: RoomTile::scaleX"][::std::mem::offset_of!(RoomTile, scaleX) - 40usize];
+    ["Offset of field: RoomTile::scaleY"][::std::mem::offset_of!(RoomTile, scaleY) - 44usize];
+    ["Offset of field: RoomTile::color"][::std::mem::offset_of!(RoomTile, color) - 48usize];
+    ["Offset of field: RoomTile::alpha"][::std::mem::offset_of!(RoomTile, alpha) - 52usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SpriteInstance {
+    pub name: *const ::std::os::raw::c_char,
+    pub spriteIndex: i32,
+    pub x: i32,
+    pub y: i32,
+    pub scaleX: f32,
+    pub scaleY: f32,
+    pub color: u32,
+    pub animationSpeed: f32,
+    pub animationSpeedType: u32,
+    pub frameIndex: f32,
+    pub rotation: f32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of SpriteInstance"][::std::mem::size_of::<SpriteInstance>() - 48usize];
+    ["Alignment of SpriteInstance"][::std::mem::align_of::<SpriteInstance>() - 8usize];
+    ["Offset of field: SpriteInstance::name"]
+        [::std::mem::offset_of!(SpriteInstance, name) - 0usize];
+    ["Offset of field: SpriteInstance::spriteIndex"]
+        [::std::mem::offset_of!(SpriteInstance, spriteIndex) - 8usize];
+    ["Offset of field: SpriteInstance::x"][::std::mem::offset_of!(SpriteInstance, x) - 12usize];
+    ["Offset of field: SpriteInstance::y"][::std::mem::offset_of!(SpriteInstance, y) - 16usize];
+    ["Offset of field: SpriteInstance::scaleX"]
+        [::std::mem::offset_of!(SpriteInstance, scaleX) - 20usize];
+    ["Offset of field: SpriteInstance::scaleY"]
+        [::std::mem::offset_of!(SpriteInstance, scaleY) - 24usize];
+    ["Offset of field: SpriteInstance::color"]
+        [::std::mem::offset_of!(SpriteInstance, color) - 28usize];
+    ["Offset of field: SpriteInstance::animationSpeed"]
+        [::std::mem::offset_of!(SpriteInstance, animationSpeed) - 32usize];
+    ["Offset of field: SpriteInstance::animationSpeedType"]
+        [::std::mem::offset_of!(SpriteInstance, animationSpeedType) - 36usize];
+    ["Offset of field: SpriteInstance::frameIndex"]
+        [::std::mem::offset_of!(SpriteInstance, frameIndex) - 40usize];
+    ["Offset of field: SpriteInstance::rotation"]
+        [::std::mem::offset_of!(SpriteInstance, rotation) - 44usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RoomLayerAssetsData {
+    pub legacyTileCount: u32,
+    pub legacyTiles: *mut RoomTile,
+    pub spriteCount: u32,
+    pub sprites: *mut SpriteInstance,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RoomLayerAssetsData"][::std::mem::size_of::<RoomLayerAssetsData>() - 32usize];
+    ["Alignment of RoomLayerAssetsData"][::std::mem::align_of::<RoomLayerAssetsData>() - 8usize];
+    ["Offset of field: RoomLayerAssetsData::legacyTileCount"]
+        [::std::mem::offset_of!(RoomLayerAssetsData, legacyTileCount) - 0usize];
+    ["Offset of field: RoomLayerAssetsData::legacyTiles"]
+        [::std::mem::offset_of!(RoomLayerAssetsData, legacyTiles) - 8usize];
+    ["Offset of field: RoomLayerAssetsData::spriteCount"]
+        [::std::mem::offset_of!(RoomLayerAssetsData, spriteCount) - 16usize];
+    ["Offset of field: RoomLayerAssetsData::sprites"]
+        [::std::mem::offset_of!(RoomLayerAssetsData, sprites) - 24usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RoomLayerBackgroundData {
+    pub visible: bool,
+    pub foreground: bool,
+    pub spriteIndex: i32,
+    pub hTiled: bool,
+    pub vTiled: bool,
+    pub stretch: bool,
+    pub color: u32,
+    pub firstFrame: f32,
+    pub animSpeed: f32,
+    pub animSpeedType: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RoomLayerBackgroundData"][::std::mem::size_of::<RoomLayerBackgroundData>() - 28usize];
+    ["Alignment of RoomLayerBackgroundData"]
+        [::std::mem::align_of::<RoomLayerBackgroundData>() - 4usize];
+    ["Offset of field: RoomLayerBackgroundData::visible"]
+        [::std::mem::offset_of!(RoomLayerBackgroundData, visible) - 0usize];
+    ["Offset of field: RoomLayerBackgroundData::foreground"]
+        [::std::mem::offset_of!(RoomLayerBackgroundData, foreground) - 1usize];
+    ["Offset of field: RoomLayerBackgroundData::spriteIndex"]
+        [::std::mem::offset_of!(RoomLayerBackgroundData, spriteIndex) - 4usize];
+    ["Offset of field: RoomLayerBackgroundData::hTiled"]
+        [::std::mem::offset_of!(RoomLayerBackgroundData, hTiled) - 8usize];
+    ["Offset of field: RoomLayerBackgroundData::vTiled"]
+        [::std::mem::offset_of!(RoomLayerBackgroundData, vTiled) - 9usize];
+    ["Offset of field: RoomLayerBackgroundData::stretch"]
+        [::std::mem::offset_of!(RoomLayerBackgroundData, stretch) - 10usize];
+    ["Offset of field: RoomLayerBackgroundData::color"]
+        [::std::mem::offset_of!(RoomLayerBackgroundData, color) - 12usize];
+    ["Offset of field: RoomLayerBackgroundData::firstFrame"]
+        [::std::mem::offset_of!(RoomLayerBackgroundData, firstFrame) - 16usize];
+    ["Offset of field: RoomLayerBackgroundData::animSpeed"]
+        [::std::mem::offset_of!(RoomLayerBackgroundData, animSpeed) - 20usize];
+    ["Offset of field: RoomLayerBackgroundData::animSpeedType"]
+        [::std::mem::offset_of!(RoomLayerBackgroundData, animSpeedType) - 24usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RoomLayerInstancesData {
+    pub instanceCount: u32,
+    pub instanceIds: *mut u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RoomLayerInstancesData"][::std::mem::size_of::<RoomLayerInstancesData>() - 16usize];
+    ["Alignment of RoomLayerInstancesData"]
+        [::std::mem::align_of::<RoomLayerInstancesData>() - 8usize];
+    ["Offset of field: RoomLayerInstancesData::instanceCount"]
+        [::std::mem::offset_of!(RoomLayerInstancesData, instanceCount) - 0usize];
+    ["Offset of field: RoomLayerInstancesData::instanceIds"]
+        [::std::mem::offset_of!(RoomLayerInstancesData, instanceIds) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RoomLayerTilesData {
+    pub backgroundIndex: i32,
+    pub tilesX: u32,
+    pub tilesY: u32,
+    pub tileData: *mut u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RoomLayerTilesData"][::std::mem::size_of::<RoomLayerTilesData>() - 24usize];
+    ["Alignment of RoomLayerTilesData"][::std::mem::align_of::<RoomLayerTilesData>() - 8usize];
+    ["Offset of field: RoomLayerTilesData::backgroundIndex"]
+        [::std::mem::offset_of!(RoomLayerTilesData, backgroundIndex) - 0usize];
+    ["Offset of field: RoomLayerTilesData::tilesX"]
+        [::std::mem::offset_of!(RoomLayerTilesData, tilesX) - 4usize];
+    ["Offset of field: RoomLayerTilesData::tilesY"]
+        [::std::mem::offset_of!(RoomLayerTilesData, tilesY) - 8usize];
+    ["Offset of field: RoomLayerTilesData::tileData"]
+        [::std::mem::offset_of!(RoomLayerTilesData, tileData) - 16usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RoomLayer {
+    pub name: *const ::std::os::raw::c_char,
+    pub id: u32,
+    pub type_: u32,
+    pub depth: i32,
+    pub xOffset: f32,
+    pub yOffset: f32,
+    pub hSpeed: f32,
+    pub vSpeed: f32,
+    pub visible: bool,
+    pub assetsData: *mut RoomLayerAssetsData,
+    pub backgroundData: *mut RoomLayerBackgroundData,
+    pub instancesData: *mut RoomLayerInstancesData,
+    pub tilesData: *mut RoomLayerTilesData,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RoomLayer"][::std::mem::size_of::<RoomLayer>() - 72usize];
+    ["Alignment of RoomLayer"][::std::mem::align_of::<RoomLayer>() - 8usize];
+    ["Offset of field: RoomLayer::name"][::std::mem::offset_of!(RoomLayer, name) - 0usize];
+    ["Offset of field: RoomLayer::id"][::std::mem::offset_of!(RoomLayer, id) - 8usize];
+    ["Offset of field: RoomLayer::type_"][::std::mem::offset_of!(RoomLayer, type_) - 12usize];
+    ["Offset of field: RoomLayer::depth"][::std::mem::offset_of!(RoomLayer, depth) - 16usize];
+    ["Offset of field: RoomLayer::xOffset"][::std::mem::offset_of!(RoomLayer, xOffset) - 20usize];
+    ["Offset of field: RoomLayer::yOffset"][::std::mem::offset_of!(RoomLayer, yOffset) - 24usize];
+    ["Offset of field: RoomLayer::hSpeed"][::std::mem::offset_of!(RoomLayer, hSpeed) - 28usize];
+    ["Offset of field: RoomLayer::vSpeed"][::std::mem::offset_of!(RoomLayer, vSpeed) - 32usize];
+    ["Offset of field: RoomLayer::visible"][::std::mem::offset_of!(RoomLayer, visible) - 36usize];
+    ["Offset of field: RoomLayer::assetsData"]
+        [::std::mem::offset_of!(RoomLayer, assetsData) - 40usize];
+    ["Offset of field: RoomLayer::backgroundData"]
+        [::std::mem::offset_of!(RoomLayer, backgroundData) - 48usize];
+    ["Offset of field: RoomLayer::instancesData"]
+        [::std::mem::offset_of!(RoomLayer, instancesData) - 56usize];
+    ["Offset of field: RoomLayer::tilesData"]
+        [::std::mem::offset_of!(RoomLayer, tilesData) - 64usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct Room {
+    pub present: bool,
+    pub name: *const ::std::os::raw::c_char,
+    pub caption: *const ::std::os::raw::c_char,
+    pub width: u32,
+    pub height: u32,
+    pub speed: u32,
+    pub persistent: bool,
+    pub backgroundColor: u32,
+    pub drawBackgroundColor: bool,
+    pub creationCodeId: i32,
+    pub flags: u32,
+    pub backgroundsFileOffset: u32,
+    pub viewsFileOffset: u32,
+    pub gameObjectsFileOffset: u32,
+    pub tilesFileOffset: u32,
+    pub world: bool,
+    pub top: u32,
+    pub left: u32,
+    pub right: u32,
+    pub bottom: u32,
+    pub gravityX: f32,
+    pub gravityY: f32,
+    pub metersPerPixel: f32,
+    pub layersFileOffset: u32,
+    pub payloadLoaded: bool,
+    pub eagerlyLoaded: bool,
+    pub backgrounds: *mut RoomBackground,
+    pub views: *mut RoomView,
+    pub gameObjects: *mut RoomGameObject,
+    pub gameObjectCount: u32,
+    pub tiles: *mut RoomTile,
+    pub tileCount: u32,
+    pub layers: *mut RoomLayer,
+    pub layerCount: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of Room"][::std::mem::size_of::<Room>() - 176usize];
+    ["Alignment of Room"][::std::mem::align_of::<Room>() - 8usize];
+    ["Offset of field: Room::present"][::std::mem::offset_of!(Room, present) - 0usize];
+    ["Offset of field: Room::name"][::std::mem::offset_of!(Room, name) - 8usize];
+    ["Offset of field: Room::caption"][::std::mem::offset_of!(Room, caption) - 16usize];
+    ["Offset of field: Room::width"][::std::mem::offset_of!(Room, width) - 24usize];
+    ["Offset of field: Room::height"][::std::mem::offset_of!(Room, height) - 28usize];
+    ["Offset of field: Room::speed"][::std::mem::offset_of!(Room, speed) - 32usize];
+    ["Offset of field: Room::persistent"][::std::mem::offset_of!(Room, persistent) - 36usize];
+    ["Offset of field: Room::backgroundColor"]
+        [::std::mem::offset_of!(Room, backgroundColor) - 40usize];
+    ["Offset of field: Room::drawBackgroundColor"]
+        [::std::mem::offset_of!(Room, drawBackgroundColor) - 44usize];
+    ["Offset of field: Room::creationCodeId"]
+        [::std::mem::offset_of!(Room, creationCodeId) - 48usize];
+    ["Offset of field: Room::flags"][::std::mem::offset_of!(Room, flags) - 52usize];
+    ["Offset of field: Room::backgroundsFileOffset"]
+        [::std::mem::offset_of!(Room, backgroundsFileOffset) - 56usize];
+    ["Offset of field: Room::viewsFileOffset"]
+        [::std::mem::offset_of!(Room, viewsFileOffset) - 60usize];
+    ["Offset of field: Room::gameObjectsFileOffset"]
+        [::std::mem::offset_of!(Room, gameObjectsFileOffset) - 64usize];
+    ["Offset of field: Room::tilesFileOffset"]
+        [::std::mem::offset_of!(Room, tilesFileOffset) - 68usize];
+    ["Offset of field: Room::world"][::std::mem::offset_of!(Room, world) - 72usize];
+    ["Offset of field: Room::top"][::std::mem::offset_of!(Room, top) - 76usize];
+    ["Offset of field: Room::left"][::std::mem::offset_of!(Room, left) - 80usize];
+    ["Offset of field: Room::right"][::std::mem::offset_of!(Room, right) - 84usize];
+    ["Offset of field: Room::bottom"][::std::mem::offset_of!(Room, bottom) - 88usize];
+    ["Offset of field: Room::gravityX"][::std::mem::offset_of!(Room, gravityX) - 92usize];
+    ["Offset of field: Room::gravityY"][::std::mem::offset_of!(Room, gravityY) - 96usize];
+    ["Offset of field: Room::metersPerPixel"]
+        [::std::mem::offset_of!(Room, metersPerPixel) - 100usize];
+    ["Offset of field: Room::layersFileOffset"]
+        [::std::mem::offset_of!(Room, layersFileOffset) - 104usize];
+    ["Offset of field: Room::payloadLoaded"]
+        [::std::mem::offset_of!(Room, payloadLoaded) - 108usize];
+    ["Offset of field: Room::eagerlyLoaded"]
+        [::std::mem::offset_of!(Room, eagerlyLoaded) - 109usize];
+    ["Offset of field: Room::backgrounds"][::std::mem::offset_of!(Room, backgrounds) - 112usize];
+    ["Offset of field: Room::views"][::std::mem::offset_of!(Room, views) - 120usize];
+    ["Offset of field: Room::gameObjects"][::std::mem::offset_of!(Room, gameObjects) - 128usize];
+    ["Offset of field: Room::gameObjectCount"]
+        [::std::mem::offset_of!(Room, gameObjectCount) - 136usize];
+    ["Offset of field: Room::tiles"][::std::mem::offset_of!(Room, tiles) - 144usize];
+    ["Offset of field: Room::tileCount"][::std::mem::offset_of!(Room, tileCount) - 152usize];
+    ["Offset of field: Room::layers"][::std::mem::offset_of!(Room, layers) - 160usize];
+    ["Offset of field: Room::layerCount"][::std::mem::offset_of!(Room, layerCount) - 168usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RoomChunk {
+    pub count: u32,
+    pub rooms: *mut Room,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RoomChunk"][::std::mem::size_of::<RoomChunk>() - 16usize];
+    ["Alignment of RoomChunk"][::std::mem::align_of::<RoomChunk>() - 8usize];
+    ["Offset of field: RoomChunk::count"][::std::mem::offset_of!(RoomChunk, count) - 0usize];
+    ["Offset of field: RoomChunk::rooms"][::std::mem::offset_of!(RoomChunk, rooms) - 8usize];
+};
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct DataWin {
@@ -1613,13 +2059,14 @@ pub struct DataWin {
     pub font: FontChunk,
     pub tmln: TmlnChunk,
     pub objt: ObjtChunk,
+    pub room: RoomChunk,
     pub detectedFormat: DetectedFormat,
     pub mappedFile: *mut u8,
     pub initialized: bool,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 568usize];
+    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 584usize];
     ["Alignment of DataWin"][::std::mem::align_of::<DataWin>() - 8usize];
     ["Offset of field: DataWin::file_data"][::std::mem::offset_of!(DataWin, file_data) - 0usize];
     ["Offset of field: DataWin::file_size"][::std::mem::offset_of!(DataWin, file_size) - 8usize];
@@ -1640,12 +2087,13 @@ const _: () = {
     ["Offset of field: DataWin::font"][::std::mem::offset_of!(DataWin, font) - 488usize];
     ["Offset of field: DataWin::tmln"][::std::mem::offset_of!(DataWin, tmln) - 504usize];
     ["Offset of field: DataWin::objt"][::std::mem::offset_of!(DataWin, objt) - 520usize];
+    ["Offset of field: DataWin::room"][::std::mem::offset_of!(DataWin, room) - 536usize];
     ["Offset of field: DataWin::detectedFormat"]
-        [::std::mem::offset_of!(DataWin, detectedFormat) - 536usize];
+        [::std::mem::offset_of!(DataWin, detectedFormat) - 552usize];
     ["Offset of field: DataWin::mappedFile"]
-        [::std::mem::offset_of!(DataWin, mappedFile) - 552usize];
+        [::std::mem::offset_of!(DataWin, mappedFile) - 568usize];
     ["Offset of field: DataWin::initialized"]
-        [::std::mem::offset_of!(DataWin, initialized) - 560usize];
+        [::std::mem::offset_of!(DataWin, initialized) - 576usize];
 };
 unsafe extern "C" {
     pub fn DataWin_loadFile(
@@ -1657,6 +2105,6 @@ unsafe extern "C" {
     pub fn DataWin_parse(dw: *mut DataWin) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    pub fn DataWin_free(dw: *mut DataWin);
+    pub fn DataWin_free(dw: *mut DataWin) -> ::std::os::raw::c_int;
 }
 pub type __builtin_va_list = *mut ::std::os::raw::c_char;
