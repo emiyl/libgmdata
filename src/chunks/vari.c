@@ -74,23 +74,23 @@ int VARI_parse(DataWin *dw) {
     v->variables = (Variable *)safeMalloc(v->variableCount * sizeof(Variable));
     repeat(v->variableCount, i) {
         Variable *var = &v->variables[i];
-        if (Reader_readString(&reader, dw, &var->name) != 0) {
+        if (Reader_readString(reader, dw, &var->name) != 0) {
             VARI_free(v);
             return -1;
         }
-        if (Reader_readInt32(&reader, &var->instanceType) != 0) {
+        if (Reader_readInt32(reader, &var->instanceType) != 0) {
             VARI_free(v);
             return -1;
         }
-        if (Reader_readInt32(&reader, &var->varID) != 0) {
+        if (Reader_readInt32(reader, &var->varID) != 0) {
             VARI_free(v);
             return -1;
         }
-        if (Reader_readUInt32(&reader, &var->occurrences) != 0) {
+        if (Reader_readUInt32(reader, &var->occurrences) != 0) {
             VARI_free(v);
             return -1;
         }
-        if (Reader_readUInt32(&reader, &var->firstAddress) != 0) {
+        if (Reader_readUInt32(reader, &var->firstAddress) != 0) {
             VARI_free(v);
             return -1;
         }
