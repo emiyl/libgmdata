@@ -133,7 +133,8 @@ int TXTR_parse(DataWin *dw) {
                 t->textures[i].blobData = dw->mappedFile + t->textures[i].blobOffset;
                 t->textures[i].mapped = true;
             } else {
-                Reader_seek(&reader, t->textures[i].blobOffset);
+                uint32_t offset = t->textures[i].blobOffset - chunk.offset;
+                Reader_seek(&reader, offset);
                 Reader_readBytes(&reader, t->textures[i].blobData, t->textures[i].blobSize);
             }
         }
