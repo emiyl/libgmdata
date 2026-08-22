@@ -110,9 +110,9 @@ const char *get_string(const DataWin *dw, uint32_t offset) {
     return NULL;
 }
 
-void string_table_free(StringTable *table) {
+int string_table_free(StringTable *table) {
     if (table == NULL) {
-        return;
+        return -1;
     }
 
     if (table->entries != NULL) {
@@ -125,4 +125,5 @@ void string_table_free(StringTable *table) {
 
     table->count = 0;
     table->capacity = 0;
+    return 0;
 }

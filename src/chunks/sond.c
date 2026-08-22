@@ -142,27 +142,33 @@ static int SOND_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *o
     return 0;
 }
 
-static void Sound_free(Sound *snd) {
+static int Sound_free(Sound *snd) {
     if (snd == NULL) {
-        return;
+        return -1;
     }
 
     snd->present = false;
     snd->name = NULL;
     snd->type = NULL;
     snd->file = NULL;
+    return 0;
 }
 
-void SOND_free(SondChunk *s) {
+int SOND_free(SondChunk *s) {
     if (s == NULL) {
-        return;
+        return -1;
     }
 
+    int result = 0;
     for (uint32_t i = 0; i < s->count; ++i) {
-        Sound_free(&s->sounds[i]);
+        if (Sound_free(&s->sounds[i])) {
+            logWarn("[SOND_free] Failed to free Sound at index %u\n", i);
+            result = -1;
+        }
     }
 
     free(s->sounds);
     s->sounds = NULL;
     s->count = 0;
+    return result;
 }

@@ -109,24 +109,29 @@ static int GamePath_free(GamePath *path) {
 }
 
 int PATH_free(PathChunk *path) {
+    int result = 0;
     repeat(path->count, i) {
-        GamePath_free(&path->paths[i]);
+        if (GamePath_free(&path->paths[i])) {
+            logWarn("[PATH_free] Failed to free GamePath at index %u\n", i);
+            result = -1;
+        }
     }
     free(path->paths);
     path->paths = NULL;
     path->count = 0;
-    return 0;
+    return result;
 }
 
 static InternalPathPoint *tempIntPoints = NULL;
 static uint32_t tempIntPointCount = 0;
 static uint32_t tempIntPointCapacity = 0;
 
-static void tempIntPoints_free(void) {
+static int tempIntPoints_free(void) {
     free(tempIntPoints);
     tempIntPoints = NULL;
     tempIntPointCount = 0;
     tempIntPointCapacity = 0;
+    return 0;
 }
 
 static void addInternalPoint(float x, float y, float speed) {

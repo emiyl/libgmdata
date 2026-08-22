@@ -151,18 +151,20 @@ static int RoomOrder_parse(Reader *reader, Gen8Chunk *g) {
     return 0;
 }
 
-static void RoomOrder_free(Gen8Chunk *g) {
+static int RoomOrder_free(Gen8Chunk *g) {
     if (g->roomOrder) {
         free(g->roomOrder);
         g->roomOrder = NULL;
     }
     g->roomOrderCount = 0;
+    return 0;
 }
 
-void GEN8_free(Gen8Chunk *g) {
+int GEN8_free(Gen8Chunk *g) {
     if (g->fileName) free((void*)g->fileName);
     if (g->config) free((void*)g->config);
     if (g->name) free((void*)g->name);
     if (g->displayName) free((void*)g->displayName);
     RoomOrder_free(g);
+    return 0;
 }

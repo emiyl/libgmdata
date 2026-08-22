@@ -135,34 +135,88 @@ int DataWin_parse(DataWin *dw) {
     return 0;
 }
 
-void DataWin_free(DataWin *dw) {
+int DataWin_free(DataWin *dw) {
     if (dw == NULL) {
-        return;
+        return -1;
     }
 
-    string_table_free(&dw->strings);
-    chunk_table_free(&dw->chunks);
+    int result = 0;
 
-    GEN8_free(&dw->gen8);
-    OPTN_free(&dw->optn);
-    LANG_free(&dw->lang);
-    EXTN_free(&dw->extn);
-    SOND_free(&dw->sond);
-    AGRP_free(&dw->agrp);
-    SPRT_free(&dw->sprt);
-    BGND_free(&dw->bgnd);
-    PATH_free(&dw->path);
-    SCPT_free(&dw->scpt);
-    GLOB_free(&dw->glob);
-    SHDR_free(&dw->shdr);
-    FONT_free(&dw->font);
-    TMLN_free(&dw->tmln);
-    OBJT_free(&dw->objt);
+    if(string_table_free(&dw->strings)) {
+        logWarn("[DataWin_free] Failed to free string table\n");
+        result = -1;
+    };
+    if(chunk_table_free(&dw->chunks)) {
+        logWarn("[DataWin_free] Failed to free chunk table\n");
+        result = -1;
+    };
+
+    if (GEN8_free(&dw->gen8)) {
+        logWarn("[DataWin_free] Failed to free GEN8 chunk\n");
+        result = -1;
+    }
+    if (OPTN_free(&dw->optn)) {
+        logWarn("[DataWin_free] Failed to free OPTN chunk\n");
+        result = -1;
+    };
+    if (LANG_free(&dw->lang)) {
+        logWarn("[DataWin_free] Failed to free LANG chunk\n");
+        result = -1;
+    }
+    if (EXTN_free(&dw->extn)) {
+        logWarn("[DataWin_free] Failed to free EXTN chunk\n");
+        result = -1;
+    }
+    if (SOND_free(&dw->sond)) {
+        logWarn("[DataWin_free] Failed to free SOND chunk\n");
+        result = -1;
+    }
+    if (AGRP_free(&dw->agrp)) {
+        logWarn("[DataWin_free] Failed to free AGRP chunk\n");
+        result = -1;
+    }
+    if (SPRT_free(&dw->sprt)) {
+        logWarn("[DataWin_free] Failed to free SPRT chunk\n");
+        result = -1;
+    }
+    if (BGND_free(&dw->bgnd)) {
+        logWarn("[DataWin_free] Failed to free BGND chunk\n");
+        result = -1;
+    }
+    if (PATH_free(&dw->path)) {
+        logWarn("[DataWin_free] Failed to free PATH chunk\n");
+        result = -1;
+    }
+    if (SCPT_free(&dw->scpt)) {
+        logWarn("[DataWin_free] Failed to free SCPT chunk\n");
+        result = -1;
+    }
+    if (GLOB_free(&dw->glob)) {
+        logWarn("[DataWin_free] Failed to free GLOB chunk\n");
+        result = -1;
+    }
+    if (SHDR_free(&dw->shdr)) {
+        logWarn("[DataWin_free] Failed to free SHDR chunk\n");
+        result = -1;
+    }
+    if (FONT_free(&dw->font)) {
+        logWarn("[DataWin_free] Failed to free FONT chunk\n");
+        result = -1;
+    }
+    if (TMLN_free(&dw->tmln)) {
+        logWarn("[DataWin_free] Failed to free TMLN chunk\n");
+        result = -1;
+    }
+    if (OBJT_free(&dw->objt)) {
+        logWarn("[DataWin_free] Failed to free OBJT chunk\n");
+        result = -1;
+    }
 
     free(dw->file_data);
     dw->file_data = NULL;
     dw->file_size = 0;
     dw->initialized = false;
+    return result;
 }
 
 bool DataWin_isVersionAtLeast(const DataWin* dw, uint32_t major, uint32_t minor, uint32_t release, uint32_t build) {

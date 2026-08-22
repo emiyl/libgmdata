@@ -313,46 +313,62 @@ static int ExtensionFunction_pointerTable_parse(Reader *reader, DataWin *dw, voi
     return ExtensionFunction_parse(reader, dw, (ExtensionFunction *)out);
 }
 
-static void ExtensionFunction_free(ExtensionFunction *func) {
+static int ExtensionFunction_free(ExtensionFunction *func) {
     if (func == NULL) {
-        return;
+        return -1;
     }
 
     free(func->arguments);
+    return 0;
 }
 
-static void ExtensionFile_free(ExtensionFile *file) {
+static int ExtensionFile_free(ExtensionFile *file) {
     if (file == NULL) {
-        return;
+        return -1;
     }
-
+    
+    int result = 0;
     for (uint32_t i = 0; i < file->functionCount; ++i) {
-        ExtensionFunction_free(&file->functions[i]);
+        if (ExtensionFunction_free(&file->functions[i])) {
+            logWarn("[ExtensionFile_free] Failed to free ExtensionFunction at index %u\n", i);
+            result = -1;
+        }
     }
 
     free(file->functions);
+    return result;
 }
 
-static void Extension_free(Extension *ext) {
+static int Extension_free(Extension *ext) {
     if (ext == NULL) {
-        return;
+        return -1;
     }
 
+    int result = 0;
     for (uint32_t i = 0; i < ext->fileCount; ++i) {
-        ExtensionFile_free(&ext->files[i]);
+        if (ExtensionFile_free(&ext->files[i])) {
+            logWarn("[Extension_free] Failed to free ExtensionFile at index %u\n", i);
+            result = -1;
+        }
     }
 
     free(ext->files);
+    return result;
 }
 
-void EXTN_free(ExtnChunk *e) {
+int EXTN_free(ExtnChunk *e) {
     if (e == NULL) {
-        return;
+        return -1;
     }
 
+    int result = 0;
     for (uint32_t i = 0; i < e->count; ++i) {
-        Extension_free(&e->extensions[i]);
+        if (Extension_free(&e->extensions[i])) {
+            logWarn("[EXTN_free] Failed to free Extension at index %u\n", i);
+            result = -1;
+        }
     }
 
     free(e->extensions);
+    return result;
 }

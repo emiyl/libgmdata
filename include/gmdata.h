@@ -542,6 +542,6 @@ typedef struct {
 
 int DataWin_loadFile(DataWin *dw, const char *path);
 int DataWin_parse(DataWin *dw);
-void DataWin_free(DataWin *dw);
+int DataWin_free(DataWin *dw);
 
 #endif // GMDATA_H

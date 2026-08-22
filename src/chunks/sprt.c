@@ -247,8 +247,8 @@ static int SPRT_pointerTable_successHandler(Reader *reader, DataWin *dw, void *o
     return 0;
 }
 
-static void Sprite_free(Sprite *spr) {
-    if (spr == NULL) return;
+static int Sprite_free(Sprite *spr) {
+    if (spr == NULL) return -1;
 
     free((void *)spr->name);
     spr->name = NULL;
@@ -267,13 +267,22 @@ static void Sprite_free(Sprite *spr) {
     }
     spr->maskCount = 0;
     spr->maskDataOwned = false;
+    return 0;
 }
 
-void SPRT_free(SprtChunk *s) {
-    if (s == NULL) return;
+int SPRT_free(SprtChunk *s) {
+    if (s == NULL) return -1;
 
+    int result = 0;
     repeat(s->count, i) {
-        Sprite_free(&s->sprites[i]);
+        if (Sprite_free(&s->sprites[i])) {
+            logWarn("[SPRT_free] Failed to free Sprite at index %u\n", i);
+            result = -1;
+        }
     }
     free(s->sprites);
+    s->sprites = NULL;
+    s->count = 0;
+    
+    return result;
 }

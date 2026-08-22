@@ -49,9 +49,9 @@ int LANG_parse(DataWin *dw) {
     return 0;
 }
 
-void LANG_free(LangChunk *l) {
+int LANG_free(LangChunk *l) {
     if (l == NULL) {
-        return;
+        return -1;
     }
 
     if (l->entryIds != NULL) {
@@ -69,4 +69,5 @@ void LANG_free(LangChunk *l) {
         free(l->languages);
         l->languages = NULL;
     }
+    return 0;
 }

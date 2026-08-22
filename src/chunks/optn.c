@@ -143,9 +143,9 @@ int OPTN_parse(DataWin *dw) {
     return 0;
 }
 
-void OPTN_free(OptnChunk *o) {
+int OPTN_free(OptnChunk *o) {
     if (o == NULL) {
-        return;
+        return -1;
     }
 
     if (o->constants != NULL) {
@@ -158,4 +158,5 @@ void OPTN_free(OptnChunk *o) {
     }
 
     o->constantCount = 0;
+    return 0;
 }

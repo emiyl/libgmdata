@@ -15,15 +15,16 @@ int chunk_table_init(ChunkTable *table) {
     return 0;
 }
 
-void chunk_table_free(ChunkTable *table) {
+int chunk_table_free(ChunkTable *table) {
     if (table == NULL) {
-        return;
+        return -1;
     }
 
     free(table->items);
     table->items = NULL;
     table->count = 0;
     table->capacity = 0;
+    return 0;
 }
 
 int find_chunk(const DataWin *dw, const char *name) {

@@ -102,18 +102,24 @@ static int AGRP_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *o
     return 0;
 }
 
-static void AudioGroup_free(AudioGroup *ag) {
+static int AudioGroup_free(AudioGroup *ag) {
     if (ag->name) free((void*)ag->name);
     if (ag->path) free((void*)ag->path);
+    return 0;
 }
 
-void AGRP_free(AgrpChunk *a) {
+int AGRP_free(AgrpChunk *a) {
+    int result = 0;
     if (a->audioGroups) {
         repeat(a->count, i) {
-            AudioGroup_free(&a->audioGroups[i]);
+            if(AudioGroup_free(&a->audioGroups[i])) {
+                logWarn("[AGRP_free] Failed to free AudioGroup at index %u\n", i);
+                result = -1;
+            };
         }
         free(a->audioGroups);
         a->audioGroups = NULL;
     }
     a->count = 0;
+    return result;
 }

@@ -123,8 +123,8 @@ static int SHDR_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *o
     return 0;
 }
 
-static void Shader_free(Shader *sh) {
-    if (sh == NULL) return;
+static int Shader_free(Shader *sh) {
+    if (sh == NULL) return -1;
 
     free((void *)sh->name);
     sh->name = NULL;
@@ -156,15 +156,21 @@ static void Shader_free(Shader *sh) {
         sh->vertexAttributes = NULL;
         sh->vertexAttributeCount = 0;
     }
+    return 0;
 }
 
-void SHDR_free(ShdrChunk *s) {
-    if (s == NULL) return;
+int SHDR_free(ShdrChunk *s) {
+    if (s == NULL) return -1;
 
+    int result = 0;
     repeat(s->count, i) {
-        Shader_free(&s->shaders[i]);
+        if (Shader_free(&s->shaders[i])) {
+            logWarn("[SHDR_free] Failed to free Shader at index %u\n", i);
+            result = -1;
+        }
     }
     free(s->shaders);
     s->shaders = NULL;
     s->count = 0;
+    return result;
 }
