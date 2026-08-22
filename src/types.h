@@ -81,7 +81,7 @@ typedef struct {
     TmlnChunk tmln;
     ObjtChunk objt;
 
-    DetectedFormat detected_format;
+    DetectedFormat detectedFormat;
     uint8_t* mappedFile;
 
     bool initialized;

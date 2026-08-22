@@ -165,7 +165,7 @@ void DataWin_free(DataWin *dw) {
 }
 
 bool DataWin_isVersionAtLeast(const DataWin* dw, uint32_t major, uint32_t minor, uint32_t release, uint32_t build) {
-    const DetectedFormat* f = &dw->detected_format;
+    const DetectedFormat* f = &dw->detectedFormat;
     if (f->major != major) return f->major > major;
     if (f->minor != minor) return f->minor > minor;
     if (f->release != release) return f->release > release;
@@ -174,8 +174,8 @@ bool DataWin_isVersionAtLeast(const DataWin* dw, uint32_t major, uint32_t minor,
 
 void DataWin_bumpVersionTo(DataWin* dw, uint32_t major, uint32_t minor, uint32_t release, uint32_t build) {
     if (DataWin_isVersionAtLeast(dw, major, minor, release, build)) return;
-    dw->detected_format.major = major;
-    dw->detected_format.minor = minor;
-    dw->detected_format.release = release;
-    dw->detected_format.build = build;
+    dw->detectedFormat.major = major;
+    dw->detectedFormat.minor = minor;
+    dw->detectedFormat.release = release;
+    dw->detectedFormat.build = build;
 }

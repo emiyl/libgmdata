@@ -1,4 +1,4 @@
-#include "../include/datawin.h"
+#include "../include/gmdata.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -145,10 +145,10 @@ int main(int argc, char **argv) {
     printf("Loaded %zu bytes with %zu chunks\n",
            dw.file_size, dw.chunks.count);
     printf("Detected format version: %" PRIu32 ".%" PRIu32 ".%" PRIu32 ".%" PRIu32 "\n",
-           dw.detected_format.major,
-           dw.detected_format.minor,
-           dw.detected_format.release,
-           dw.detected_format.build);
+           dw.detectedFormat.major,
+           dw.detectedFormat.minor,
+           dw.detectedFormat.release,
+           dw.detectedFormat.build);
 
     if (printGen8) GEN8_Print(&dw.gen8);
     if (printOptn) OPTN_Print(&dw.optn);

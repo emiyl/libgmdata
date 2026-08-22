@@ -24,12 +24,7 @@ PUBLIC_HEADERS = include/types.h include/types/*.h
 
 .DEFAULT_GOAL := all
 
-.PHONY: all lib install clean prepare_public_headers
-
-prepare_public_headers:
-	mkdir -p include/types
-	cp src/types.h include/types.h
-	cp src/types/*.h include/types/
+.PHONY: all lib install clean
 
 all: $(LIB_TARGET) $(CLI_TARGET)
 
@@ -43,12 +38,12 @@ install: $(LIB_TARGET) $(CLI_TARGET)
 	install -m 644 include/types/*.h "$(INSTALL_INC_DIR)/types/"
 
 
-$(LIB_TARGET): $(LIB_OBJS) | prepare_public_headers
+$(LIB_TARGET): $(LIB_OBJS)
 	mkdir -p $(LIB_DIR)
 	$(AR) rcs $@ $^
 	$(RANLIB) $@
 
-$(CLI_TARGET): $(CLI_SRC) $(LIB_TARGET) | prepare_public_headers
+$(CLI_TARGET): $(CLI_SRC) $(LIB_TARGET)
 	mkdir -p $(BIN_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $(CLI_SRC) $(LIB_TARGET)
 
