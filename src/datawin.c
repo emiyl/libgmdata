@@ -81,6 +81,7 @@ void DataWin_initParserOptions(DataWinParserOptions *options) {
     options->parseStrg = true;
     options->parseTxtr = true;
     options->parseAudo = true;
+    options->parseAcrv = true;
     options->loadType = DATAWINLOADTYPE_LOAD_PER_CHUNK;
 }
 
@@ -195,32 +196,32 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
         assert(GEN8_parse(dw) == 0);
         DataWin_bumpVersionTo(dw, dw->gen8.major, dw->gen8.minor, dw->gen8.release, dw->gen8.build);
     }
-    if (effective.parseOptn) { assert(OPTN_parse(dw) == 0); logInfo("Parsed chunk OPTN\n"); }
-    if (effective.parseLang) { assert(LANG_parse(dw) == 0); logInfo("Parsed chunk LANG\n"); }
-    if (effective.parseExtn) { assert(EXTN_parse(dw) == 0); logInfo("Parsed chunk EXTN\n"); }
-    if (effective.parseSond) { assert(SOND_parse(dw) == 0); logInfo("Parsed chunk SOND\n"); }
-    if (effective.parseAgrp) { assert(AGRP_parse(dw) == 0); logInfo("Parsed chunk AGRP\n"); }
-    if (effective.parseSprt) { assert(SPRT_parse(dw) == 0); logInfo("Parsed chunk SPRT\n"); }
-    if (effective.parseBgnd) { assert(BGND_parse(dw) == 0); logInfo("Parsed chunk BGND\n"); }
-    if (effective.parseFont) { assert(FONT_parse(dw) == 0); logInfo("Parsed chunk FONT\n"); }
-    if (effective.parseTpag) { assert(TPAG_parse(dw) == 0); logInfo("Parsed chunk TPAG\n"); }
-    if (effective.parsePath) { assert(PATH_parse(dw) == 0); logInfo("Parsed chunk PATH\n"); }
-    if (effective.parseScpt) { assert(SCPT_parse(dw) == 0); logInfo("Parsed chunk SCPT\n"); }
-    if (effective.parseGlob) { assert(GLOB_parse(dw) == 0); logInfo("Parsed chunk GLOB\n"); }
-    if (effective.parseCode) { assert(CODE_parse(dw) == 0); logInfo("Parsed chunk CODE\n"); }
-    if (effective.parseVari) { assert(VARI_parse(dw) == 0); logInfo("Parsed chunk VARI\n"); }
-    if (effective.parseFunc) { assert(FUNC_parse(dw) == 0); logInfo("Parsed chunk FUNC\n"); }
-    if (effective.parseShdr) { assert(SHDR_parse(dw) == 0); logInfo("Parsed chunk SHDR\n"); }
-    if (effective.parseTmln) { assert(TMLN_parse(dw) == 0); logInfo("Parsed chunk TMLN\n"); }
-    if (effective.parseObjt) { assert(OBJT_parse(dw) == 0); logInfo("Parsed chunk OBJT\n"); }
-    if (effective.parseRoom) { assert(ROOM_parse(dw) == 0); logInfo("Parsed chunk ROOM\n"); }
-    if (effective.parseAgrp || effective.parseStrg || effective.parseTxtr || effective.parseAudo) {
-        // keep the loader logic aligned with the requested parser options
-    }
-    if (effective.parseTxtr) { assert(TXTR_parse(dw) == 0); logInfo("Parsed chunk TXTR\n"); }
-    if (effective.parseAudo) { assert(AUDO_parse(dw) == 0); logInfo("Parsed chunk AUDO\n"); }
-    if (effective.parseRoom) { assert(ACRV_parse(dw) == 0); logInfo("Parsed chunk ACRV\n"); }
 
+    #define parse(option, chunk) if (effective.parse##option) { assert(chunk##_parse(dw) == 0); logInfo("Parsed chunk " #chunk "\n"); }
+    parse(Optn, OPTN);
+    parse(Lang, LANG);
+    parse(Extn, EXTN);
+    parse(Sond, SOND);
+    parse(Agrp, AGRP);
+    parse(Sprt, SPRT);
+    parse(Bgnd, BGND);
+    parse(Font, FONT);
+    parse(Tpag, TPAG);
+    parse(Path, PATH);
+    parse(Scpt, SCPT);
+    parse(Glob, GLOB);
+    parse(Code, CODE);
+    parse(Vari, VARI);
+    parse(Func, FUNC);
+    parse(Shdr, SHDR);
+    parse(Tmln, TMLN);
+    parse(Objt, OBJT);
+    parse(Room, ROOM);
+    parse(Strg, STRG);
+    parse(Txtr, TXTR);
+    parse(Audo, AUDO);
+    parse(Acrv, ACRV);
+    
     return 0;
 }
 
@@ -326,6 +327,10 @@ int DataWin_free(DataWin *dw) {
     }
     if (ACRV_free(&dw->acrv)) {
         logWarn("[DataWin_free] Failed to free ACRV chunk\n");
+        result = -1;
+    }
+    if (STRG_free(&dw->strg)) {
+        logWarn("[DataWin_free] Failed to free STRG chunk\n");
         result = -1;
     }
     if (TXTR_free(&dw->txtr)) {

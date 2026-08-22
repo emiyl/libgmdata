@@ -2478,6 +2478,9 @@ pub struct DataWin {
     pub audo: AudoChunk,
     pub detectedFormat: DetectedFormat,
     pub mappedFile: *mut u8,
+    pub lazyLoadRooms: bool,
+    pub lazyLoadTextures: bool,
+    pub lazyLoadAudio: bool,
     pub initialized: bool,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
@@ -2516,8 +2519,14 @@ const _: () = {
         [::std::mem::offset_of!(DataWin, detectedFormat) - 744usize];
     ["Offset of field: DataWin::mappedFile"]
         [::std::mem::offset_of!(DataWin, mappedFile) - 760usize];
+    ["Offset of field: DataWin::lazyLoadRooms"]
+        [::std::mem::offset_of!(DataWin, lazyLoadRooms) - 768usize];
+    ["Offset of field: DataWin::lazyLoadTextures"]
+        [::std::mem::offset_of!(DataWin, lazyLoadTextures) - 769usize];
+    ["Offset of field: DataWin::lazyLoadAudio"]
+        [::std::mem::offset_of!(DataWin, lazyLoadAudio) - 770usize];
     ["Offset of field: DataWin::initialized"]
-        [::std::mem::offset_of!(DataWin, initialized) - 768usize];
+        [::std::mem::offset_of!(DataWin, initialized) - 771usize];
 };
 unsafe extern "C" {
     pub fn DataWin_loadFile(

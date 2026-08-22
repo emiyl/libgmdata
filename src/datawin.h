@@ -38,6 +38,7 @@ typedef struct {
     bool parseStrg;
     bool parseTxtr;
     bool parseAudo;
+    bool parseAcrv;
     bool skipLoadingPreciseMasksForNonPreciseSprites;
     bool lazyLoadRooms;
     bool lazyLoadTextures;

@@ -1,6 +1,30 @@
 #include "common.h"
 #include "../strings.h"
 
+static const char *STRG_dup_string(const DataWin *dw, uint32_t absolute_offset) {
+    if (dw == NULL || dw->file_data == NULL) {
+        return NULL;
+    }
+
+    if (absolute_offset + sizeof(uint32_t) > dw->file_size) {
+        return NULL;
+    }
+
+    uint32_t length = read_u32_le_at(dw->file_data, dw->file_size, absolute_offset);
+    if (absolute_offset + sizeof(uint32_t) + length > dw->file_size) {
+        return NULL;
+    }
+
+    char *copy = (char *)malloc((size_t)length + 1U);
+    if (copy == NULL) {
+        return NULL;
+    }
+
+    memcpy(copy, dw->file_data + absolute_offset + sizeof(uint32_t), length);
+    copy[length] = '\0';
+    return copy;
+}
+
 static int STRG_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void *extraData) {
     (void)extraData;
     const char **str = (const char **)out;
@@ -42,8 +66,13 @@ int STRG_parse(DataWin *dw) {
 
     s->strings = (const char **)safeCalloc(count, sizeof(const char *));
     repeat(count, i) {
-        if (ptrs[i] == 0) continue;
-        s->strings[i] = resolve_string_ptr(dw, base, ptrs[i]);
+        if (ptrs[i] == 0) {
+            s->strings[i] = NULL;
+            continue;
+        }
+
+        uint32_t absolute_offset = chunk.offset + ptrs[i];
+        s->strings[i] = STRG_dup_string(dw, absolute_offset);
     }
 
     free(ptrs);
@@ -52,6 +81,11 @@ int STRG_parse(DataWin *dw) {
 
 int STRG_free(StrgChunk *s) {
     if (s == NULL) return -1;
+    if (s->strings != NULL) {
+        for (uint32_t i = 0; i < s->count; ++i) {
+            free((void *)s->strings[i]);
+        }
+    }
     free(s->strings);
     s->strings = NULL;
     s->count = 0;
