@@ -167,6 +167,48 @@ fn texture_preview_image(texture: &Texture, gm2022_5: bool) -> Option<egui::Colo
     Some(egui::ColorImage::from_rgba_unmultiplied([width, height], &decoded))
 }
 
+fn texture_page_item_preview_image(
+    page_item: &TexturePageItem,
+    textures: &[Texture],
+    gm2022_5: bool,
+) -> Option<egui::ColorImage> {
+    let page_index = usize::try_from(page_item.texturePageId).ok()?;
+    let texture = textures.get(page_index)?;
+    let full_page = texture_preview_image(texture, gm2022_5)?;
+    let [page_width, page_height] = full_page.size;
+
+    let src_x = page_item.sourceX as usize;
+    let src_y = page_item.sourceY as usize;
+    let src_w = page_item.sourceWidth as usize;
+    let src_h = page_item.sourceHeight as usize;
+
+    if src_w == 0 || src_h == 0 || src_x >= page_width || src_y >= page_height {
+        return Some(full_page);
+    }
+
+    let x0 = src_x.min(page_width.saturating_sub(1));
+    let y0 = src_y.min(page_height.saturating_sub(1));
+    let x1 = (x0 + src_w).min(page_width);
+    let y1 = (y0 + src_h).min(page_height);
+    let crop_w = x1.saturating_sub(x0);
+    let crop_h = y1.saturating_sub(y0);
+
+    let mut pixels = vec![0u8; crop_w * crop_h * 4];
+    for y in 0..crop_h {
+        let src_row = y0 + y;
+        let dst_row = y * crop_w;
+        for x in 0..crop_w {
+            let src_index = src_row * page_width + (x0 + x);
+            let dst_index = dst_row + x;
+            let rgba = full_page.pixels[src_index].to_array();
+            let dst_offset = dst_index * 4;
+            pixels[dst_offset..dst_offset + 4].copy_from_slice(&rgba);
+        }
+    }
+
+    Some(egui::ColorImage::from_rgba_unmultiplied([crop_w, crop_h], &pixels))
+}
+
 fn matches_item_query(item: &ChunkItem, query: &str) -> bool {
     if query.trim().is_empty() {
         return true;
@@ -903,7 +945,158 @@ struct App {
     chunks: Vec<ChunkInfo>,
     active_chunk: usize,
     dw: DataWin,
-    texture_preview_cache: HashMap<usize, Option<egui::ColorImage>>,
+    texture_preview_cache: HashMap<String, Option<egui::ColorImage>>,
+    texture_popup: Option<(String, usize)>,
+    texture_popup_zoom: HashMap<(String, usize), f32>,
+}
+
+impl App {
+    fn texture_preview_size(&self, chunk_name: &str, active_item_idx: usize) -> Option<egui::Vec2> {
+        if chunk_name != "TXTR" && chunk_name != "TPAG" {
+            return None;
+        }
+
+        let texture_slice = if self.dw.txtr.textures.is_null() || self.dw.txtr.count == 0 {
+            &[][..]
+        } else {
+            unsafe {
+                std::slice::from_raw_parts(
+                    self.dw.txtr.textures,
+                    self.dw.txtr.count as usize,
+                )
+            }
+        };
+
+        if chunk_name == "TXTR" {
+            texture_slice
+                .get(active_item_idx)
+                .map(|texture| {
+                    egui::vec2(
+                        texture.textureWidth.max(1) as f32,
+                        texture.textureHeight.max(1) as f32,
+                    )
+                })
+        } else {
+            let page_data = if self.dw.tpag.items.is_null() || self.dw.tpag.count == 0 {
+                &[][..]
+            } else {
+                unsafe {
+                    std::slice::from_raw_parts(
+                        self.dw.tpag.items,
+                        self.dw.tpag.count as usize,
+                    )
+                }
+            };
+            page_data.get(active_item_idx).map(|page_item| {
+                egui::vec2(
+                    page_item.sourceWidth.max(1) as f32,
+                    page_item.sourceHeight.max(1) as f32,
+                )
+            })
+        }
+    }
+
+    fn render_texture_preview(
+        &mut self,
+        ui: &mut egui::Ui,
+        chunk_name: &str,
+        active_item_idx: usize,
+        popup_zoom: Option<f32>,
+    ) {
+        if chunk_name != "TXTR" && chunk_name != "TPAG" {
+            return;
+        }
+
+        let preview_key = format!("{}-{}", chunk_name, active_item_idx);
+
+        let texture_slice = if self.dw.txtr.textures.is_null() || self.dw.txtr.count == 0 {
+            &[][..]
+        } else {
+            unsafe {
+                std::slice::from_raw_parts(
+                    self.dw.txtr.textures,
+                    self.dw.txtr.count as usize,
+                )
+            }
+        };
+
+        let gm2022_5 =
+            self.dw.detectedFormat.major >= 2022 &&
+            self.dw.detectedFormat.minor >= 5;
+
+        let preview_image = if chunk_name == "TXTR" {
+            if let Some(texture) = texture_slice.get(active_item_idx) {
+                self.texture_preview_cache
+                    .entry(preview_key.clone())
+                    .or_insert_with(|| texture_preview_image(texture, gm2022_5))
+                    .clone()
+            } else {
+                None
+            }
+        } else {
+            let page_data = if self.dw.tpag.items.is_null() || self.dw.tpag.count == 0 {
+                &[][..]
+            } else {
+                unsafe {
+                    std::slice::from_raw_parts(
+                        self.dw.tpag.items,
+                        self.dw.tpag.count as usize,
+                    )
+                }
+            };
+
+            page_data.get(active_item_idx).and_then(|page_item| {
+                self.texture_preview_cache
+                    .entry(preview_key.clone())
+                    .or_insert_with(|| texture_page_item_preview_image(page_item, texture_slice, gm2022_5))
+                    .clone()
+            })
+        };
+
+        let Some(image) = preview_image else {
+            ui.label("No preview available for this item.");
+            return;
+        };
+
+        let handle = ui.ctx().load_texture(
+            format!("{}-preview-{}", chunk_name, active_item_idx),
+            image,
+            egui::TextureOptions::LINEAR,
+        );
+
+        let Some(original_size) = self.texture_preview_size(chunk_name, active_item_idx) else {
+            return;
+        };
+
+        let zoom_scale = popup_zoom.unwrap_or(1.0);
+        let display_size = if let Some(_) = popup_zoom {
+            let max_width = ui.available_width().max(1.0);
+            let max_height = ui.available_height().max(1.0);
+            let fit_scale = (max_width / original_size.x)
+                .min(max_height / original_size.y)
+                .min(1.0);
+            original_size * fit_scale * zoom_scale
+        } else {
+            let available_width = ui.available_width();
+            let scale = if original_size.x > available_width {
+                available_width / original_size.x
+            } else {
+                1.0
+            };
+            original_size * scale
+        };
+
+        let response = ui.add_sized(
+            display_size,
+            egui::Image::new(&handle)
+                .fit_to_exact_size(display_size)
+                .sense(egui::Sense::click()),
+        );
+
+        if response.clicked() {
+            self.texture_popup = Some((chunk_name.to_string(), active_item_idx));
+        }
+    }
 }
 
 impl Drop for App {
@@ -918,6 +1111,43 @@ impl eframe::App for App {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         ui.ctx().set_visuals(egui::Visuals::dark());
         ui.ctx().set_theme(egui::ThemePreference::Dark);
+
+        if let Some((chunk_name, item_idx)) = self.texture_popup.clone() {
+            let mut open = true;
+            let zoom_key = (chunk_name.clone(), item_idx);
+            let current_zoom = self.texture_popup_zoom.get(&zoom_key).copied().unwrap_or(1.0);
+            let mut zoom = current_zoom;
+
+            egui::Window::new(format!("{} preview", chunk_name))
+                .default_size([420.0, 420.0])
+                .open(&mut open)
+                .show(ui.ctx(), |ui| {
+                    let pinch_delta = ui.ctx().input(|i| i.zoom_delta());
+                    if pinch_delta != 1.0 {
+                        zoom = (zoom * pinch_delta).clamp(0.25, 8.0);
+                        self.texture_popup_zoom.insert(zoom_key.clone(), zoom);
+                    }
+
+                    let scroll_area = egui::ScrollArea::both()
+                        .auto_shrink([false, false]);
+
+                    let base_size = self
+                        .texture_preview_size(&chunk_name, item_idx)
+                        .unwrap_or(egui::vec2(1.0, 1.0));
+                    let zoomed_size = base_size * zoom;
+
+                    scroll_area.show(ui, |ui| {
+                        ui.allocate_ui(zoomed_size, |ui| {
+                            self.render_texture_preview(ui, &chunk_name, item_idx, Some(zoom));
+                        });
+                    });
+                });
+
+            if !open {
+                self.texture_popup = None;
+                self.texture_popup_zoom.remove(&zoom_key);
+            }
+        }
 
         egui::Frame::default()
             .inner_margin(egui::Margin::same(20))
@@ -1096,90 +1326,37 @@ impl eframe::App for App {
 
                     columns[1].vertical(|ui| {
                         egui::ScrollArea::vertical()
-                            .id_salt("chunk-item-scroll")
-                            .auto_shrink([false, false])
-                            .show(ui, |ui| {
-                                ui.group(|ui| {
-                                    ui.label(format!("Chunk: {}", active_chunk_name));
-                                    ui.label(format!("Offset: {}", active_chunk_offset));
-                                    ui.label(format!("Length: {}", active_chunk_length));
-                                    ui.label(format!("Item: {}", active_item.name));
-                                    ui.separator();
+                        .id_salt("chunk-item-scroll")
+                        .auto_shrink([false, false])
+                        .show(ui, |ui| {
+                            ui.group(|ui| {
+                                ui.label(format!("Chunk: {}", active_chunk_name));
+                                ui.label(format!("Offset: {}", active_chunk_offset));
+                                ui.label(format!("Length: {}", active_chunk_length));
+                                ui.label(format!("Item: {}", active_item.name));
+                                ui.separator();
 
-                                    egui::Grid::new(format!(
-                                        "chunk-item-fields-{}-{}",
-                                        active_chunk_name,
-                                        active_item.name
-                                    ))
-                                    .num_columns(2)
-                                    .spacing([12.0, 4.0])
-                                    .show(ui, |ui| {
-                                        for field in &active_item.fields {
-                                            ui.label(&field.name);
-                                            ui.label(&field.value);
-                                            ui.end_row();
-                                        }
-                                    });
-
-                                    if active_chunk_name == "TXTR" {
-                                        ui.separator();
-                                        
-                                        let texture_slice = unsafe {
-                                            std::slice::from_raw_parts(
-                                                self.dw.txtr.textures,
-                                                self.dw.txtr.count as usize,
-                                            )
-                                        };
-
-                                        let gm2022_5 =
-                                            self.dw.detectedFormat.major >= 2022 &&
-                                            self.dw.detectedFormat.minor >= 5;
-
-                                        let preview_image = if let Some(texture) =
-                                            texture_slice.get(active_item_idx)
-                                        {
-                                            self.texture_preview_cache
-                                                .entry(active_item_idx)
-                                                .or_insert_with(|| texture_preview_image(texture, gm2022_5))
-                                                .clone()
-                                        } else {
-                                            None
-                                        };
-
-                                        if let Some(image) = preview_image {
-                                            let handle = ui.ctx().load_texture(
-                                                format!("txtr-preview-{}", active_item_idx),
-                                                image,
-                                                egui::TextureOptions::LINEAR,
-                                            );
-
-                                            if let Some(texture) = texture_slice.get(active_item_idx) {
-                                                let original_size = egui::vec2(
-                                                    texture.textureWidth.max(1) as f32,
-                                                    texture.textureHeight.max(1) as f32,
-                                                );
-
-                                                let available_width = ui.available_width();
-
-                                                let scale = if original_size.x > available_width {
-                                                    available_width / original_size.x
-                                                } else {
-                                                    1.0
-                                                };
-
-                                                let display_size = original_size * scale;
-
-                                                ui.add_sized(
-                                                    display_size,
-                                                    egui::Image::new(&handle)
-                                                        .fit_to_exact_size(display_size),
-                                                
-                                                );
-                                            }
-                                        }
+                                egui::Grid::new(format!(
+                                    "chunk-item-fields-{}-{}",
+                                    active_chunk_name,
+                                    active_item.name
+                                ))
+                                .num_columns(2)
+                                .spacing([12.0, 4.0])
+                                .show(ui, |ui| {
+                                    for field in &active_item.fields {
+                                        ui.label(&field.name);
+                                        ui.label(&field.value);
+                                        ui.end_row();
                                     }
                                 });
+
+                                if active_chunk_name == "TXTR" || active_chunk_name == "TPAG" {
+                                    ui.separator();
+                                    self.render_texture_preview(ui, &active_chunk_name, active_item_idx, None);
+                                }
                             });
+                        });
                     });
                 });
             });
@@ -1280,6 +1457,8 @@ fn main() {
                 active_chunk: 0,
                 dw,
                 texture_preview_cache: HashMap::new(),
+                texture_popup: None,
+                texture_popup_zoom: HashMap::new(),
             }))
         }),
     );
