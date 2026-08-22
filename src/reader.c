@@ -34,12 +34,12 @@ size_t Reader_remaining(const Reader *reader) {
 
 int Reader_seek(Reader *reader, size_t offset) {
     if (reader == NULL || reader->data == NULL) {
-        logWarn("Reader_seek (%s): Attempted to seek in a NULL reader or with NULL data\n", reader ? reader->name : "NULL");
+        logWarn("[Reader_seek] (%s): Attempted to seek in a NULL reader or with NULL data\n", reader ? reader->name : "NULL");
         return -1;
     }
 
     if (offset > reader->size) {
-        logWarn("Reader_seek (%s): Attempted to seek beyond the end of the buffer (offset: %zu, size: %zu)\n", reader->name, offset, reader->size);
+        logWarn("[Reader_seek] (%s): Attempted to seek beyond the end of the buffer (offset: %zu, size: %zu)\n", reader->name, offset, reader->size);
         return -1;
     }
 
@@ -186,6 +186,11 @@ int Reader_readInt16(Reader *reader, int16_t *out) {
 int Reader_readBool32At(Reader *reader, size_t offset, bool *out) {
     uint32_t value;
     if (_read_u32_at(reader, offset, &value) != 0) {
+        return -1;
+    }
+
+    if (value != 0 && value != 1) {
+        logWarn("[Reader_readBool32At] (%s): Invalid boolean value %u at offset %zu\n", reader->name, value, offset);
         return -1;
     }
 
