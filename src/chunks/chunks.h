@@ -1,7 +1,7 @@
 #ifndef CHUNKS_H
 #define CHUNKS_H
 
-#include "../types.h"
+#include "../gmdata.h"
 
 int GEN8_parse(DataWin *dw);
 void GEN8_free(Gen8Chunk *g);
@@ -46,5 +46,6 @@ int TMLN_parse(DataWin *dw);
 void TMLN_free(TmlnChunk *t);
 
 int OBJT_parse(DataWin *dw);
+int OBJT_free(ObjtChunk *o);
 
 #endif

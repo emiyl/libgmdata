@@ -126,6 +126,7 @@ static int OBJT_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *o
 }
 
 static int PhysicsVertex_parse(Reader *reader, PhysicsVertex *vertex);
+static int GameObject_parse(Reader *reader, DataWin *dw, GameObject *obj);
 static int GameObject_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
 static int GameObject_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
 static int OBJT_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
@@ -137,8 +138,18 @@ static int OBJT_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void*
     }
 
     logDebug("[OBJT_pointerTable_parse] Parsing GameObject at offset %zu\n", reader->cursor);
+    GameObject *obj = (GameObject *)out;
+    if (GameObject_parse(reader, dw, obj) != 0) {
+        logWarn("[OBJT_pointerTable_parse] Failed to parse GameObject at offset %zu\n", reader->cursor);
+        return -1;
+    }
+
+    return 0;
+}
+
+static int GameObject_parse(Reader *reader, DataWin *dw, GameObject *o) {
+    logDebug("[GameObject_parse] Parsing GameObject...\n");
     
-    GameObject *o = (GameObject *)out;
     o->present = true;
     Reader_readString(reader, dw, &o->name);
     Reader_readInt32(reader, &o->spriteId);
@@ -253,7 +264,6 @@ static int OBJT_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void*
     }
 
     free(eventTypePtrs);
-
     return 0;
 }
 
@@ -292,6 +302,51 @@ static int PhysicsVertex_parse(Reader *reader, PhysicsVertex *vertex) {
 
     Reader_readFloat32(reader, &vertex->x);
     Reader_readFloat32(reader, &vertex->y);
+
+    return 0;
+}
+
+static int GameObject_free(GameObject *obj) {
+    if (obj == NULL) return -1;
+
+    obj->name = NULL;
+
+    if (obj->physicsVertices != NULL) {
+        free(obj->physicsVertices);
+        obj->physicsVertices = NULL;
+    }
+
+    for (uint32_t eventType = 0; eventType < OBJT_EVENT_TYPE_COUNT; eventType++) {
+        ObjectEventList *eventList = &obj->eventLists[eventType];
+        if (eventList->events != NULL) {
+            for (uint32_t eventIndex = 0; eventIndex < eventList->eventCount; eventIndex++) {
+                ObjectEvent *event = &eventList->events[eventIndex];
+                if (event->actions != NULL) {
+                    free(event->actions);
+                    event->actions = NULL;
+                }
+            }
+            free(eventList->events);
+            eventList->events = NULL;
+        }
+        eventList->eventCount = 0;
+    }
+
+    return 0;
+}
+
+int OBJT_free(ObjtChunk *objt) {
+    if (objt == NULL) return -1;
+
+    if (objt->objects != NULL) {
+        for (uint32_t i = 0; i < objt->count; i++) {
+            GameObject_free(&objt->objects[i]);
+        }
+        free(objt->objects);
+        objt->objects = NULL;
+    }
+
+    objt->count = 0;
 
     return 0;
 }

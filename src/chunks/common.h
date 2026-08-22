@@ -8,7 +8,7 @@
 #include <string.h>
 
 #include "../utils.h"
-#include "../types.h"
+#include "../gmdata.h"
 #include "../chunk_table.h"
 #include "../reader.h"
 

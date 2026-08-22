@@ -157,6 +157,7 @@ void DataWin_free(DataWin *dw) {
     SHDR_free(&dw->shdr);
     FONT_free(&dw->font);
     TMLN_free(&dw->tmln);
+    OBJT_free(&dw->objt);
 
     free(dw->file_data);
     dw->file_data = NULL;

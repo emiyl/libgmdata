@@ -1,7 +1,7 @@
 #ifndef CHUNK_TABLE_H
 #define CHUNK_TABLE_H
 
-#include "types.h"
+#include "gmdata.h"
 
 int chunk_table_init(ChunkTable *table);
 void chunk_table_free(ChunkTable *table);

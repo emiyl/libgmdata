@@ -1,7 +1,7 @@
 #ifndef READER_H
 #define READER_H
 
-#include "types.h"
+#include "gmdata.h"
 
 void Reader_init(Reader *reader, const uint8_t *data, size_t size, size_t offset, const char* name);
 size_t Reader_remaining(const Reader *reader);
