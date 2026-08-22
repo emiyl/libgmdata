@@ -19,6 +19,7 @@ void GLOB_Print(const GlobChunk *g);
 void SHDR_Print(const ShdrChunk *s);
 void FONT_Print(const FontChunk *f);
 void TMLN_Print(const TmlnChunk *t);
+void OBJT_Print(const ObjtChunk *o);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -47,6 +48,7 @@ int main(int argc, char **argv) {
     bool printShdr = false;
     bool printFont = false;
     bool printTmln = false;
+    bool printObjt = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -74,6 +76,7 @@ int main(int argc, char **argv) {
                 printShdr = true;
                 printFont = true;
                 printTmln = true;
+                printObjt = true;
             } else if (strcmp(name, "gen8") == 0) {
                 printGen8 = true;
             } else if (strcmp(name, "optn") == 0) {
@@ -102,6 +105,8 @@ int main(int argc, char **argv) {
                 printFont = true;
             } else if (strcmp(name, "tmln") == 0) {
                 printTmln = true;
+            } else if (strcmp(name, "objt") == 0) {
+                printObjt = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -159,6 +164,7 @@ int main(int argc, char **argv) {
     if (printShdr) SHDR_Print(&dw.shdr);
     if (printFont) FONT_Print(&dw.font);
     if (printTmln) TMLN_Print(&dw.tmln);
+    if (printObjt) OBJT_Print(&dw.objt);
 
     DataWin_free(&dw);
     return 0;
@@ -926,6 +932,121 @@ void TMLN_Print(const TmlnChunk *t) {
                        action->isNot ? "true" : "false");
                 printf("        unknownAlwaysZero: %" PRIu32 "\n",
                        action->unknownAlwaysZero);
+            }
+        }
+    }
+}
+
+void OBJT_Print(const ObjtChunk *o) {
+    printf("OBJT:\n");
+    printf("  count: %" PRIu32 "\n", o->count);
+
+    for (uint32_t i = 0; i < o->count; i++) {
+        const GameObject *obj = &o->objects[i];
+
+        printf("  object[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n", obj->present ? "true" : "false");
+
+        if (!obj->present) {
+            continue;
+        }
+
+        printf("    name: %s\n", obj->name ? obj->name : "(null)");
+        printf("    spriteId: %" PRId32 "\n", obj->spriteId);
+        printf("    visible: %s\n", obj->visible ? "true" : "false");
+        printf("    managed: %s\n", obj->managed ? "true" : "false");
+        printf("    solid: %s\n", obj->solid ? "true" : "false");
+        printf("    depth: %" PRId32 "\n", obj->depth);
+        printf("    persistent: %s\n", obj->persistent ? "true" : "false");
+        printf("    parentId: %" PRId32 "\n", obj->parentId);
+        printf("    textureMaskId: %" PRId32 "\n", obj->textureMaskId);
+
+        printf("    usesPhysics: %s\n",
+               obj->usesPhysics ? "true" : "false");
+        printf("    isSensor: %s\n",
+               obj->isSensor ? "true" : "false");
+        printf("    collisionShape: %" PRIu32 "\n", obj->collisionShape);
+        printf("    density: %f\n", obj->density);
+        printf("    restitution: %f\n", obj->restitution);
+        printf("    group: %" PRIu32 "\n", obj->group);
+        printf("    linearDamping: %f\n", obj->linearDamping);
+        printf("    angularDamping: %f\n", obj->angularDamping);
+
+        printf("    physicsVertexCount: %" PRId32 "\n",
+               obj->physicsVertexCount);
+        printf("    friction: %f\n", obj->friction);
+        printf("    awake: %s\n", obj->awake ? "true" : "false");
+        printf("    kinematic: %s\n", obj->kinematic ? "true" : "false");
+
+        for (int32_t j = 0; j < obj->physicsVertexCount; j++) {
+            const PhysicsVertex *vertex = &obj->physicsVertices[j];
+
+            printf("    physicsVertex[%" PRId32 "]:\n", j);
+            printf("      x: %f\n", vertex->x);
+            printf("      y: %f\n", vertex->y);
+        }
+
+        for (uint32_t eventType = 0;
+             eventType < OBJT_EVENT_TYPE_COUNT;
+             eventType++) {
+            const ObjectEventList *eventList =
+                &obj->eventLists[eventType];
+
+            printf("    eventList[%" PRIu32 "]:\n", eventType);
+            printf("      eventCount: %" PRIu32 "\n",
+                   eventList->eventCount);
+
+            for (uint32_t eventIndex = 0;
+                 eventIndex < eventList->eventCount;
+                 eventIndex++) {
+                const ObjectEvent *event =
+                    &eventList->events[eventIndex];
+
+                printf("      event[%" PRIu32 "]:\n", eventIndex);
+                printf("        eventSubtype: %" PRIu32 "\n",
+                       event->eventSubtype);
+                printf("        actionCount: %" PRIu32 "\n",
+                       event->actionCount);
+
+                for (uint32_t actionIndex = 0;
+                     actionIndex < event->actionCount;
+                     actionIndex++) {
+                    const EventAction *action =
+                        &event->actions[actionIndex];
+
+                    printf("        action[%" PRIu32 "]:\n",
+                           actionIndex);
+                    printf("          libID: %" PRIu32 "\n",
+                           action->libID);
+                    printf("          id: %" PRIu32 "\n",
+                           action->id);
+                    printf("          kind: %" PRIu32 "\n",
+                           action->kind);
+                    printf("          useRelative: %s\n",
+                           action->useRelative ? "true" : "false");
+                    printf("          isQuestion: %s\n",
+                           action->isQuestion ? "true" : "false");
+                    printf("          useApplyTo: %s\n",
+                           action->useApplyTo ? "true" : "false");
+                    printf("          exeType: %" PRIu32 "\n",
+                           action->exeType);
+                    printf("          actionName: %s\n",
+                           action->actionName
+                               ? action->actionName
+                               : "(null)");
+                    printf("          codeId: %" PRId32 "\n",
+                           action->codeId);
+                    printf("          argumentCount: %" PRIu32 "\n",
+                           action->argumentCount);
+                    printf("          who: %" PRId32 "\n",
+                           action->who);
+                    printf("          relative: %s\n",
+                           action->relative ? "true" : "false");
+                    printf("          isNot: %s\n",
+                           action->isNot ? "true" : "false");
+                    printf("          unknownAlwaysZero: %" PRIu32 "\n",
+                           action->unknownAlwaysZero);
+                }
             }
         }
     }
