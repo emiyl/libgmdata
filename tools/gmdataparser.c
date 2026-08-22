@@ -16,6 +16,7 @@ void BGND_Print(const BgndChunk *b);
 void PATH_Print(const PathChunk *p);
 void SCPT_Print(const ScptChunk *s);
 void GLOB_Print(const GlobChunk *g);
+void CODE_Print(const CodeChunk *c);
 void SHDR_Print(const ShdrChunk *s);
 void FONT_Print(const FontChunk *f);
 void TMLN_Print(const TmlnChunk *t);
@@ -47,6 +48,7 @@ int main(int argc, char **argv) {
     bool printPath = false;
     bool printScpt = false;
     bool printGlob = false;
+    bool printCode = false;
     bool printShdr = false;
     bool printFont = false;
     bool printTmln = false;
@@ -77,6 +79,7 @@ int main(int argc, char **argv) {
                 printPath = true;
                 printScpt = true;
                 printGlob = true;
+                printCode = true;
                 printShdr = true;
                 printFont = true;
                 printTmln = true;
@@ -105,6 +108,8 @@ int main(int argc, char **argv) {
                 printScpt = true;
             } else if (strcmp(name, "glob") == 0) {
                 printGlob = true;
+            } else if (strcmp(name, "code") == 0) {
+                printCode = true;
             } else if (strcmp(name, "shdr") == 0) {
                 printShdr = true;
             } else if (strcmp(name, "font") == 0) {
@@ -171,6 +176,7 @@ int main(int argc, char **argv) {
     if (printPath) PATH_Print(&dw.path);
     if (printScpt) SCPT_Print(&dw.scpt);
     if (printGlob) GLOB_Print(&dw.glob);
+    if (printCode) CODE_Print(&dw.code);
     if (printShdr) SHDR_Print(&dw.shdr);
     if (printFont) FONT_Print(&dw.font);
     if (printTmln) TMLN_Print(&dw.tmln);
@@ -704,6 +710,35 @@ void GLOB_Print(const GlobChunk *g) {
         printf("  codeIds[%" PRIu32 "]: %" PRId32 "\n",
                i,
                g->codeIds[i]);
+    }
+}
+
+void CODE_Print(const CodeChunk *c) {
+    printf("CODE:\n");
+    if (c == NULL || c->entries == NULL || c->count == 0) {
+        printf("  (none)\n");
+        return;
+    }
+
+    printf("  count: %" PRIu32 "\n", c->count);
+    printf("  bytecodeBase: %" PRIu32 "\n", c->bytecodeBase);
+    printf("  bytecodeSize: %zu\n", c->bytecodeSize);
+
+    for (uint32_t i = 0; i < c->count; i++) {
+        const CodeEntry *entry = &c->entries[i];
+
+        printf("  code[%" PRIu32 "]:\n", i);
+        printf("    present: %s\n", entry->present ? "true" : "false");
+        if (!entry->present) {
+            continue;
+        }
+
+        printf("    name: %s\n", entry->name ? entry->name : "(null)");
+        printf("    length: %" PRIu32 "\n", entry->length);
+        printf("    localsCount: %" PRIu16 "\n", entry->localsCount);
+        printf("    argumentsCount: %" PRIu16 "\n", entry->argumentsCount);
+        printf("    offset: %" PRIu32 "\n", entry->offset);
+        printf("    bytecodeAbsoluteOffset: %" PRIu32 "\n", entry->bytecodeAbsoluteOffset);
     }
 }
 

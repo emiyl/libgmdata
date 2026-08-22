@@ -55,6 +55,27 @@ fn item_label(name: &str, index: usize) -> String {
     }
 }
 
+fn checked_ptr_slice<T: Copy>(ptr: *mut T, count: usize) -> Option<Vec<T>> {
+    if ptr.is_null() || count == 0 {
+        return None;
+    }
+
+    let addr = ptr as usize;
+    if addr % std::mem::align_of::<T>() != 0 {
+        return None;
+    }
+
+    let byte_count = count.checked_mul(std::mem::size_of::<T>())?;
+    if byte_count > isize::MAX as usize {
+        return None;
+    }
+
+    unsafe {
+        let slice = std::slice::from_raw_parts(ptr, count);
+        Some(slice.to_vec())
+    }
+}
+
 fn matches_item_query(item: &ChunkItem, query: &str) -> bool {
     if query.trim().is_empty() {
         return true;
@@ -80,7 +101,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.optn.constants.is_null() {
                 return items;
             }
-            let constants = unsafe { std::slice::from_raw_parts(dw.optn.constants, count) };
+            let Some(constants) = checked_ptr_slice(dw.optn.constants, count) else {
+                return items;
+            };
             for (idx, constant) in constants.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "name", cstr_or_null(constant.name));
@@ -96,7 +119,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.lang.languages.is_null() {
                 return items;
             }
-            let languages = unsafe { std::slice::from_raw_parts(dw.lang.languages, count) };
+            let Some(languages) = checked_ptr_slice(dw.lang.languages, count) else {
+                return items;
+            };
             for (idx, language) in languages.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "name", cstr_or_null(language.name));
@@ -113,7 +138,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.extn.extensions.is_null() {
                 return items;
             }
-            let extensions = unsafe { std::slice::from_raw_parts(dw.extn.extensions, count) };
+            let Some(extensions) = checked_ptr_slice(dw.extn.extensions, count) else {
+                return items;
+            };
             for (idx, extension) in extensions.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "folderName", cstr_or_null(extension.folderName));
@@ -131,7 +158,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.sond.sounds.is_null() {
                 return items;
             }
-            let sounds = unsafe { std::slice::from_raw_parts(dw.sond.sounds, count) };
+            let Some(sounds) = checked_ptr_slice(dw.sond.sounds, count) else {
+                return items;
+            };
             for (idx, sound) in sounds.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "present", sound.present);
@@ -156,7 +185,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.agrp.audioGroups.is_null() {
                 return items;
             }
-            let audio_groups = unsafe { std::slice::from_raw_parts(dw.agrp.audioGroups, count) };
+            let Some(audio_groups) = checked_ptr_slice(dw.agrp.audioGroups, count) else {
+                return items;
+            };
             for (idx, group) in audio_groups.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "present", group.present);
@@ -173,7 +204,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.sprt.sprites.is_null() {
                 return items;
             }
-            let sprites = unsafe { std::slice::from_raw_parts(dw.sprt.sprites, count) };
+            let Some(sprites) = checked_ptr_slice(dw.sprt.sprites, count) else {
+                return items;
+            };
             for (idx, sprite) in sprites.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "present", sprite.present);
@@ -198,7 +231,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.bgnd.backgrounds.is_null() {
                 return items;
             }
-            let backgrounds = unsafe { std::slice::from_raw_parts(dw.bgnd.backgrounds, count) };
+            let Some(backgrounds) = checked_ptr_slice(dw.bgnd.backgrounds, count) else {
+                return items;
+            };
             for (idx, background) in backgrounds.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "present", background.present);
@@ -220,7 +255,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.path.paths.is_null() {
                 return items;
             }
-            let paths = unsafe { std::slice::from_raw_parts(dw.path.paths, count) };
+            let Some(paths) = checked_ptr_slice(dw.path.paths, count) else {
+                return items;
+            };
             for (idx, path) in paths.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "present", path.present);
@@ -242,7 +279,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.scpt.scripts.is_null() {
                 return items;
             }
-            let scripts = unsafe { std::slice::from_raw_parts(dw.scpt.scripts, count) };
+            let Some(scripts) = checked_ptr_slice(dw.scpt.scripts, count) else {
+                return items;
+            };
             for (idx, script) in scripts.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "present", script.present);
@@ -259,7 +298,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.glob.codeIds.is_null() {
                 return items;
             }
-            let code_ids = unsafe { std::slice::from_raw_parts(dw.glob.codeIds, count) };
+            let Some(code_ids) = checked_ptr_slice(dw.glob.codeIds, count) else {
+                return items;
+            };
             for (idx, code_id) in code_ids.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "codeId", *code_id);
@@ -269,12 +310,37 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
                 });
             }
         }
+        "CODE" => {
+            let count = dw.code.count as usize;
+            if count == 0 || dw.code.entries.is_null() {
+                return items;
+            }
+            let Some(entries) = checked_ptr_slice(dw.code.entries, count) else {
+                return items;
+            };
+            for (idx, entry) in entries.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "present", entry.present);
+                push_field(&mut fields, "name", cstr_or_null(entry.name));
+                push_field(&mut fields, "length", entry.length);
+                push_field(&mut fields, "localsCount", entry.localsCount);
+                push_field(&mut fields, "argumentsCount", entry.argumentsCount);
+                push_field(&mut fields, "offset", entry.offset);
+                push_field(&mut fields, "bytecodeAbsoluteOffset", entry.bytecodeAbsoluteOffset);
+                items.push(ChunkItem {
+                    name: item_label(&cstr_or_null(entry.name), idx),
+                    fields,
+                });
+            }
+        }
         "SHDR" => {
             let count = dw.shdr.count as usize;
             if count == 0 || dw.shdr.shaders.is_null() {
                 return items;
             }
-            let shaders = unsafe { std::slice::from_raw_parts(dw.shdr.shaders, count) };
+            let Some(shaders) = checked_ptr_slice(dw.shdr.shaders, count) else {
+                return items;
+            };
             for (idx, shader) in shaders.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "present", shader.present);
@@ -292,7 +358,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.font.fonts.is_null() {
                 return items;
             }
-            let fonts = unsafe { std::slice::from_raw_parts(dw.font.fonts, count) };
+            let Some(fonts) = checked_ptr_slice(dw.font.fonts, count) else {
+                return items;
+            };
             for (idx, font) in fonts.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "present", font.present);
@@ -313,7 +381,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.tmln.timelines.is_null() {
                 return items;
             }
-            let timelines = unsafe { std::slice::from_raw_parts(dw.tmln.timelines, count) };
+            let Some(timelines) = checked_ptr_slice(dw.tmln.timelines, count) else {
+                return items;
+            };
             for (idx, timeline) in timelines.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "present", timeline.present);
@@ -330,7 +400,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.tpag.items.is_null() {
                 return items;
             }
-            let items_ptr = unsafe { std::slice::from_raw_parts(dw.tpag.items, count) };
+            let Some(items_ptr) = checked_ptr_slice(dw.tpag.items, count) else {
+                return items;
+            };
             for (idx, item) in items_ptr.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "present", item.present);
@@ -356,7 +428,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.objt.objects.is_null() {
                 return items;
             }
-            let objects = unsafe { std::slice::from_raw_parts(dw.objt.objects, count) };
+            let Some(objects) = checked_ptr_slice(dw.objt.objects, count) else {
+                return items;
+            };
             for (idx, object) in objects.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "present", object.present);
@@ -380,7 +454,9 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
             if count == 0 || dw.room.rooms.is_null() {
                 return items;
             }
-            let rooms = unsafe { std::slice::from_raw_parts(dw.room.rooms, count) };
+            let Some(rooms) = checked_ptr_slice(dw.room.rooms, count) else {
+                return items;
+            };
             for (idx, room) in rooms.iter().enumerate() {
                 let mut fields = Vec::new();
                 push_field(&mut fields, "present", room.present);
@@ -522,6 +598,14 @@ fn build_chunk_fields(name: &str, dw: &DataWin) -> Vec<ChunkField> {
             push_field(&mut fields, "count", g.count);
             add_count_field(&mut fields, "codeIds", g.codeIds as *mut std::ffi::c_void, g.count as usize);
         }
+        "CODE" => {
+            let c = &dw.code;
+            push_field(&mut fields, "count", c.count);
+            add_count_field(&mut fields, "entries", c.entries as *mut std::ffi::c_void, c.count as usize);
+            push_field(&mut fields, "bytecodeBase", c.bytecodeBase);
+            push_field(&mut fields, "bytecodeSize", c.bytecodeSize);
+            add_count_field(&mut fields, "bytecodeData", c.bytecodeData as *mut std::ffi::c_void, c.bytecodeSize as usize);
+        }
         "SHDR" => {
             let s = &dw.shdr;
             push_field(&mut fields, "count", s.count);
@@ -599,6 +683,7 @@ impl eframe::App for App {
                             "PATH" => "Paths",
                             "SCPT" => "Scripts",
                             "GLOB" => "Global Code IDs",
+                            "CODE" => "Code",
                             "SHDR" => "Shaders",
                             "FONT" => "Fonts",
                             "TMLN" => "Timelines",
@@ -806,27 +891,39 @@ fn main() {
         println!("Detected version: {}", version);
 
         if dw.chunks.count > 0 {
-            let items = std::slice::from_raw_parts(dw.chunks.items, dw.chunks.count);
-            chunks = items
-                .iter()
-                .map(|chunk| {
-                    let name = CStr::from_ptr(chunk.name.as_ptr())
-                        .to_string_lossy()
-                        .into_owned();
-                    let fields = build_chunk_fields(&name, &dw);
-                    let items = build_pointer_table_items(&name, &dw);
-                    ChunkInfo {
-                        name: name.clone(),
-                        offset: chunk.offset,
-                        length: chunk.length,
-                        fields,
-                        items,
-                        active_item: 0,
-                        item_filter: String::new(),
-                        visible_item_count: 100,
-                    }
-                })
-                .collect();
+            let chunk_items = match checked_ptr_slice(dw.chunks.items, dw.chunks.count as usize) {
+                Some(items) => items,
+                None => {
+                    println!(
+                        "Skipping chunk table: invalid pointer or size for {} entries",
+                        dw.chunks.count
+                    );
+                    Vec::new()
+                }
+            };
+
+            if !chunk_items.is_empty() {
+                chunks = chunk_items
+                    .iter()
+                    .map(|chunk| {
+                        let name = CStr::from_ptr(chunk.name.as_ptr())
+                            .to_string_lossy()
+                            .into_owned();
+                        let fields = build_chunk_fields(&name, &dw);
+                        let items = build_pointer_table_items(&name, &dw);
+                        ChunkInfo {
+                            name: name.clone(),
+                            offset: chunk.offset,
+                            length: chunk.length,
+                            fields,
+                            items,
+                            active_item: 0,
+                            item_filter: String::new(),
+                            visible_item_count: 100,
+                        }
+                    })
+                    .collect();
+            }
         }
     }
 

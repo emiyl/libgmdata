@@ -39,6 +39,9 @@ int SCPT_free(ScptChunk *s);
 int GLOB_parse(DataWin *dw);
 int GLOB_free(GlobChunk *g);
 
+int CODE_parse(DataWin *dw);
+int CODE_free(CodeChunk *c);
+
 int SHDR_parse(DataWin *dw);
 int SHDR_free(ShdrChunk *s);
 

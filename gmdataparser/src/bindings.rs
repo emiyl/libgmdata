@@ -1005,64 +1005,6 @@ const _: () = {
 };
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct TexturePageItem {
-    pub present: bool,
-    pub sourceX: u16,
-    pub sourceY: u16,
-    pub sourceWidth: u16,
-    pub sourceHeight: u16,
-    pub targetX: u16,
-    pub targetY: u16,
-    pub targetWidth: u16,
-    pub targetHeight: u16,
-    pub boundingWidth: u16,
-    pub boundingHeight: u16,
-    pub texturePageId: i16,
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of TexturePageItem"][::std::mem::size_of::<TexturePageItem>() - 24usize];
-    ["Alignment of TexturePageItem"][::std::mem::align_of::<TexturePageItem>() - 2usize];
-    ["Offset of field: TexturePageItem::present"]
-        [::std::mem::offset_of!(TexturePageItem, present) - 0usize];
-    ["Offset of field: TexturePageItem::sourceX"]
-        [::std::mem::offset_of!(TexturePageItem, sourceX) - 2usize];
-    ["Offset of field: TexturePageItem::sourceY"]
-        [::std::mem::offset_of!(TexturePageItem, sourceY) - 4usize];
-    ["Offset of field: TexturePageItem::sourceWidth"]
-        [::std::mem::offset_of!(TexturePageItem, sourceWidth) - 6usize];
-    ["Offset of field: TexturePageItem::sourceHeight"]
-        [::std::mem::offset_of!(TexturePageItem, sourceHeight) - 8usize];
-    ["Offset of field: TexturePageItem::targetX"]
-        [::std::mem::offset_of!(TexturePageItem, targetX) - 10usize];
-    ["Offset of field: TexturePageItem::targetY"]
-        [::std::mem::offset_of!(TexturePageItem, targetY) - 12usize];
-    ["Offset of field: TexturePageItem::targetWidth"]
-        [::std::mem::offset_of!(TexturePageItem, targetWidth) - 14usize];
-    ["Offset of field: TexturePageItem::targetHeight"]
-        [::std::mem::offset_of!(TexturePageItem, targetHeight) - 16usize];
-    ["Offset of field: TexturePageItem::boundingWidth"]
-        [::std::mem::offset_of!(TexturePageItem, boundingWidth) - 18usize];
-    ["Offset of field: TexturePageItem::boundingHeight"]
-        [::std::mem::offset_of!(TexturePageItem, boundingHeight) - 20usize];
-    ["Offset of field: TexturePageItem::texturePageId"]
-        [::std::mem::offset_of!(TexturePageItem, texturePageId) - 22usize];
-};
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct TpagChunk {
-    pub count: u32,
-    pub items: *mut TexturePageItem,
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of TpagChunk"][::std::mem::size_of::<TpagChunk>() - 16usize];
-    ["Alignment of TpagChunk"][::std::mem::align_of::<TpagChunk>() - 8usize];
-    ["Offset of field: TpagChunk::count"][::std::mem::offset_of!(TpagChunk, count) - 0usize];
-    ["Offset of field: TpagChunk::items"][::std::mem::offset_of!(TpagChunk, items) - 8usize];
-};
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
 pub struct PathPoint {
     pub x: f32,
     pub y: f32,
@@ -2097,6 +2039,112 @@ const _: () = {
 };
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct TexturePageItem {
+    pub present: bool,
+    pub sourceX: u16,
+    pub sourceY: u16,
+    pub sourceWidth: u16,
+    pub sourceHeight: u16,
+    pub targetX: u16,
+    pub targetY: u16,
+    pub targetWidth: u16,
+    pub targetHeight: u16,
+    pub boundingWidth: u16,
+    pub boundingHeight: u16,
+    pub texturePageId: i16,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of TexturePageItem"][::std::mem::size_of::<TexturePageItem>() - 24usize];
+    ["Alignment of TexturePageItem"][::std::mem::align_of::<TexturePageItem>() - 2usize];
+    ["Offset of field: TexturePageItem::present"]
+        [::std::mem::offset_of!(TexturePageItem, present) - 0usize];
+    ["Offset of field: TexturePageItem::sourceX"]
+        [::std::mem::offset_of!(TexturePageItem, sourceX) - 2usize];
+    ["Offset of field: TexturePageItem::sourceY"]
+        [::std::mem::offset_of!(TexturePageItem, sourceY) - 4usize];
+    ["Offset of field: TexturePageItem::sourceWidth"]
+        [::std::mem::offset_of!(TexturePageItem, sourceWidth) - 6usize];
+    ["Offset of field: TexturePageItem::sourceHeight"]
+        [::std::mem::offset_of!(TexturePageItem, sourceHeight) - 8usize];
+    ["Offset of field: TexturePageItem::targetX"]
+        [::std::mem::offset_of!(TexturePageItem, targetX) - 10usize];
+    ["Offset of field: TexturePageItem::targetY"]
+        [::std::mem::offset_of!(TexturePageItem, targetY) - 12usize];
+    ["Offset of field: TexturePageItem::targetWidth"]
+        [::std::mem::offset_of!(TexturePageItem, targetWidth) - 14usize];
+    ["Offset of field: TexturePageItem::targetHeight"]
+        [::std::mem::offset_of!(TexturePageItem, targetHeight) - 16usize];
+    ["Offset of field: TexturePageItem::boundingWidth"]
+        [::std::mem::offset_of!(TexturePageItem, boundingWidth) - 18usize];
+    ["Offset of field: TexturePageItem::boundingHeight"]
+        [::std::mem::offset_of!(TexturePageItem, boundingHeight) - 20usize];
+    ["Offset of field: TexturePageItem::texturePageId"]
+        [::std::mem::offset_of!(TexturePageItem, texturePageId) - 22usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct TpagChunk {
+    pub count: u32,
+    pub items: *mut TexturePageItem,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of TpagChunk"][::std::mem::size_of::<TpagChunk>() - 16usize];
+    ["Alignment of TpagChunk"][::std::mem::align_of::<TpagChunk>() - 8usize];
+    ["Offset of field: TpagChunk::count"][::std::mem::offset_of!(TpagChunk, count) - 0usize];
+    ["Offset of field: TpagChunk::items"][::std::mem::offset_of!(TpagChunk, items) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct CodeEntry {
+    pub present: bool,
+    pub name: *const ::std::os::raw::c_char,
+    pub length: u32,
+    pub localsCount: u16,
+    pub argumentsCount: u16,
+    pub offset: u32,
+    pub bytecodeAbsoluteOffset: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of CodeEntry"][::std::mem::size_of::<CodeEntry>() - 32usize];
+    ["Alignment of CodeEntry"][::std::mem::align_of::<CodeEntry>() - 8usize];
+    ["Offset of field: CodeEntry::present"][::std::mem::offset_of!(CodeEntry, present) - 0usize];
+    ["Offset of field: CodeEntry::name"][::std::mem::offset_of!(CodeEntry, name) - 8usize];
+    ["Offset of field: CodeEntry::length"][::std::mem::offset_of!(CodeEntry, length) - 16usize];
+    ["Offset of field: CodeEntry::localsCount"]
+        [::std::mem::offset_of!(CodeEntry, localsCount) - 20usize];
+    ["Offset of field: CodeEntry::argumentsCount"]
+        [::std::mem::offset_of!(CodeEntry, argumentsCount) - 22usize];
+    ["Offset of field: CodeEntry::offset"][::std::mem::offset_of!(CodeEntry, offset) - 24usize];
+    ["Offset of field: CodeEntry::bytecodeAbsoluteOffset"]
+        [::std::mem::offset_of!(CodeEntry, bytecodeAbsoluteOffset) - 28usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct CodeChunk {
+    pub count: u32,
+    pub entries: *mut CodeEntry,
+    pub bytecodeData: *mut u8,
+    pub bytecodeBase: u32,
+    pub bytecodeSize: usize,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of CodeChunk"][::std::mem::size_of::<CodeChunk>() - 40usize];
+    ["Alignment of CodeChunk"][::std::mem::align_of::<CodeChunk>() - 8usize];
+    ["Offset of field: CodeChunk::count"][::std::mem::offset_of!(CodeChunk, count) - 0usize];
+    ["Offset of field: CodeChunk::entries"][::std::mem::offset_of!(CodeChunk, entries) - 8usize];
+    ["Offset of field: CodeChunk::bytecodeData"]
+        [::std::mem::offset_of!(CodeChunk, bytecodeData) - 16usize];
+    ["Offset of field: CodeChunk::bytecodeBase"]
+        [::std::mem::offset_of!(CodeChunk, bytecodeBase) - 24usize];
+    ["Offset of field: CodeChunk::bytecodeSize"]
+        [::std::mem::offset_of!(CodeChunk, bytecodeSize) - 32usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct DataWin {
     pub file_data: *mut u8,
     pub file_size: usize,
@@ -2114,6 +2162,7 @@ pub struct DataWin {
     pub path: PathChunk,
     pub scpt: ScptChunk,
     pub glob: GlobChunk,
+    pub code: CodeChunk,
     pub shdr: ShdrChunk,
     pub font: FontChunk,
     pub tmln: TmlnChunk,
@@ -2125,7 +2174,7 @@ pub struct DataWin {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 600usize];
+    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 640usize];
     ["Alignment of DataWin"][::std::mem::align_of::<DataWin>() - 8usize];
     ["Offset of field: DataWin::file_data"][::std::mem::offset_of!(DataWin, file_data) - 0usize];
     ["Offset of field: DataWin::file_size"][::std::mem::offset_of!(DataWin, file_size) - 8usize];
@@ -2143,17 +2192,18 @@ const _: () = {
     ["Offset of field: DataWin::path"][::std::mem::offset_of!(DataWin, path) - 440usize];
     ["Offset of field: DataWin::scpt"][::std::mem::offset_of!(DataWin, scpt) - 456usize];
     ["Offset of field: DataWin::glob"][::std::mem::offset_of!(DataWin, glob) - 472usize];
-    ["Offset of field: DataWin::shdr"][::std::mem::offset_of!(DataWin, shdr) - 488usize];
-    ["Offset of field: DataWin::font"][::std::mem::offset_of!(DataWin, font) - 504usize];
-    ["Offset of field: DataWin::tmln"][::std::mem::offset_of!(DataWin, tmln) - 520usize];
-    ["Offset of field: DataWin::objt"][::std::mem::offset_of!(DataWin, objt) - 536usize];
-    ["Offset of field: DataWin::room"][::std::mem::offset_of!(DataWin, room) - 552usize];
+    ["Offset of field: DataWin::code"][::std::mem::offset_of!(DataWin, code) - 488usize];
+    ["Offset of field: DataWin::shdr"][::std::mem::offset_of!(DataWin, shdr) - 528usize];
+    ["Offset of field: DataWin::font"][::std::mem::offset_of!(DataWin, font) - 544usize];
+    ["Offset of field: DataWin::tmln"][::std::mem::offset_of!(DataWin, tmln) - 560usize];
+    ["Offset of field: DataWin::objt"][::std::mem::offset_of!(DataWin, objt) - 576usize];
+    ["Offset of field: DataWin::room"][::std::mem::offset_of!(DataWin, room) - 592usize];
     ["Offset of field: DataWin::detectedFormat"]
-        [::std::mem::offset_of!(DataWin, detectedFormat) - 568usize];
+        [::std::mem::offset_of!(DataWin, detectedFormat) - 608usize];
     ["Offset of field: DataWin::mappedFile"]
-        [::std::mem::offset_of!(DataWin, mappedFile) - 584usize];
+        [::std::mem::offset_of!(DataWin, mappedFile) - 624usize];
     ["Offset of field: DataWin::initialized"]
-        [::std::mem::offset_of!(DataWin, initialized) - 592usize];
+        [::std::mem::offset_of!(DataWin, initialized) - 632usize];
 };
 unsafe extern "C" {
     pub fn DataWin_loadFile(

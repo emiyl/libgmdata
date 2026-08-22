@@ -709,6 +709,24 @@ typedef struct {
 } TpagChunk;
 
 typedef struct {
+    bool present;
+    const char* name;
+    uint32_t length;
+    uint16_t localsCount;
+    uint16_t argumentsCount;
+    uint32_t offset;
+    uint32_t bytecodeAbsoluteOffset;
+} CodeEntry;
+
+typedef struct {
+    uint32_t count;
+    CodeEntry* entries;
+    uint8_t* bytecodeData;
+    uint32_t bytecodeBase;
+    size_t bytecodeSize;
+} CodeChunk;
+
+typedef struct {
     uint8_t *file_data;
     size_t file_size;
     StringTable strings;
@@ -726,6 +744,7 @@ typedef struct {
     PathChunk path;
     ScptChunk scpt;
     GlobChunk glob;
+    CodeChunk code;
     ShdrChunk shdr;
     FontChunk font;
     TmlnChunk tmln;

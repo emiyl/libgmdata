@@ -127,6 +127,8 @@ int DataWin_parse(DataWin *dw) {
     logInfo("Parsed chunk SCPT\n");
     assert(GLOB_parse(dw) == 0);
     logInfo("Parsed chunk GLOB\n");
+    assert(CODE_parse(dw) == 0);
+    logInfo("Parsed chunk CODE\n");
     assert(SHDR_parse(dw) == 0);
     logInfo("Parsed chunk SHDR\n");
     assert(TMLN_parse(dw) == 0);
@@ -201,6 +203,10 @@ int DataWin_free(DataWin *dw) {
     }
     if (GLOB_free(&dw->glob)) {
         logWarn("[DataWin_free] Failed to free GLOB chunk\n");
+        result = -1;
+    }
+    if (CODE_free(&dw->code)) {
+        logWarn("[DataWin_free] Failed to free CODE chunk\n");
         result = -1;
     }
     if (SHDR_free(&dw->shdr)) {

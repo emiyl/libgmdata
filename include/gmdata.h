@@ -283,26 +283,6 @@ typedef struct {
 } BgndChunk;
 
 typedef struct {
-    bool present;
-    uint16_t sourceX;
-    uint16_t sourceY;
-    uint16_t sourceWidth;
-    uint16_t sourceHeight;
-    uint16_t targetX;
-    uint16_t targetY;
-    uint16_t targetWidth;
-    uint16_t targetHeight;
-    uint16_t boundingWidth;
-    uint16_t boundingHeight;
-    int16_t texturePageId;
-} TexturePageItem;
-
-typedef struct {
-    uint32_t count;
-    TexturePageItem* items;
-} TpagChunk;
-
-typedef struct {
     float x;
     float y;
     float speed;
@@ -709,6 +689,44 @@ typedef struct {
 } RoomChunk;
 
 typedef struct {
+    bool present;
+    uint16_t sourceX;
+    uint16_t sourceY;
+    uint16_t sourceWidth;
+    uint16_t sourceHeight;
+    uint16_t targetX;
+    uint16_t targetY;
+    uint16_t targetWidth;
+    uint16_t targetHeight;
+    uint16_t boundingWidth;
+    uint16_t boundingHeight;
+    int16_t texturePageId;
+} TexturePageItem;
+
+typedef struct {
+    uint32_t count;
+    TexturePageItem* items;
+} TpagChunk;
+
+typedef struct {
+    bool present;
+    const char* name;
+    uint32_t length;
+    uint16_t localsCount;
+    uint16_t argumentsCount;
+    uint32_t offset;
+    uint32_t bytecodeAbsoluteOffset;
+} CodeEntry;
+
+typedef struct {
+    uint32_t count;
+    CodeEntry* entries;
+    uint8_t* bytecodeData;
+    uint32_t bytecodeBase;
+    size_t bytecodeSize;
+} CodeChunk;
+
+typedef struct {
     uint8_t *file_data;
     size_t file_size;
     StringTable strings;
@@ -726,6 +744,7 @@ typedef struct {
     PathChunk path;
     ScptChunk scpt;
     GlobChunk glob;
+    CodeChunk code;
     ShdrChunk shdr;
     FontChunk font;
     TmlnChunk tmln;
