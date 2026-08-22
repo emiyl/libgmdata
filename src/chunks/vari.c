@@ -20,8 +20,8 @@ int VARI_parse(DataWin *dw) {
     }
 
     const uint8_t *base = dw->file_data + chunk.offset;
-    Reader reader;
-    Reader_init(&reader, base, chunk.length, chunk.offset, "VARI");
+    Reader re; Reader* reader = &re;
+    Reader_init(reader, base, chunk.length, chunk.offset, "VARI");
 
     bool oldFormat = dw->gen8.wadVersion <= 14;
     if (oldFormat) {
@@ -37,15 +37,15 @@ int VARI_parse(DataWin *dw) {
         v->variables = (Variable *)safeMalloc(v->variableCount * sizeof(Variable));
         repeat(v->variableCount, i) {
             Variable *var = &v->variables[i];
-            if (Reader_readString(&reader, dw, &var->name) != 0) {
+            if (Reader_readString(reader, dw, &var->name) != 0) {
                 VARI_free(v);
                 return -1;
             }
-            if (Reader_readUInt32(&reader, &var->occurrences) != 0) {
+            if (Reader_readUInt32(reader, &var->occurrences) != 0) {
                 VARI_free(v);
                 return -1;
             }
-            if (Reader_readUInt32(&reader, &var->firstAddress) != 0) {
+            if (Reader_readUInt32(reader, &var->firstAddress) != 0) {
                 VARI_free(v);
                 return -1;
             }
@@ -55,9 +55,9 @@ int VARI_parse(DataWin *dw) {
         return 0;
     }
 
-    if (Reader_readUInt32(&reader, &v->varCount1) != 0) return -1;
-    if (Reader_readUInt32(&reader, &v->varCount2) != 0) return -1;
-    if (Reader_readUInt32(&reader, &v->maxLocalVarCount) != 0) return -1;
+    read(&v->varCount1, UInt32);
+    read(&v->varCount2, UInt32);
+    read(&v->maxLocalVarCount, UInt32);
 
     if (chunk.length < 12U) {
         v->variableCount = 0;

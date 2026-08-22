@@ -6,13 +6,13 @@ static int TXTR_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void 
     memset(tex, 0, sizeof(*tex));
 
     tex->present = true;
-    if (Reader_readUInt32(reader, &tex->scaled) != 0) return -1;
-    if (Reader_readUInt32(reader, &tex->generatedMips) != 0) return -1;
-    if (Reader_readUInt32(reader, &tex->textureBlockSize) != 0) return -1;
-    if (Reader_readInt32(reader, &tex->textureWidth) != 0) return -1;
-    if (Reader_readInt32(reader, &tex->textureHeight) != 0) return -1;
-    if (Reader_readInt32(reader, &tex->indexInGroup) != 0) return -1;
-    if (Reader_readUInt32(reader, &tex->blobOffset) != 0) return -1;
+    read(&tex->scaled, UInt32);
+    read(&tex->generatedMips, UInt32);
+    read(&tex->textureBlockSize, UInt32);
+    read(&tex->textureWidth, Int32);
+    read(&tex->textureHeight, Int32);
+    read(&tex->indexInGroup, Int32);
+    
     return 0;
 }
 
