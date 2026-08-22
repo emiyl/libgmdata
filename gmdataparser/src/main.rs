@@ -1095,43 +1095,22 @@ impl eframe::App for App {
                     });
 
                     columns[1].vertical(|ui| {
-                        ui.group(|ui| {
-                            ui.label(format!("Chunk: {}", active_chunk_name));
-                            ui.label(format!("Offset: {}", active_chunk_offset));
-                            ui.label(format!("Length: {}", active_chunk_length));
-                            ui.label(format!("Item: {}", active_item.name));
-                            ui.separator();
-
-                            if active_chunk_name == "TXTR" {
-                                let texture_slice = unsafe {
-                                    std::slice::from_raw_parts(self.dw.txtr.textures, self.dw.txtr.count as usize)
-                                };
-
-                                let gm2022_5 = self.dw.detectedFormat.major >= 2022 && self.dw.detectedFormat.minor >= 5;
-                                let preview_image = if let Some(texture) = texture_slice.get(active_item_idx) {
-                                    self.texture_preview_cache
-                                        .entry(active_item_idx)
-                                        .or_insert_with(|| texture_preview_image(texture, gm2022_5))
-                                        .clone()
-                                } else {
-                                    None
-                                };
-
-                                if let Some(image) = preview_image {
-                                    let handle = ui.ctx().load_texture(
-                                        format!("txtr-preview-{}", active_item_idx),
-                                        image,
-                                        egui::TextureOptions::LINEAR,
-                                    );
-                                    let texture = texture_slice.get(active_item_idx).unwrap();
-                                    let size = [texture.textureWidth.max(1) as f32, texture.textureHeight.max(1) as f32];
-                                    ui.add_sized(size, egui::Image::new(&handle).fit_to_original_size(1.0));
+                        egui::ScrollArea::vertical()
+                            .id_salt("chunk-item-scroll")
+                            .auto_shrink([false, false])
+                            .show(ui, |ui| {
+                                ui.group(|ui| {
+                                    ui.label(format!("Chunk: {}", active_chunk_name));
+                                    ui.label(format!("Offset: {}", active_chunk_offset));
+                                    ui.label(format!("Length: {}", active_chunk_length));
+                                    ui.label(format!("Item: {}", active_item.name));
                                     ui.separator();
-                                }
-                            }
 
-                            egui::ScrollArea::vertical().max_height(260.0).show(ui, |ui| {
-                                egui::Grid::new(format!("chunk-item-fields-{}-{}", active_chunk_name, active_item.name))
+                                    egui::Grid::new(format!(
+                                        "chunk-item-fields-{}-{}",
+                                        active_chunk_name,
+                                        active_item.name
+                                    ))
                                     .num_columns(2)
                                     .spacing([12.0, 4.0])
                                     .show(ui, |ui| {
@@ -1141,8 +1120,66 @@ impl eframe::App for App {
                                             ui.end_row();
                                         }
                                     });
+
+                                    if active_chunk_name == "TXTR" {
+                                        ui.separator();
+                                        
+                                        let texture_slice = unsafe {
+                                            std::slice::from_raw_parts(
+                                                self.dw.txtr.textures,
+                                                self.dw.txtr.count as usize,
+                                            )
+                                        };
+
+                                        let gm2022_5 =
+                                            self.dw.detectedFormat.major >= 2022 &&
+                                            self.dw.detectedFormat.minor >= 5;
+
+                                        let preview_image = if let Some(texture) =
+                                            texture_slice.get(active_item_idx)
+                                        {
+                                            self.texture_preview_cache
+                                                .entry(active_item_idx)
+                                                .or_insert_with(|| texture_preview_image(texture, gm2022_5))
+                                                .clone()
+                                        } else {
+                                            None
+                                        };
+
+                                        if let Some(image) = preview_image {
+                                            let handle = ui.ctx().load_texture(
+                                                format!("txtr-preview-{}", active_item_idx),
+                                                image,
+                                                egui::TextureOptions::LINEAR,
+                                            );
+
+                                            if let Some(texture) = texture_slice.get(active_item_idx) {
+                                                let original_size = egui::vec2(
+                                                    texture.textureWidth.max(1) as f32,
+                                                    texture.textureHeight.max(1) as f32,
+                                                );
+
+                                                let available_width = ui.available_width();
+
+                                                let scale = if original_size.x > available_width {
+                                                    available_width / original_size.x
+                                                } else {
+                                                    1.0
+                                                };
+
+                                                let display_size = original_size * scale;
+
+                                                ui.add_sized(
+                                                    display_size,
+                                                    egui::Image::new(&handle)
+                                                        .fit_to_exact_size(display_size),
+                                                
+                                                );
+                                            }
+                                        }
+                                    }
+                                });
                             });
-                        });
                     });
                 });
             });
