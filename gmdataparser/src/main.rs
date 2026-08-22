@@ -333,6 +333,46 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
                 });
             }
         }
+        "VARI" => {
+            let count = dw.vari.variableCount as usize;
+            if count == 0 || dw.vari.variables.is_null() {
+                return items;
+            }
+            let Some(variables) = checked_ptr_slice(dw.vari.variables, count) else {
+                return items;
+            };
+            for (idx, variable) in variables.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "name", cstr_or_null(variable.name));
+                push_field(&mut fields, "instanceType", variable.instanceType);
+                push_field(&mut fields, "varID", variable.varID);
+                push_field(&mut fields, "occurrences", variable.occurrences);
+                push_field(&mut fields, "firstAddress", variable.firstAddress);
+                items.push(ChunkItem {
+                    name: item_label(&cstr_or_null(variable.name), idx),
+                    fields,
+                });
+            }
+        }
+        "FUNC" => {
+            let count = dw.func.functionCount as usize;
+            if count == 0 || dw.func.functions.is_null() {
+                return items;
+            }
+            let Some(functions) = checked_ptr_slice(dw.func.functions, count) else {
+                return items;
+            };
+            for (idx, function) in functions.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "name", cstr_or_null(function.name));
+                push_field(&mut fields, "occurrences", function.occurrences);
+                push_field(&mut fields, "firstAddress", function.firstAddress);
+                items.push(ChunkItem {
+                    name: item_label(&cstr_or_null(function.name), idx),
+                    fields,
+                });
+            }
+        }
         "SHDR" => {
             let count = dw.shdr.count as usize;
             if count == 0 || dw.shdr.shaders.is_null() {
@@ -606,6 +646,21 @@ fn build_chunk_fields(name: &str, dw: &DataWin) -> Vec<ChunkField> {
             push_field(&mut fields, "bytecodeSize", c.bytecodeSize);
             add_count_field(&mut fields, "bytecodeData", c.bytecodeData as *mut std::ffi::c_void, c.bytecodeSize as usize);
         }
+        "VARI" => {
+            let v = &dw.vari;
+            push_field(&mut fields, "varCount1", v.varCount1);
+            push_field(&mut fields, "varCount2", v.varCount2);
+            push_field(&mut fields, "maxLocalVarCount", v.maxLocalVarCount);
+            push_field(&mut fields, "variableCount", v.variableCount);
+            add_count_field(&mut fields, "variables", v.variables as *mut std::ffi::c_void, v.variableCount as usize);
+        }
+        "FUNC" => {
+            let f = &dw.func;
+            push_field(&mut fields, "functionCount", f.functionCount);
+            add_count_field(&mut fields, "functions", f.functions as *mut std::ffi::c_void, f.functionCount as usize);
+            push_field(&mut fields, "codeLocalsCount", f.codeLocalsCount);
+            add_count_field(&mut fields, "codeLocals", f.codeLocals as *mut std::ffi::c_void, f.codeLocalsCount as usize);
+        }
         "SHDR" => {
             let s = &dw.shdr;
             push_field(&mut fields, "count", s.count);
@@ -684,6 +739,8 @@ impl eframe::App for App {
                             "SCPT" => "Scripts",
                             "GLOB" => "Global Code IDs",
                             "CODE" => "Code",
+                            "VARI" => "Variables",
+                            "FUNC" => "Functions",
                             "SHDR" => "Shaders",
                             "FONT" => "Fonts",
                             "TMLN" => "Timelines",

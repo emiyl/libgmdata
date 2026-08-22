@@ -129,6 +129,10 @@ int DataWin_parse(DataWin *dw) {
     logInfo("Parsed chunk GLOB\n");
     assert(CODE_parse(dw) == 0);
     logInfo("Parsed chunk CODE\n");
+    assert(VARI_parse(dw) == 0);
+    logInfo("Parsed chunk VARI\n");
+    assert(FUNC_parse(dw) == 0);
+    logInfo("Parsed chunk FUNC\n");
     assert(SHDR_parse(dw) == 0);
     logInfo("Parsed chunk SHDR\n");
     assert(TMLN_parse(dw) == 0);
@@ -207,6 +211,14 @@ int DataWin_free(DataWin *dw) {
     }
     if (CODE_free(&dw->code)) {
         logWarn("[DataWin_free] Failed to free CODE chunk\n");
+        result = -1;
+    }
+    if (VARI_free(&dw->vari)) {
+        logWarn("[DataWin_free] Failed to free VARI chunk\n");
+        result = -1;
+    }
+    if (FUNC_free(&dw->func)) {
+        logWarn("[DataWin_free] Failed to free FUNC chunk\n");
         result = -1;
     }
     if (SHDR_free(&dw->shdr)) {

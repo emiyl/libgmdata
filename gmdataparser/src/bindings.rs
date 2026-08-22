@@ -2097,6 +2097,119 @@ const _: () = {
 };
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct Variable {
+    pub name: *const ::std::os::raw::c_char,
+    pub instanceType: i32,
+    pub varID: i32,
+    pub occurrences: u32,
+    pub firstAddress: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of Variable"][::std::mem::size_of::<Variable>() - 24usize];
+    ["Alignment of Variable"][::std::mem::align_of::<Variable>() - 8usize];
+    ["Offset of field: Variable::name"][::std::mem::offset_of!(Variable, name) - 0usize];
+    ["Offset of field: Variable::instanceType"]
+        [::std::mem::offset_of!(Variable, instanceType) - 8usize];
+    ["Offset of field: Variable::varID"][::std::mem::offset_of!(Variable, varID) - 12usize];
+    ["Offset of field: Variable::occurrences"]
+        [::std::mem::offset_of!(Variable, occurrences) - 16usize];
+    ["Offset of field: Variable::firstAddress"]
+        [::std::mem::offset_of!(Variable, firstAddress) - 20usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct VariChunk {
+    pub varCount1: u32,
+    pub varCount2: u32,
+    pub maxLocalVarCount: u32,
+    pub variableCount: u32,
+    pub variables: *mut Variable,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of VariChunk"][::std::mem::size_of::<VariChunk>() - 24usize];
+    ["Alignment of VariChunk"][::std::mem::align_of::<VariChunk>() - 8usize];
+    ["Offset of field: VariChunk::varCount1"]
+        [::std::mem::offset_of!(VariChunk, varCount1) - 0usize];
+    ["Offset of field: VariChunk::varCount2"]
+        [::std::mem::offset_of!(VariChunk, varCount2) - 4usize];
+    ["Offset of field: VariChunk::maxLocalVarCount"]
+        [::std::mem::offset_of!(VariChunk, maxLocalVarCount) - 8usize];
+    ["Offset of field: VariChunk::variableCount"]
+        [::std::mem::offset_of!(VariChunk, variableCount) - 12usize];
+    ["Offset of field: VariChunk::variables"]
+        [::std::mem::offset_of!(VariChunk, variables) - 16usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct LocalVar {
+    pub varID: u32,
+    pub name: *const ::std::os::raw::c_char,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of LocalVar"][::std::mem::size_of::<LocalVar>() - 16usize];
+    ["Alignment of LocalVar"][::std::mem::align_of::<LocalVar>() - 8usize];
+    ["Offset of field: LocalVar::varID"][::std::mem::offset_of!(LocalVar, varID) - 0usize];
+    ["Offset of field: LocalVar::name"][::std::mem::offset_of!(LocalVar, name) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct CodeLocals {
+    pub localVarCount: u32,
+    pub name: *const ::std::os::raw::c_char,
+    pub locals: *mut LocalVar,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of CodeLocals"][::std::mem::size_of::<CodeLocals>() - 24usize];
+    ["Alignment of CodeLocals"][::std::mem::align_of::<CodeLocals>() - 8usize];
+    ["Offset of field: CodeLocals::localVarCount"]
+        [::std::mem::offset_of!(CodeLocals, localVarCount) - 0usize];
+    ["Offset of field: CodeLocals::name"][::std::mem::offset_of!(CodeLocals, name) - 8usize];
+    ["Offset of field: CodeLocals::locals"][::std::mem::offset_of!(CodeLocals, locals) - 16usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct Function {
+    pub name: *const ::std::os::raw::c_char,
+    pub occurrences: u32,
+    pub firstAddress: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of Function"][::std::mem::size_of::<Function>() - 16usize];
+    ["Alignment of Function"][::std::mem::align_of::<Function>() - 8usize];
+    ["Offset of field: Function::name"][::std::mem::offset_of!(Function, name) - 0usize];
+    ["Offset of field: Function::occurrences"]
+        [::std::mem::offset_of!(Function, occurrences) - 8usize];
+    ["Offset of field: Function::firstAddress"]
+        [::std::mem::offset_of!(Function, firstAddress) - 12usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct FuncChunk {
+    pub functionCount: u32,
+    pub functions: *mut Function,
+    pub codeLocalsCount: u32,
+    pub codeLocals: *mut CodeLocals,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of FuncChunk"][::std::mem::size_of::<FuncChunk>() - 32usize];
+    ["Alignment of FuncChunk"][::std::mem::align_of::<FuncChunk>() - 8usize];
+    ["Offset of field: FuncChunk::functionCount"]
+        [::std::mem::offset_of!(FuncChunk, functionCount) - 0usize];
+    ["Offset of field: FuncChunk::functions"]
+        [::std::mem::offset_of!(FuncChunk, functions) - 8usize];
+    ["Offset of field: FuncChunk::codeLocalsCount"]
+        [::std::mem::offset_of!(FuncChunk, codeLocalsCount) - 16usize];
+    ["Offset of field: FuncChunk::codeLocals"]
+        [::std::mem::offset_of!(FuncChunk, codeLocals) - 24usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct CodeEntry {
     pub present: bool,
     pub name: *const ::std::os::raw::c_char,
@@ -2163,6 +2276,8 @@ pub struct DataWin {
     pub scpt: ScptChunk,
     pub glob: GlobChunk,
     pub code: CodeChunk,
+    pub vari: VariChunk,
+    pub func: FuncChunk,
     pub shdr: ShdrChunk,
     pub font: FontChunk,
     pub tmln: TmlnChunk,
@@ -2174,7 +2289,7 @@ pub struct DataWin {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 640usize];
+    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 696usize];
     ["Alignment of DataWin"][::std::mem::align_of::<DataWin>() - 8usize];
     ["Offset of field: DataWin::file_data"][::std::mem::offset_of!(DataWin, file_data) - 0usize];
     ["Offset of field: DataWin::file_size"][::std::mem::offset_of!(DataWin, file_size) - 8usize];
@@ -2193,17 +2308,19 @@ const _: () = {
     ["Offset of field: DataWin::scpt"][::std::mem::offset_of!(DataWin, scpt) - 456usize];
     ["Offset of field: DataWin::glob"][::std::mem::offset_of!(DataWin, glob) - 472usize];
     ["Offset of field: DataWin::code"][::std::mem::offset_of!(DataWin, code) - 488usize];
-    ["Offset of field: DataWin::shdr"][::std::mem::offset_of!(DataWin, shdr) - 528usize];
-    ["Offset of field: DataWin::font"][::std::mem::offset_of!(DataWin, font) - 544usize];
-    ["Offset of field: DataWin::tmln"][::std::mem::offset_of!(DataWin, tmln) - 560usize];
-    ["Offset of field: DataWin::objt"][::std::mem::offset_of!(DataWin, objt) - 576usize];
-    ["Offset of field: DataWin::room"][::std::mem::offset_of!(DataWin, room) - 592usize];
+    ["Offset of field: DataWin::vari"][::std::mem::offset_of!(DataWin, vari) - 528usize];
+    ["Offset of field: DataWin::func"][::std::mem::offset_of!(DataWin, func) - 552usize];
+    ["Offset of field: DataWin::shdr"][::std::mem::offset_of!(DataWin, shdr) - 584usize];
+    ["Offset of field: DataWin::font"][::std::mem::offset_of!(DataWin, font) - 600usize];
+    ["Offset of field: DataWin::tmln"][::std::mem::offset_of!(DataWin, tmln) - 616usize];
+    ["Offset of field: DataWin::objt"][::std::mem::offset_of!(DataWin, objt) - 632usize];
+    ["Offset of field: DataWin::room"][::std::mem::offset_of!(DataWin, room) - 648usize];
     ["Offset of field: DataWin::detectedFormat"]
-        [::std::mem::offset_of!(DataWin, detectedFormat) - 608usize];
+        [::std::mem::offset_of!(DataWin, detectedFormat) - 664usize];
     ["Offset of field: DataWin::mappedFile"]
-        [::std::mem::offset_of!(DataWin, mappedFile) - 624usize];
+        [::std::mem::offset_of!(DataWin, mappedFile) - 680usize];
     ["Offset of field: DataWin::initialized"]
-        [::std::mem::offset_of!(DataWin, initialized) - 632usize];
+        [::std::mem::offset_of!(DataWin, initialized) - 688usize];
 };
 unsafe extern "C" {
     pub fn DataWin_loadFile(

@@ -42,6 +42,12 @@ int GLOB_free(GlobChunk *g);
 int CODE_parse(DataWin *dw);
 int CODE_free(CodeChunk *c);
 
+int VARI_parse(DataWin *dw);
+int VARI_free(VariChunk *v);
+
+int FUNC_parse(DataWin *dw);
+int FUNC_free(FuncChunk *f);
+
 int SHDR_parse(DataWin *dw);
 int SHDR_free(ShdrChunk *s);
 

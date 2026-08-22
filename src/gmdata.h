@@ -709,6 +709,46 @@ typedef struct {
 } TpagChunk;
 
 typedef struct {
+    const char* name;
+    int32_t instanceType;
+    int32_t varID;
+    uint32_t occurrences;
+    uint32_t firstAddress;
+} Variable;
+
+typedef struct {
+    uint32_t varCount1;
+    uint32_t varCount2;
+    uint32_t maxLocalVarCount;
+    uint32_t variableCount;
+    Variable* variables;
+} VariChunk;
+
+typedef struct {
+    uint32_t varID;
+    const char* name;
+} LocalVar;
+
+typedef struct {
+    uint32_t localVarCount;
+    const char* name;
+    LocalVar* locals;
+} CodeLocals;
+
+typedef struct {
+    const char* name;
+    uint32_t occurrences;
+    uint32_t firstAddress;
+} Function;
+
+typedef struct {
+    uint32_t functionCount;
+    Function* functions;
+    uint32_t codeLocalsCount;
+    CodeLocals* codeLocals;
+} FuncChunk;
+
+typedef struct {
     bool present;
     const char* name;
     uint32_t length;
@@ -745,6 +785,8 @@ typedef struct {
     ScptChunk scpt;
     GlobChunk glob;
     CodeChunk code;
+    VariChunk vari;
+    FuncChunk func;
     ShdrChunk shdr;
     FontChunk font;
     TmlnChunk tmln;
