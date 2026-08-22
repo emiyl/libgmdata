@@ -79,34 +79,34 @@ int BGND_parse(DataWin *dw) {
 
 static int Background_parse(Reader *reader, DataWin *dw, Background *bg) {
     bg->present = true;
-    Reader_readString(reader, dw, &bg->name);
-    Reader_readBool32(reader, &bg->smooth);
-    Reader_readBool32(reader, &bg->preload);
+    readString(&bg->name, dw);
+    read(&bg->smooth, Bool32);
+    read(&bg->preload, Bool32);
 
     // Temporarily store the absolute file offset; parseTPAG resolves it in-place to a TPAG index once the TPAG table is known.
-    Reader_readInt32(reader, &bg->tpagIndex);
+    read(&bg->tpagIndex, Int32);
     if (DataWin_isVersionAtLeast(dw, 2, 0, 0, 0)) {
-        Reader_readUInt32(reader, &bg->gms2UnknownAlways2);
-        Reader_readUInt32(reader, &bg->gms2TileWidth);
-        Reader_readUInt32(reader, &bg->gms2TileHeight);
+        read(&bg->gms2UnknownAlways2, UInt32);
+        read(&bg->gms2TileWidth, UInt32);
+        read(&bg->gms2TileHeight, UInt32);
         if (DataWin_isVersionAtLeast(dw, 2024, 14, 1, 0)) {
-            Reader_readUInt32(reader, &bg->gms2TileSeparationX);
-            Reader_readUInt32(reader, &bg->gms2TileSeparationY);
+            read(&bg->gms2TileSeparationX, UInt32);
+            read(&bg->gms2TileSeparationY, UInt32);
         }
-        Reader_readUInt32(reader, &bg->gms2OutputBorderX);
-        Reader_readUInt32(reader, &bg->gms2OutputBorderY);
-        Reader_readUInt32(reader, &bg->gms2TileColumns);
-        Reader_readUInt32(reader, &bg->gms2ItemsPerTileCount);
-        Reader_readUInt32(reader, &bg->gms2TileCount);
-        Reader_readInt32(reader, &bg->gms2ExportedSpriteIndex);
-        Reader_readInt64(reader, &bg->gms2FrameLength);
+        read(&bg->gms2OutputBorderX, UInt32);
+        read(&bg->gms2OutputBorderY, UInt32);
+        read(&bg->gms2TileColumns, UInt32);
+        read(&bg->gms2ItemsPerTileCount, UInt32);
+        read(&bg->gms2TileCount, UInt32);
+        read(&bg->gms2ExportedSpriteIndex, Int32);
+        read(&bg->gms2FrameLength, Int64);
         int tileIdCount = bg->gms2TileCount * bg->gms2ItemsPerTileCount;
         bg->gms2TileIds = (uint32_t *)safeMalloc(tileIdCount*sizeof(uint32_t));
         repeat(tileIdCount, j) {
-            Reader_readUInt32(reader, &bg->gms2TileIds[j]);
+            read(&bg->gms2TileIds[j], UInt32);
         }
     }
-
+    
     return 0;
 }
 

@@ -11,11 +11,11 @@ int SCPT_parse(DataWin *dw) {
 
     const uint8_t *base = dw->file_data + chunk.offset;
 
-    Reader reader;
-    Reader_init(&reader, base, chunk.length, chunk.offset, "SCPT");
+    Reader re; Reader *reader = &re;
+    Reader_init(reader, base, chunk.length, chunk.offset, "SCPT");
 
     return Reader_readAndParsePointerTable(
-        &reader, dw,
+        reader, dw,
         (void **)&s->scripts, NULL,
         &s->count, sizeof(Script),
         SCPT_pointerTable_parse,
@@ -26,8 +26,8 @@ int SCPT_parse(DataWin *dw) {
 
 static int Script_parse(Reader *reader, DataWin *dw, Script *script) {
     script->present = true;
-    Reader_readString(reader, dw, &script->name);
-    Reader_readInt32(reader, &script->codeId);
+    readString(&script->name, dw);
+    read(&script->codeId, Int32);
     return 0;
 }
 

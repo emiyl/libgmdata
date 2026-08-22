@@ -43,6 +43,11 @@ int CODE_parse(DataWin *dw) {
 
     repeat(codeCount, i) {
         if (codePtrs[i] == 0) {
+            if (CODE_pointerTable_missingHandler(&reader, dw, &c->entries[i], NULL) != 0) {
+                free(codePtrs);
+                CODE_free(c);
+                return -1;
+            }
             continue;
         }
 
@@ -99,12 +104,8 @@ static int CODE_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void 
     memset(entry, 0, sizeof(*entry));
 
     entry->present = true;
-    if (Reader_readString(reader, dw, &entry->name) != 0) {
-        return -1;
-    }
-    if (Reader_readUInt32(reader, &entry->length) != 0) {
-        return -1;
-    }
+    readString(&entry->name, dw);
+    read(&entry->length, UInt32);
 
     if (dw->gen8.wadVersion <= 14) {
         entry->localsCount = 0;
@@ -119,34 +120,24 @@ static int CODE_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void 
 
     uint16_t localsCount = 0;
     uint16_t argumentsCount = 0;
-    if (Reader_readUInt16(reader, &localsCount) != 0) {
-        return -1;
-    }
-    if (Reader_readUInt16(reader, &argumentsCount) != 0) {
-        return -1;
-    }
+    read(&localsCount, UInt16);
+    read(&argumentsCount, UInt16);
 
     entry->localsCount = localsCount;
     entry->argumentsCount = argumentsCount;
 
     size_t relAddrFieldPos = reader->offset + reader->cursor;
     int32_t bytecodeRelAddr = 0;
-    if (Reader_readInt32(reader, &bytecodeRelAddr) != 0) {
-        return -1;
-    }
+    read(&bytecodeRelAddr, Int32);
     entry->bytecodeAbsoluteOffset = (uint32_t)((int64_t)relAddrFieldPos + bytecodeRelAddr);
 
-    if (Reader_readUInt32(reader, &entry->offset) != 0) {
-        return -1;
-    }
+    read(&entry->offset, UInt32);
 
     return 0;
 }
 
 static int CODE_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void *extraData) {
-    (void)reader;
-    (void)dw;
-    (void)extraData;
+    (void)reader; (void)dw; (void)extraData;
 
     CodeEntry *entry = (CodeEntry *)out;
     memset(entry, 0, sizeof(*entry));

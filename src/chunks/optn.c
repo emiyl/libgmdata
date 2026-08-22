@@ -9,27 +9,27 @@ int OPTN_parse(DataWin *dw) {
 
     const uint8_t *base = dw->file_data + chunk.offset;
 
-    Reader reader;
-    Reader_init(&reader, base, chunk.length, chunk.offset, "OPTN");
+    Reader re; Reader *reader = &re;
+    Reader_init(reader, base, chunk.length, chunk.offset, "OPTN");
 
-    Reader_readInt32(&reader, &o->shaderExtensionFlag);
+    read(&o->shaderExtensionFlag, Int32);
     bool newFormat = o->shaderExtensionFlag == (int32_t)0x80000000;
 
     if (newFormat) {
-        Reader_readInt32(&reader, &o->shaderExtensionVersion);
-        Reader_readUInt64(&reader, &o->info);
-        Reader_readUInt32(&reader, &o->windowColor);
-        Reader_readUInt32(&reader, &o->colorDepth);
-        Reader_readUInt32(&reader, &o->resolution);
-        Reader_readUInt32(&reader, &o->frequency);
-        Reader_readUInt32(&reader, &o->vertexSync);
-        Reader_readUInt32(&reader, &o->priority);
-        Reader_readUInt32(&reader, &o->backImage);
-        Reader_readUInt32(&reader, &o->frontImage);
-        Reader_readUInt32(&reader, &o->loadImage);
-        Reader_readUInt32(&reader, &o->loadAlpha);
+        read(&o->shaderExtensionVersion, Int32);
+        read(&o->info, UInt64);
+        read(&o->windowColor, UInt32);
+        read(&o->colorDepth, UInt32);
+        read(&o->resolution, UInt32);
+        read(&o->frequency, UInt32);
+        read(&o->vertexSync, UInt32);
+        read(&o->priority, UInt32);
+        read(&o->backImage, UInt32);
+        read(&o->frontImage, UInt32);
+        read(&o->loadImage, UInt32);
+        read(&o->loadAlpha, UInt32);
     } else {
-        Reader_skip(&reader, -4);
+        Reader_skip(reader, -4);
         o->info = 0;
 
         bool fullscreen;
@@ -57,41 +57,41 @@ int OPTN_parse(DataWin *dw) {
         bool variable_errors;
         bool creation_event_order;
         
-        Reader_readBool32(&reader, &fullscreen);
-        Reader_readBool32(&reader, &interpolate_pixels);
-        Reader_readBool32(&reader, &use_new_audio);
-        Reader_readBool32(&reader, &no_border);
-        Reader_readBool32(&reader, &show_cursor);
-        Reader_readInt32(&reader, &o->scale);
-        Reader_readBool32(&reader, &sizable);
-        Reader_readBool32(&reader, &stay_on_top);
-        Reader_readUInt32(&reader, &o->windowColor);
-        Reader_readBool32(&reader, &change_resolution);
-        Reader_readUInt32(&reader, &o->colorDepth);
-        Reader_readUInt32(&reader, &o->resolution);
-        Reader_readUInt32(&reader, &o->frequency);
-        Reader_readBool32(&reader, &no_buttons);
-        Reader_readUInt32(&reader, &o->vertexSync);
-        Reader_readBool32(&reader, &screen_key);
-        Reader_readBool32(&reader, &help_key);
-        Reader_readBool32(&reader, &quit_key);
-        Reader_readBool32(&reader, &save_key);
-        Reader_readBool32(&reader, &screenshot_key);
-        Reader_readBool32(&reader, &close_sec);
-        Reader_readUInt32(&reader, &o->priority);
-        Reader_readBool32(&reader, &freeze);
-        Reader_readBool32(&reader, &show_progress);
-        Reader_readUInt32(&reader, &o->backImage);
-        Reader_readUInt32(&reader, &o->frontImage);
-        Reader_readUInt32(&reader, &o->loadImage);
-        Reader_readBool32(&reader, &load_transparent);
-        Reader_readUInt32(&reader, &o->loadAlpha);
-        Reader_readBool32(&reader, &scale_progress);
-        Reader_readBool32(&reader, &display_errors);
-        Reader_readBool32(&reader, &write_errors);
-        Reader_readBool32(&reader, &abort_errors);
-        Reader_readBool32(&reader, &variable_errors);
-        Reader_readBool32(&reader, &creation_event_order);
+        read(&fullscreen, Bool32);
+        read(&interpolate_pixels, Bool32);
+        read(&use_new_audio, Bool32);
+        read(&no_border, Bool32);
+        read(&show_cursor, Bool32);
+        read(&o->scale, Int32);
+        read(&sizable, Bool32);
+        read(&stay_on_top, Bool32);
+        read(&o->windowColor, UInt32);
+        read(&change_resolution, Bool32);
+        read(&o->colorDepth, UInt32);
+        read(&o->resolution, UInt32);
+        read(&o->frequency, UInt32);
+        read(&no_buttons, Bool32);
+        read(&o->vertexSync, UInt32);
+        read(&screen_key, Bool32);
+        read(&help_key, Bool32);
+        read(&quit_key, Bool32);
+        read(&save_key, Bool32);
+        read(&screenshot_key, Bool32);
+        read(&close_sec, Bool32);
+        read(&o->priority, UInt32);
+        read(&freeze, Bool32);
+        read(&show_progress, Bool32);
+        read(&o->backImage, UInt32);
+        read(&o->frontImage, UInt32);
+        read(&o->loadImage, UInt32);
+        read(&load_transparent, Bool32);
+        read(&o->loadAlpha, UInt32);
+        read(&scale_progress, Bool32);
+        read(&display_errors, Bool32);
+        read(&write_errors, Bool32);
+        read(&abort_errors, Bool32);
+        read(&variable_errors, Bool32);
+        read(&creation_event_order, Bool32);
 
         if (fullscreen)            o->info |= INFO_FULLSCREEN;
         if (interpolate_pixels)    o->info |= INFO_INTERPOLATE_PIXELS;
@@ -126,7 +126,7 @@ int OPTN_parse(DataWin *dw) {
         return 0;
     }
 
-    Reader_readUInt32(&reader, &o->constantCount);
+    read(&o->constantCount, UInt32);
 
     if (o->constantCount == 0) {
         o->constants = NULL;
@@ -136,8 +136,8 @@ int OPTN_parse(DataWin *dw) {
     o->constants = (OptnConstant *)safeMalloc(o->constantCount * sizeof(OptnConstant));
 
     repeat(o->constantCount, i) {
-        Reader_readString(&reader, dw, &o->constants[i].name);
-        Reader_readString(&reader, dw, &o->constants[i].value);
+        readString(&o->constants[i].name, dw);
+        readString(&o->constants[i].value, dw);
     }
 
     return 0;

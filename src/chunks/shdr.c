@@ -11,11 +11,11 @@ int SHDR_parse(DataWin *dw) {
 
     const uint8_t *base = dw->file_data + chunk.offset;
 
-    Reader reader;
-    Reader_init(&reader, base, chunk.length, chunk.offset, "SHDR");
+    Reader re; Reader *reader = &re;
+    Reader_init(reader, base, chunk.length, chunk.offset, "SHDR");
 
     return Reader_readAndParsePointerTable(
-        &reader, dw,
+        reader, dw,
         (void **)&s->shaders, NULL,
         
         &s->count, sizeof(Shader),
@@ -32,41 +32,41 @@ int Shader_parse(Reader *reader, DataWin *dw, Shader *sh) {
     }
 
     sh->present = true;
-    Reader_readString(reader, dw, &sh->name);
-    Reader_readUInt32(reader, &sh->type);
-    Reader_readString(reader, dw, &sh->glslES_Vertex);
-    Reader_readString(reader, dw, &sh->glslES_Fragment);
-    Reader_readString(reader, dw, &sh->glsl_Vertex);
-    Reader_readString(reader, dw, &sh->glsl_Fragment);
-    Reader_readString(reader, dw, &sh->hlsl9_Vertex);
-    Reader_readString(reader, dw, &sh->hlsl9_Fragment);
-    Reader_readUInt32(reader, &sh->hlsl11_VertexOffset);
-    Reader_readUInt32(reader, &sh->hlsl11_PixelOffset);
+    readString(&sh->name, dw);
+    read(&sh->type, UInt32);
+    readString(&sh->glslES_Vertex, dw);
+    readString(&sh->glslES_Fragment, dw);
+    readString(&sh->glsl_Vertex, dw);
+    readString(&sh->glsl_Fragment, dw);
+    readString(&sh->hlsl9_Vertex, dw);
+    readString(&sh->hlsl9_Fragment, dw);
+    read(&sh->hlsl11_VertexOffset, UInt32);
+    read(&sh->hlsl11_PixelOffset, UInt32);
 
     // Vertex attributes SimpleList
-    Reader_readUInt32(reader, &sh->vertexAttributeCount);
+    read(&sh->vertexAttributeCount, UInt32);
     sh->vertexAttributes = (const char **)safeCalloc(sh->vertexAttributeCount, sizeof(const char *));
     repeat(sh->vertexAttributeCount, i) {
-        Reader_readString(reader, dw, &sh->vertexAttributes[i]);
+        readString(&sh->vertexAttributes[i], dw);
     }
 
     // Version field and console shader variants only exist on wadVersion > 13.
     if (dw->gen8.wadVersion > 13) {
-        Reader_readInt32(reader, &sh->version);
-        Reader_readUInt32(reader, &sh->pssl_VertexOffset);
-        Reader_readUInt32(reader, &sh->pssl_VertexLen);
-        Reader_readUInt32(reader, &sh->pssl_PixelOffset);
-        Reader_readUInt32(reader, &sh->pssl_PixelLen);
-        Reader_readUInt32(reader, &sh->cgVita_VertexOffset);
-        Reader_readUInt32(reader, &sh->cgVita_VertexLen);
-        Reader_readUInt32(reader, &sh->cgVita_PixelOffset);
-        Reader_readUInt32(reader, &sh->cgVita_PixelLen);
+        read(&sh->version, Int32);
+        read(&sh->pssl_VertexOffset, UInt32);
+        read(&sh->pssl_VertexLen, UInt32);
+        read(&sh->pssl_PixelOffset, UInt32);
+        read(&sh->pssl_PixelLen, UInt32);
+        read(&sh->cgVita_VertexOffset, UInt32);
+        read(&sh->cgVita_VertexLen, UInt32);
+        read(&sh->cgVita_PixelOffset, UInt32);
+        read(&sh->cgVita_PixelLen, UInt32);
         
         if (sh->version >= 2) {
-            Reader_readUInt32(reader, &sh->cgPS3_VertexOffset);
-            Reader_readUInt32(reader, &sh->cgPS3_VertexLen);
-            Reader_readUInt32(reader, &sh->cgPS3_PixelOffset);
-            Reader_readUInt32(reader, &sh->cgPS3_PixelLen);
+            read(&sh->cgPS3_VertexOffset, UInt32);
+            read(&sh->cgPS3_VertexLen, UInt32);
+            read(&sh->cgPS3_PixelOffset, UInt32);
+            read(&sh->cgPS3_PixelLen, UInt32);
         } else {
             sh->cgPS3_VertexOffset = 0;
             sh->cgPS3_VertexLen = 0;

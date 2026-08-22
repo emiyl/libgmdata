@@ -4,21 +4,22 @@ static int ACRV_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void 
 static int ACRV_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void *extraData);
 
 static int AnimCurvePoint_parse(Reader *reader, AnimCurvePoint *point) {
-    if (Reader_readFloat32(reader, &point->x) != 0) return -1;
-    if (Reader_readFloat32(reader, &point->value) != 0) return -1;
-    if (Reader_readFloat32(reader, &point->bezierX0) != 0) return -1;
-    if (Reader_readFloat32(reader, &point->bezierY0) != 0) return -1;
-    if (Reader_readFloat32(reader, &point->bezierX1) != 0) return -1;
-    if (Reader_readFloat32(reader, &point->bezierY1) != 0) return -1;
+    read(&point->x, Float32);
+    read(&point->value, Float32);
+    read(&point->bezierX0, Float32);
+    read(&point->bezierY0, Float32);
+    read(&point->bezierX1, Float32);
+    read(&point->bezierY1, Float32);
     return 0;
 }
 
 static int AnimCurveChannel_parse(Reader *reader, DataWin *dw, AnimCurveChannel *channel) {
     (void)dw;
-    if (Reader_readString(reader, dw, &channel->name) != 0) return -1;
-    if (Reader_readUInt32(reader, &channel->curveType) != 0) return -1;
-    if (Reader_readUInt32(reader, &channel->iterations) != 0) return -1;
-    if (Reader_readUInt32(reader, &channel->pointCount) != 0) return -1;
+
+    readString(&channel->name, dw);
+    read(&channel->curveType, UInt32);
+    read(&channel->iterations, UInt32);
+    read(&channel->pointCount, UInt32);
 
     channel->points = NULL;
     if (channel->pointCount > 0) {
@@ -36,9 +37,9 @@ static int AnimCurveChannel_parse(Reader *reader, DataWin *dw, AnimCurveChannel 
 }
 
 static int AnimCurve_parse(Reader *reader, DataWin *dw, AnimCurve *curve) {
-    if (Reader_readString(reader, dw, &curve->name) != 0) return -1;
-    if (Reader_readUInt32(reader, &curve->graphType) != 0) return -1;
-    if (Reader_readUInt32(reader, &curve->channelCount) != 0) return -1;
+    readString(&curve->name, dw);
+    read(&curve->graphType, UInt32);
+    read(&curve->channelCount, UInt32);
 
     curve->channels = NULL;
     if (curve->channelCount > 0) {

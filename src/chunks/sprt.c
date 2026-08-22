@@ -16,57 +16,64 @@ int SPRT_parse(DataWin *dw) {
     Reader reader;
     Reader_init(&reader, base, chunk.length, chunk.offset, "SPRT");
 
-    return Reader_readAndParsePointerTable(
+    if (Reader_readAndParsePointerTable(
         &reader, dw,
         (void **)&s->sprites, &s->parsedCount,
         &s->count, sizeof(Sprite), 
         SPRT_pointerTable_parse,
         SPRT_pointerTable_missingHandler,
         SPRT_pointerTable_successHandler
-    );
+    ) != 0) {
+        logWarn("[SPRT_parse] Failed to parse SPRT pointer table\n");
+        return -1;
+    }
+
+    return 0;
 }
 
 static int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
     if (reader == NULL || dw == NULL || spr == NULL) {
+        logWarn("[Sprite_parse] Invalid parameters\n");
         return -1;
     }
 
     spr->present = true;
-    Reader_readString(reader, dw, &spr->name);
-    Reader_readUInt32(reader, &spr->width);
-    Reader_readUInt32(reader, &spr->height);
-    Reader_readInt32(reader, &spr->marginLeft);
-    Reader_readInt32(reader, &spr->marginRight);
-    Reader_readInt32(reader, &spr->marginBottom);
-    Reader_readInt32(reader, &spr->marginTop);
-    Reader_readBool32(reader, &spr->transparent);
-    Reader_readBool32(reader, &spr->smooth);
-    Reader_readBool32(reader, &spr->preload);
-    Reader_readUInt32(reader, &spr->bboxMode);
-    Reader_readUInt32(reader, &spr->sepMasks);
-    Reader_readInt32(reader, &spr->originX);
-    Reader_readInt32(reader, &spr->originY);
+
+    readString(&spr->name, dw);
+    read(&spr->width, UInt32);
+    read(&spr->height, UInt32);
+    read(&spr->marginLeft, Int32);
+    read(&spr->marginRight, Int32);
+    read(&spr->marginBottom, Int32);
+    read(&spr->marginTop, Int32);
+    read(&spr->transparent, Bool32);
+    read(&spr->smooth, Bool32);
+    read(&spr->preload, Bool32);
+    read(&spr->bboxMode, UInt32);
+    read(&spr->sepMasks, UInt32);
+    read(&spr->originX, Int32);
+    read(&spr->originY, Int32);
 
     int32_t check;
-    Reader_readInt32(reader, &check);
+    read(&check, Int32);
     uint32_t nineSliceOffset = 0;
     if (check == -1) {
         spr->specialType = true;
-        Reader_readUInt32(reader, &spr->sVersion);
-        Reader_readUInt32(reader, &spr->sSpriteType);
+        read(&spr->sVersion, UInt32);
+        read(&spr->sSpriteType, UInt32);
         if (spr->sSpriteType == 0) {
             // Normal "special" sprite, technically only used for GameMaker: Studio 2+, but some modding tools (like UndertaleModTool) may inject special sprite types,
             // even though the data.win is NOT GM:S 2+
             if (DataWin_isVersionAtLeast(dw, 2, 0, 0, 0)) {
-                Reader_readFloat32(reader, &spr->gms2PlaybackSpeed);
-                Reader_readBool32(reader, &spr->gms2PlaybackSpeedType);
+                read(&spr->gms2PlaybackSpeed, Float32);
+                read(&spr->gms2PlaybackSpeedType, Bool32);
                 if (spr->sVersion >= 2) {
                     Reader_skip(reader, 4); //sequenceOffset;
                     if (spr->sVersion >= 3) {
-                        Reader_readUInt32(reader, &nineSliceOffset);
+                        read(&nineSliceOffset, UInt32);
                     }
                 }
-                Reader_readInt32(reader, &check);
+                read(&check, Int32);
             } else {
                 // Technically should NEVER happen on legit data.wins
                 check = 0;
@@ -87,7 +94,7 @@ static int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
         // Temporarily store the absolute file offsets here; parseTPAG resolves them in-place to TPAG indices once the TPAG table is known.
         spr->tpagIndices = (int32_t *)safeMalloc(spr->textureCount * sizeof(int32_t));
         repeat (spr->textureCount, i) {
-            Reader_readInt32(reader, &spr->tpagIndices[i]);
+            read(&spr->tpagIndices[i], Int32);
         }
     } else {
         spr->tpagIndices = NULL;
@@ -121,7 +128,7 @@ static int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
         return 0;
     }
 
-    Reader_readUInt32(reader, &spr->maskCount);
+    read(&spr->maskCount, UInt32);
     uint32_t maskDataCount = spr->maskCount;
     bool skipLoadingPreciseMasksForNonPreciseSprites = false;
 
@@ -162,14 +169,14 @@ static int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
     if (nineSliceOffset != 0) {
         size_t savedPos = reader->cursor;
         Reader_seek(reader, (size_t) nineSliceOffset);
-        Reader_readInt32(reader, &spr->nsLeft);
-        Reader_readInt32(reader, &spr->nsTop);
-        Reader_readInt32(reader, &spr->nsRight);
-        Reader_readInt32(reader, &spr->nsBottom);
-        Reader_readBool32(reader, &spr->nineSliceEnabled);
+        read(&spr->nsLeft, Int32);
+        read(&spr->nsTop, Int32);
+        read(&spr->nsRight, Int32);
+        read(&spr->nsBottom, Int32);
+        read(&spr->nineSliceEnabled, Bool32);
         repeat(5, j) {
             int32_t mode;
-            Reader_readInt32(reader, &mode);
+            read(&mode, Int32);
             spr->nsTileModes[j] = (uint8_t) mode;
         }
         Reader_seek(reader, savedPos);
@@ -180,7 +187,10 @@ static int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
 
 static int SPRT_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData) {
     (void)extraData; // Unused parameter
-    return Sprite_parse(reader, dw, (Sprite *)out);
+    if (Sprite_parse(reader, dw, (Sprite *)out) != 0) {
+        logWarn("[SPRT_pointerTable_parse] Failed to parse Sprite\n");
+        return -1;
+    };
 }
 
 static int SPRT_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {

@@ -19,17 +19,18 @@ static int TexturePageItem_parse(Reader *reader, DataWin *dw, TexturePageItem *i
     item->boundingHeight = 0;
     item->texturePageId = -1;
 
-    Reader_readUInt16(reader, &item->sourceX);
-    Reader_readUInt16(reader, &item->sourceY);
-    Reader_readUInt16(reader, &item->sourceWidth);
-    Reader_readUInt16(reader, &item->sourceHeight);
-    Reader_readUInt16(reader, &item->targetX);
-    Reader_readUInt16(reader, &item->targetY);
-    Reader_readUInt16(reader, &item->targetWidth);
-    Reader_readUInt16(reader, &item->targetHeight);
-    Reader_readUInt16(reader, &item->boundingWidth);
-    Reader_readUInt16(reader, &item->boundingHeight);
-    Reader_readInt16(reader, &item->texturePageId);
+    read(&item->sourceX, UInt16);
+    read(&item->sourceY, UInt16);
+    read(&item->sourceWidth, UInt16);
+    read(&item->sourceHeight, UInt16);
+    read(&item->targetX, UInt16);
+    read(&item->targetY, UInt16);
+    read(&item->targetWidth, UInt16);
+    read(&item->targetHeight, UInt16);
+    read(&item->boundingWidth, UInt16);
+    read(&item->boundingHeight, UInt16);
+    read(&item->texturePageId, Int16);
+    
     return 0;
 }
 

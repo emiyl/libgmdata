@@ -1,11 +1,11 @@
 #include "common.h"
 
 static int AUDO_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void *extraData) {
-    (void)extraData;
+    (void)dw; (void)extraData;
     AudioEntry *entry = (AudioEntry *)out;
     memset(entry, 0, sizeof(*entry));
     entry->present = true;
-    if (Reader_readUInt32(reader, &entry->dataSize) != 0) return -1;
+    read(&entry->dataSize, UInt32);
     entry->dataOffset = (uint32_t)reader->cursor;
     entry->data = NULL;
     return 0;

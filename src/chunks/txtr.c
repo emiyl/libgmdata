@@ -1,7 +1,7 @@
 #include "common.h"
 
 static int TXTR_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void *extraData) {
-    (void)extraData;
+    (void)extraData; (void)dw;
     Texture *tex = (Texture *)out;
     memset(tex, 0, sizeof(*tex));
 

@@ -15,11 +15,11 @@ int PATH_parse(DataWin *dw) {
 
     const uint8_t *base = dw->file_data + chunk.offset;
 
-    Reader reader;
-    Reader_init(&reader, base, chunk.length, chunk.offset, "PATH");
+    Reader re; Reader *reader = &re;
+    Reader_init(reader, base, chunk.length, chunk.offset, "PATH");
 
     return Reader_readAndParsePointerTable(
-        &reader, dw,
+        reader, dw,
         (void **)&p->paths, NULL,
         &p->count, sizeof(GamePath),
         PATH_pointerTable_parse,
@@ -33,14 +33,16 @@ static int GamePath_parse(Reader *reader, DataWin *dw, GamePath *path) {
     path->internalPoints = NULL;
     path->internalPointCount = 0;
     path->length = 0.0;
-    Reader_readString(reader, dw, &path->name);
-    Reader_readBool32(reader, &path->isSmooth);
-    Reader_readBool32(reader, &path->isClosed);
-    Reader_readUInt32(reader, &path->precision);
+
+    readString(&path->name, dw);
+    read(&path->isSmooth, Bool32);
+    read(&path->isClosed, Bool32);
+    read(&path->precision, UInt32);
+    
     path->exists = true;
 
     // Points SimpleList
-    Reader_readUInt32(reader, &path->pointCount);
+    read(&path->pointCount, UInt32);
     if (path->pointCount > 0) {
         path->points = (PathPoint*)safeMalloc(sizeof(PathPoint) * path->pointCount);
         repeat(path->pointCount, i) {
@@ -61,9 +63,9 @@ static int GamePath_parse(Reader *reader, DataWin *dw, GamePath *path) {
 }
 
 static int PathPoint_parse(Reader *reader, PathPoint *point) {
-    Reader_readFloat32(reader, &point->x);
-    Reader_readFloat32(reader, &point->y);
-    Reader_readFloat32(reader, &point->speed);
+    read(&point->x, Float32);
+    read(&point->y, Float32);
+    read(&point->speed, Float32);
     return 0;
 }
 

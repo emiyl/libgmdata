@@ -11,11 +11,11 @@ int TMLN_parse(DataWin *dw) {
 
     const uint8_t *base = dw->file_data + chunk.offset;
 
-    Reader reader;
-    Reader_init(&reader, base, chunk.length, chunk.offset, "TMLN");
+    Reader re; Reader *reader = &re;
+    Reader_init(reader, base, chunk.length, chunk.offset, "TMLN");
 
     return Reader_readAndParsePointerTable(
-        &reader, dw,
+        reader, dw,
         (void **)&t->timelines, NULL,
         &t->count, sizeof(Timeline),
         TMLN_pointerTable_parse,
@@ -28,8 +28,8 @@ static int Timeline_pointerTable_parse(Reader *reader, DataWin *dw, void *out, v
 static int Timeline_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
 static int Timeline_parse(Reader *reader, DataWin *dw, Timeline *tl) {
     tl->present = true;
-    Reader_readString(reader, dw, &tl->name);
-    Reader_readUInt32(reader, &tl->momentCount);
+    readString(&tl->name, dw);
+    read(&tl->momentCount, UInt32);
 
     if (tl->momentCount == 0) {
         tl->moments = NULL;
@@ -42,8 +42,8 @@ static int Timeline_parse(Reader *reader, DataWin *dw, Timeline *tl) {
 
         // Pass 1: Read step + event pointer pairs
         repeat(tl->momentCount, j) {
-            Reader_readUInt32(reader, &eventPtrs[j]);
-            Reader_readUInt32(reader, &eventPtrs[j]);
+            read(&tl->moments[j].step, UInt32);
+            read(&eventPtrs[j], UInt32);
         }
 
         // Pass 2: Parse event action lists
@@ -84,20 +84,21 @@ static int Timeline_parse(Reader *reader, DataWin *dw, Timeline *tl) {
 
 // Used in objt.c too
 int EventAction_parse(Reader *reader, DataWin *dw, EventAction *action) {
-    Reader_readUInt32(reader, &action->libID);
-    Reader_readUInt32(reader, &action->id);
-    Reader_readUInt32(reader, &action->kind);
-    Reader_readBool32(reader, &action->useRelative);
-    Reader_readBool32(reader, &action->isQuestion);
-    Reader_readBool32(reader, &action->useApplyTo);
-    Reader_readUInt32(reader, &action->exeType);
-    Reader_readString(reader, dw, &action->actionName);
-    Reader_readInt32(reader, &action->codeId);
-    Reader_readUInt32(reader, &action->argumentCount);
-    Reader_readInt32(reader, &action->who);
-    Reader_readBool32(reader, &action->relative);
-    Reader_readBool32(reader, &action->isNot);
-    Reader_readUInt32(reader, &action->unknownAlwaysZero);
+    read(&action->libID, UInt32);
+    read(&action->id, UInt32);
+    read(&action->kind, UInt32);
+    read(&action->useRelative, Bool32);
+    read(&action->isQuestion, Bool32);
+    read(&action->useApplyTo, Bool32);
+    read(&action->exeType, UInt32);
+    readString(&action->actionName, dw);
+    read(&action->codeId, Int32);
+    read(&action->argumentCount, UInt32);
+    read(&action->who, Int32);
+    read(&action->relative, Bool32);
+    read(&action->isNot, Bool32);
+    read(&action->unknownAlwaysZero, UInt32);
+    
     return 0;
 }
 

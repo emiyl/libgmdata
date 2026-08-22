@@ -81,15 +81,8 @@ static int Extension_parse(Reader *reader, DataWin *dw, Extension *e, int32_t st
         return -1;
     }
 
-    if (Reader_readString(reader, dw, &e->folderName) != 0) {
-        logError("[Extension_parse] Failed to read folderName\n");
-        return -1;
-    }
-
-    if (Reader_readString(reader, dw, &e->name) != 0) {
-        logError("[Extension_parse] Failed to read name\n");
-        return -1;
-    }
+    readString(&e->folderName, dw);
+    readString(&e->name, dw);
 
     if (stringCount >= 4) {
         if (Reader_skip(reader, 4) != 0) {
@@ -98,19 +91,12 @@ static int Extension_parse(Reader *reader, DataWin *dw, Extension *e, int32_t st
         }
     }
 
-    if (Reader_readString(reader, dw, &e->className) != 0) {
-        logError("[Extension_parse] Failed to read className\n");
-        return -1;
-    }
+    readString(&e->className, dw);
 
     Reader fullReader = {0};
     if (stringCount > 0) {
         uint32_t filesPtr = 0;
-        if (Reader_readUInt32(reader, &filesPtr) != 0) {
-            logError("[Extension_parse] Failed to read files pointer for extension '%s'\n",
-                     e->name ? e->name : "<null>");
-            return -1;
-        }
+        read(&filesPtr, UInt32);
 
         Reader_init(&fullReader, dw->file_data, dw->file_size, 0, "EXTN_FILE");
         if (Reader_seek(&fullReader, filesPtr) != 0) {
@@ -157,25 +143,10 @@ static int ExtensionFile_parse(Reader *reader, DataWin *dw, ExtensionFile *f) {
         return -1;
     }
 
-    if (Reader_readString(reader, dw, &f->filename) != 0) {
-        logError("[ExtensionFile_parse] Failed to read filename\n");
-        return -1;
-    }
-
-    if (Reader_readString(reader, dw, &f->cleanupScript) != 0) {
-        logError("[ExtensionFile_parse] Failed to read cleanupScript\n");
-        return -1;
-    }
-
-    if (Reader_readString(reader, dw, &f->initScript) != 0) {
-        logError("[ExtensionFile_parse] Failed to read initScript\n");
-        return -1;
-    }
-
-    if (Reader_readUInt32(reader, &f->kind) != 0) {
-        logError("[ExtensionFile_parse] Failed to read kind\n");
-        return -1;
-    }
+    readString(&f->filename, dw);
+    readString(&f->cleanupScript, dw);
+    readString(&f->initScript, dw);
+    read(&f->kind, UInt32);
 
     uint32_t *ptrs = NULL;
     if (Reader_readPointerTable(reader, &ptrs, &f->functionCount) != 0) {
@@ -209,35 +180,12 @@ static int ExtensionFunction_parse(Reader *reader, DataWin *dw, ExtensionFunctio
         return -1;
     }
 
-    if (Reader_readString(reader, dw, &func->name) != 0) {
-        logError("[ExtensionFunction_parse] Failed to read name\n");
-        return -1;
-    }
-
-    if (Reader_readUInt32(reader, &func->id) != 0) {
-        logError("[ExtensionFunction_parse] Failed to read id\n");
-        return -1;
-    }
-
-    if (Reader_readUInt32(reader, &func->kind) != 0) {
-        logError("[ExtensionFunction_parse] Failed to read kind\n");
-        return -1;
-    }
-
-    if (Reader_readUInt32(reader, &func->retType) != 0) {
-        logError("[ExtensionFunction_parse] Failed to read retType\n");
-        return -1;
-    }
-
-    if (Reader_readString(reader, dw, &func->extName) != 0) {
-        logError("[ExtensionFunction_parse] Failed to read extName\n");
-        return -1;
-    }
-
-    if (Reader_readUInt32(reader, &func->argumentCount) != 0) {
-        logError("[ExtensionFunction_parse] Failed to read argumentCount\n");
-        return -1;
-    }
+    readString(&func->name, dw);
+    read(&func->id, UInt32);
+    read(&func->kind, UInt32);
+    read(&func->retType, UInt32);
+    readString(&func->extName, dw);
+    read(&func->argumentCount, UInt32);
 
     if (func->argumentCount == 0) {
         func->arguments = NULL;

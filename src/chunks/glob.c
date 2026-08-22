@@ -9,10 +9,10 @@ int GLOB_parse(DataWin *dw) {
 
     const uint8_t *base = dw->file_data + chunk.offset;
 
-    Reader reader;
-    Reader_init(&reader, base, chunk.length, chunk.offset, "GLOB");
+    Reader re; Reader *reader = &re;
+    Reader_init(reader, base, chunk.length, chunk.offset, "GLOB");
 
-    Reader_readUInt32(&reader, &g->count);
+    read(&g->count, UInt32);
     if (g->count == 0) {
         g->codeIds = NULL;
         return 0;
@@ -20,7 +20,7 @@ int GLOB_parse(DataWin *dw) {
 
     g->codeIds = (int32_t*)safeMalloc(g->count * sizeof(int32_t));
     repeat(g->count, i) {
-        Reader_readInt32(&reader, &g->codeIds[i]);
+        read(&g->codeIds[i], Int32);
     }
 
     return 0;

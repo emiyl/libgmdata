@@ -69,21 +69,22 @@ int SOND_parse(DataWin *dw) {
 
 static int Sound_parse(Reader *reader, DataWin *dw, Sound *snd) {
     snd->present = true;
-    Reader_readString(reader, dw, &snd->name);
-    Reader_readUInt32(reader, &snd->flags);
-    Reader_readString(reader, dw, &snd->type);
-    Reader_readString(reader, dw, &snd->file);
-    Reader_readUInt32(reader, &snd->effects);
-    Reader_readFloat32(reader, &snd->volume);
+
+    readString(&snd->name, dw);
+    read(&snd->flags, UInt32);
+    readString(&snd->type, dw);
+    readString(&snd->file, dw);
+    read(&snd->effects, UInt32);
+    read(&snd->volume, Float32);
     
     // Pre-WAD13 games store pan instead of pitch, and
     // stores the embedded flag as a separate boolean.
     if (dw->gen8.wadVersion <= 12) {
         bool embedded;
 
-        Reader_readFloat32(reader, &snd->pan);
-        Reader_readBool32(reader, &embedded);
-        Reader_readInt32(reader, &snd->audioFile);
+        read(&snd->pan, Float32);
+        read(&embedded, Bool32);
+        read(&snd->audioFile, Int32);
 
         if (embedded) {
             snd->flags |= AUDIO_ENTRY_FLAG_IS_EMBEDDED;
@@ -98,19 +99,19 @@ static int Sound_parse(Reader *reader, DataWin *dw, Sound *snd) {
     }
 
     snd->pan = 0.0f;
-    Reader_readFloat32(reader, &snd->pitch);
+    read(&snd->pitch, Float32);
 
     // AudioGroup or preload field at offset +28
     // For GMS 1.4.x (wadVersion >= 14) with Regular flag: resource_id
     if ((snd->flags & AUDIO_ENTRY_FLAG_REGULAR) == AUDIO_ENTRY_FLAG_REGULAR && dw->gen8.wadVersion >= 14) {
-        Reader_readInt32(reader, &snd->audioGroup);
+        read(&snd->audioGroup, Int32);
     } else {
         int32_t preload;
-        Reader_readInt32(reader, &preload);
+        read(&preload, Int32);
         snd->audioGroup = 0;
     }
 
-    Reader_readInt32(reader, &snd->audioFile);
+    read(&snd->audioFile, Int32);
 
     return 0;
 }

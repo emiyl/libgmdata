@@ -119,10 +119,10 @@ static int Function_parse(Reader *reader, DataWin *dw, Function *func) {
     }
 
     memset(func, 0, sizeof(*func));
-    if (Reader_readString(reader, dw, &func->name) != 0) return -1;
-    if (Reader_readUInt32(reader, &func->occurrences) != 0) return -1;
+    readString(&func->name, dw);
+    read(&func->occurrences, UInt32);
     uint32_t rawAddr = 0;
-    if (Reader_readUInt32(reader, &rawAddr) != 0) return -1;
+    read(&rawAddr, UInt32);
     if (DataWin_isVersionAtLeast(dw, 2, 3, 0, 0) && rawAddr != (uint32_t)-1) {
         rawAddr -= 4U;
     }
@@ -136,8 +136,8 @@ static int CodeLocals_parse(Reader *reader, DataWin *dw, CodeLocals *locals) {
     }
 
     memset(locals, 0, sizeof(*locals));
-    if (Reader_readUInt32(reader, &locals->localVarCount) != 0) return -1;
-    if (Reader_readString(reader, dw, &locals->name) != 0) return -1;
+    read(&locals->localVarCount, UInt32);
+    readString(&locals->name, dw);
 
     if (locals->localVarCount > 0) {
         locals->locals = (LocalVar *)safeMalloc(locals->localVarCount * sizeof(LocalVar));

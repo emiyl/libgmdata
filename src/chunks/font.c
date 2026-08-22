@@ -61,11 +61,11 @@ static int Font_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void*
 static int Font_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);
 static int Font_parse(Reader *reader, DataWin *dw, Font *f, uint32_t fontOptionalCount) {
     f->present = true;
-    Reader_readString(reader, dw, &f->name);
-    Reader_readString(reader, dw, &f->displayName);
-
+    readString(&f->name, dw);
+    readString(&f->displayName, dw);
+    
     uint32_t rawEmSize;
-    Reader_readUInt32(reader, &rawEmSize);
+    read(&rawEmSize, UInt32);
     if (rawEmSize & (1u << 31)) {
         float negated;
         memcpy(&negated, &rawEmSize, sizeof(negated));
@@ -73,16 +73,17 @@ static int Font_parse(Reader *reader, DataWin *dw, Font *f, uint32_t fontOptiona
     } else {
         f->emSize = (float)rawEmSize;
     }
-    Reader_readBool32(reader, &f->bold);
-    Reader_readBool32(reader, &f->italic);
-    Reader_readUInt16(reader, &f->rangeStart);
-    Reader_readUInt8(reader, &f->charset);
-    Reader_readUInt8(reader, &f->antiAliasing);
-    Reader_readUInt32(reader, &f->rangeEnd);
+
+    read(&f->bold, Bool32);
+    read(&f->italic, Bool32);
+    read(&f->rangeStart, UInt16);
+    read(&f->charset, UInt8);
+    read(&f->antiAliasing, UInt8);
+    read(&f->rangeEnd, UInt32);
     // Temporarily store the absolute file offset; parseTPAG resolves it in-place to a TPAG index once the TPAG table is known.
-    Reader_readInt32(reader, &f->tpagIndex);
-    Reader_readFloat32(reader, &f->scaleX);
-    Reader_readFloat32(reader, &f->scaleY);
+    read(&f->tpagIndex, Int32);
+    read(&f->scaleX, Float32);
+    read(&f->scaleY, Float32);
     // Optional fields appear in this order when present: AscenderOffset (WAD17+), Ascender, SDFSpread, LineHeight. `fontOptionalCount` says how many are actually on disk.
     f->ascenderOffset = 0;
     f->ascender = 0;
@@ -94,21 +95,21 @@ static int Font_parse(Reader *reader, DataWin *dw, Font *f, uint32_t fontOptiona
     uint32_t readSoFar = 0;
 
     if (dw->gen8.wadVersion >= 17 && fontOptionalCount > readSoFar) {
-        Reader_readInt32(reader, &f->ascenderOffset);
+        read(&f->ascenderOffset, Int32);
         readSoFar++;
     }
     if (fontOptionalCount > readSoFar) {
-        Reader_readUInt32(reader, &f->ascender);
+        read(&f->ascender, UInt32);
         f->hasAscender = true;
         readSoFar++;
     }
     if (fontOptionalCount > readSoFar) {
-        Reader_readUInt32(reader, &f->sdfSpread);
+        read(&f->sdfSpread, UInt32);
         f->hasSDFSpread = true;
         readSoFar++;
     }
     if (fontOptionalCount > readSoFar) {
-        Reader_readUInt32(reader, &f->lineHeight);
+        read(&f->lineHeight, UInt32);
         f->hasLineHeight = true;
         readSoFar++;
     }
@@ -158,18 +159,18 @@ static int Font_parse(Reader *reader, DataWin *dw, Font *f, uint32_t fontOptiona
 
 static int FontKerningPair_parse(Reader *reader, KerningPair *kerningPair);
 static int FontGlyph_parse(Reader *reader, FontGlyph *g, uint32_t *maxGlyphHeight) {
-    Reader_readUInt16(reader, &g->character);
-    Reader_readUInt16(reader, &g->sourceX);
-    Reader_readUInt16(reader, &g->sourceY);
-    Reader_readUInt16(reader, &g->sourceWidth);
-    Reader_readUInt16(reader, &g->sourceHeight);
-    Reader_readInt16(reader, &g->shift);
-    Reader_readInt16(reader, &g->offset);
+    read(&g->character, UInt16);
+    read(&g->sourceX, UInt16);
+    read(&g->sourceY, UInt16);
+    read(&g->sourceWidth, UInt16);
+    read(&g->sourceHeight, UInt16);
+    read(&g->shift, Int16);
+    read(&g->offset, Int16);
     
     if (g->sourceHeight > *maxGlyphHeight) *maxGlyphHeight = g->sourceHeight;
 
     // Kerning SimpleShortList (uint16 count)
-    Reader_readUInt16(reader, &g->kerningCount);
+    read(&g->kerningCount, UInt16);
 
     if (g->kerningCount == 0) {
         g->kerning = NULL;
@@ -190,8 +191,8 @@ static int FontGlyph_parse(Reader *reader, FontGlyph *g, uint32_t *maxGlyphHeigh
 }
 
 static int FontKerningPair_parse(Reader *reader, KerningPair *kerningPair) {
-    Reader_readInt16(reader, &kerningPair->character);
-    Reader_readInt16(reader, &kerningPair->shiftModifier);
+    read(&kerningPair->character, Int16);
+    read(&kerningPair->shiftModifier, Int16);
     return 0;
 }
 

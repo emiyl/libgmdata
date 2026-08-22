@@ -16,13 +16,13 @@ int OBJT_parse(DataWin *dw) {
 
     const uint8_t *base = dw->file_data + chunk.offset;
 
-    Reader reader;
-    Reader_init(&reader, base, chunk.length, chunk.offset, "OBJT");
+    Reader re; Reader *reader = &re;
+    Reader_init(reader, base, chunk.length, chunk.offset, "OBJT");
 
     logDebug("[OBJT_parse] Reading pointer table for %u game objects...\n", b->count);
 
     uint32_t *ptrs;
-    if (Reader_readPointerTable(&reader, &ptrs, &b->count) != 0) return -1;
+    if (Reader_readPointerTable(reader, &ptrs, &b->count) != 0) return -1;
 
     if (b->count == 0) {
         b->objects = NULL;
@@ -43,24 +43,25 @@ int OBJT_parse(DataWin *dw) {
         }
         if (probePtr != 0) {
             // Skip the 16 fixed uint32 header fields (name..angularDamping) to reach physicsVertexCount.
-            Reader_seek(&reader, probePtr + 16 * 4);
+            Reader_seek(reader, probePtr + 16 * 4);
             
             int32_t vertexCount;
-            Reader_readInt32(&reader, &vertexCount);
+            read(&vertexCount, Int32);
 
             if (vertexCount >= 0) {
                 // Skip friction + awake + kinematic (12 bytes) and physics vertices (8 bytes each).
                 uint32_t skipCount = 12 + vertexCount * 8;
-                uint32_t newLocation = reader.cursor + skipCount;
+                uint32_t newLocation = reader->cursor + skipCount;
                 bool isOldFormat = false;
-                if (newLocation < reader.size) {
-                    Reader_skip(&reader, skipCount);
+                if (newLocation < reader->size) {
+                    Reader_skip(reader, skipCount);
                     uint32_t eventTypeCount;
-                    Reader_readUInt32(&reader, &eventTypeCount);
+                    read(&eventTypeCount, UInt32);
+                    read(&eventTypeCount, UInt32);
                     if (eventTypeCount == OBJT_EVENT_TYPE_COUNT) {
                         uint32_t firstSubEventPtr;
-                        Reader_readUInt32(&reader, &firstSubEventPtr);
-                        uint32_t currentAbsPos = reader.cursor;
+                        read(&firstSubEventPtr, UInt32);
+                        uint32_t currentAbsPos = reader->cursor;
                         // The remaining 14 outer-list pointers sit between here and the first sub-event list.
                         if (firstSubEventPtr == currentAbsPos + 14 * 4) {
                             isOldFormat = true;
@@ -75,7 +76,7 @@ int OBJT_parse(DataWin *dw) {
     }
     
     int result = Reader_parsePointerTable(
-        &reader, dw,
+        reader, dw,
         ptrs, b->count,
         (void **)&b->objects, sizeof(GameObject),
         NULL,
@@ -151,28 +152,28 @@ static int GameObject_parse(Reader *reader, DataWin *dw, GameObject *o) {
     logDebug("[GameObject_parse] Parsing GameObject...\n");
     
     o->present = true;
-    Reader_readString(reader, dw, &o->name);
-    Reader_readInt32(reader, &o->spriteId);
-    Reader_readBool32(reader, &o->visible);
+    readString(&o->name, dw);
+    read(&o->spriteId, Int32);
+    read(&o->visible, Bool32);
     if (DataWin_isVersionAtLeast(dw, 2022, 5, 0, 0)) {
-        Reader_readBool32(reader, &o->managed);
+        read(&o->managed, Bool32);
     } else {
         o->managed = false;
     }
-    Reader_readBool32(reader, &o->solid);
-    Reader_readInt32(reader, &o->depth);
-    Reader_readBool32(reader, &o->persistent);
-    Reader_readInt32(reader, &o->parentId);
-    Reader_readInt32(reader, &o->textureMaskId);
-    Reader_readBool32(reader, &o->usesPhysics);
-    Reader_readBool32(reader, &o->isSensor);
-    Reader_readUInt32(reader, &o->collisionShape);
-    Reader_readFloat32(reader, &o->density);
-    Reader_readFloat32(reader, &o->restitution);
-    Reader_readUInt32(reader, &o->group);
-    Reader_readFloat32(reader, &o->linearDamping);
-    Reader_readFloat32(reader, &o->angularDamping);
-    Reader_readInt32(reader, &o->physicsVertexCount);
+    read(&o->solid, Bool32);
+    read(&o->depth, Int32);
+    read(&o->persistent, Bool32);
+    read(&o->parentId, Int32);
+    read(&o->textureMaskId, Int32);
+    read(&o->usesPhysics, Bool32);
+    read(&o->isSensor, Bool32);
+    read(&o->collisionShape, UInt32);
+    read(&o->density, Float32);
+    read(&o->restitution, Float32);
+    read(&o->group, UInt32);
+    read(&o->linearDamping, Float32);
+    read(&o->angularDamping, Float32);
+    read(&o->physicsVertexCount, Int32);
 
     // WAD8 object records end at physicsVertexCount (no friction/awake/kinematic before the events list)
     if (8 >= dw->gen8.wadVersion) {
@@ -180,9 +181,9 @@ static int GameObject_parse(Reader *reader, DataWin *dw, GameObject *o) {
         o->awake = false;
         o->kinematic = false;
     } else {
-        Reader_readFloat32(reader, &o->friction);
-        Reader_readBool32(reader, &o->awake);
-        Reader_readBool32(reader, &o->kinematic);
+        read(&o->friction, Float32);
+        read(&o->awake, Bool32);
+        read(&o->kinematic, Bool32);
     }
 
     // Physics vertices
@@ -224,7 +225,7 @@ static int GameObject_parse(Reader *reader, DataWin *dw, GameObject *o) {
         
             Reader_seek(reader, eventPtrs[eventIndex]);
             ObjectEvent *event = &eventList->events[eventIndex];
-            Reader_readUInt32(reader, &event->eventSubtype);
+            read(&event->eventSubtype, UInt32);
             
             uint32_t *actionPtrs;
             Reader_readPointerTable(reader, &actionPtrs, &event->actionCount);
@@ -300,8 +301,8 @@ static int PhysicsVertex_parse(Reader *reader, PhysicsVertex *vertex) {
         return -1;
     }
 
-    Reader_readFloat32(reader, &vertex->x);
-    Reader_readFloat32(reader, &vertex->y);
+    read(&vertex->x, Float32);
+    read(&vertex->y, Float32);
 
     return 0;
 }

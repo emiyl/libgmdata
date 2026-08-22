@@ -57,45 +57,45 @@ static int RoomHeader_parse(Reader *reader, DataWin *dw, Room *room) {
     room->payloadLoaded = false;
     room->eagerlyLoaded = false;
 
-    Reader_readString(reader, dw, &room->name);
-    Reader_readString(reader, dw, &room->caption);
-    Reader_readUInt32(reader, &room->width);
-    Reader_readUInt32(reader, &room->height);
-    Reader_readUInt32(reader, &room->speed);
-    Reader_readBool32(reader, &room->persistent);
-    Reader_readUInt32(reader, &room->backgroundColor);
-    Reader_readBool32(reader, &room->drawBackgroundColor);
-    Reader_readInt32(reader, &room->creationCodeId);
-    Reader_readUInt32(reader, &room->flags);
-    Reader_readUInt32(reader, &room->backgroundsFileOffset);
+    readString(&room->name, dw);
+    readString(&room->caption, dw);
+    read(&room->width, UInt32);
+    read(&room->height, UInt32);
+    read(&room->speed, UInt32);
+    read(&room->persistent, Bool32);
+    read(&room->backgroundColor, UInt32);
+    read(&room->drawBackgroundColor, Bool32);
+    read(&room->creationCodeId, Int32);
+    read(&room->flags, UInt32);
+    read(&room->backgroundsFileOffset, UInt32);
     room->backgroundsFileOffset = room->backgroundsFileOffset >= reader->offset ? room->backgroundsFileOffset - reader->offset : 0;
-    Reader_readUInt32(reader, &room->viewsFileOffset);
+    read(&room->viewsFileOffset, UInt32);
     room->viewsFileOffset = room->viewsFileOffset >= reader->offset ? room->viewsFileOffset - reader->offset : 0;
-    Reader_readUInt32(reader, &room->gameObjectsFileOffset);
+    read(&room->gameObjectsFileOffset, UInt32);
     room->gameObjectsFileOffset = room->gameObjectsFileOffset >= reader->offset ? room->gameObjectsFileOffset - reader->offset : 0;
-    Reader_readUInt32(reader, &room->tilesFileOffset);
+    read(&room->tilesFileOffset, UInt32);
     room->tilesFileOffset = room->tilesFileOffset >= reader->offset ? room->tilesFileOffset - reader->offset : 0;
-    Reader_readBool32(reader, &room->world);
-    Reader_readUInt32(reader, &room->top);
-    Reader_readUInt32(reader, &room->left);
-    Reader_readUInt32(reader, &room->right);
-    Reader_readUInt32(reader, &room->bottom);
-    Reader_readFloat32(reader, &room->gravityX);
-    Reader_readFloat32(reader, &room->gravityY);
-    Reader_readFloat32(reader, &room->metersPerPixel);
+    read(&room->world, Bool32);
+    read(&room->top, UInt32);
+    read(&room->left, UInt32);
+    read(&room->right, UInt32);
+    read(&room->bottom, UInt32);
+    read(&room->gravityX, Float32);
+    read(&room->gravityY, Float32);
+    read(&room->metersPerPixel, Float32);
 
     if (DataWin_isVersionAtLeast(dw, 2024, 13, 0, 0)) {
         uint32_t ignored = 0;
-        Reader_readUInt32(reader, &ignored);
+        read(&ignored, UInt32);
     }
 
     room->layersFileOffset = 0;
     if (DataWin_isVersionAtLeast(dw, 2, 0, 0, 0)) {
-        Reader_readUInt32(reader, &room->layersFileOffset);
+        read(&room->layerCount, UInt32);
         room->layersFileOffset = room->layersFileOffset >= reader->offset ? room->layersFileOffset - reader->offset : 0;
         if (DataWin_isVersionAtLeast(dw, 2, 3, 0, 0)) {
             uint32_t ignored = 0;
-            Reader_readUInt32(reader, &ignored);
+            read(&ignored, UInt32);
         }
     }
 
@@ -123,16 +123,16 @@ static int RoomBackgrounds_parse(Reader *reader, Room *room) {
         bg->speedY = 0;
         bg->stretch = false;
 
-        Reader_readBool32(reader, &bg->enabled);
-        Reader_readBool32(reader, &bg->foreground);
-        Reader_readInt32(reader, &bg->backgroundDefinition);
-        Reader_readInt32(reader, &bg->x);
-        Reader_readInt32(reader, &bg->y);
-        Reader_readInt32(reader, &bg->tileX);
-        Reader_readInt32(reader, &bg->tileY);
-        Reader_readInt32(reader, &bg->speedX);
-        Reader_readInt32(reader, &bg->speedY);
-        Reader_readBool32(reader, &bg->stretch);
+        read(&bg->enabled, Bool32);
+        read(&bg->foreground, Bool32);
+        read(&bg->backgroundDefinition, Int32);
+        read(&bg->x, Int32);
+        read(&bg->y, Int32);
+        read(&bg->tileX, Int32);
+        read(&bg->tileY, Int32);
+        read(&bg->speedX, Int32);
+        read(&bg->speedY, Int32);
+        read(&bg->stretch, Bool32);
     }
 
     for (uint32_t j = fillEnd; j < 8; j++) {
@@ -153,20 +153,21 @@ static int RoomViews_parse(Reader *reader, Room *room) {
         Reader_seek(reader, viewPtrs[j]);
         RoomView *view = &room->views[j];
         memset(view, 0, sizeof(*view));
-        Reader_readBool32(reader, &view->enabled);
-        Reader_readInt32(reader, &view->viewX);
-        Reader_readInt32(reader, &view->viewY);
-        Reader_readInt32(reader, &view->viewWidth);
-        Reader_readInt32(reader, &view->viewHeight);
-        Reader_readInt32(reader, &view->portX);
-        Reader_readInt32(reader, &view->portY);
-        Reader_readInt32(reader, &view->portWidth);
-        Reader_readInt32(reader, &view->portHeight);
-        Reader_readUInt32(reader, &view->borderX);
-        Reader_readUInt32(reader, &view->borderY);
-        Reader_readInt32(reader, &view->speedX);
-        Reader_readInt32(reader, &view->speedY);
-        Reader_readInt32(reader, &view->objectId);
+
+        read(&view->enabled, Bool32);
+        read(&view->viewX, Int32);
+        read(&view->viewY, Int32);
+        read(&view->viewWidth, Int32);
+        read(&view->viewHeight, Int32);
+        read(&view->portX, Int32);
+        read(&view->portY, Int32);
+        read(&view->portWidth, Int32);
+        read(&view->portHeight, Int32);
+        read(&view->borderX, UInt32);
+        read(&view->borderY, UInt32);
+        read(&view->speedX, Int32);
+        read(&view->speedY, Int32);
+        read(&view->objectId, Int32);
     }
     for (uint32_t j = viewCount < 8 ? viewCount : 8; j < 8; j++) {
         memset(&room->views[j], 0, sizeof(RoomView));
@@ -193,24 +194,25 @@ static int RoomGameObjects_parse(Reader *reader, DataWin *dw, Room *room) {
         Reader_seek(reader, objPtrs[j]);
         RoomGameObject *go = &room->gameObjects[j];
         memset(go, 0, sizeof(*go));
-        Reader_readInt32(reader, &go->x);
-        Reader_readInt32(reader, &go->y);
-        Reader_readInt32(reader, &go->objectDefinition);
-        Reader_readUInt32(reader, &go->instanceID);
-        Reader_readInt32(reader, &go->creationCode);
-        Reader_readFloat32(reader, &go->scaleX);
-        Reader_readFloat32(reader, &go->scaleY);
+
+        read(&go->x, Int32);
+        read(&go->y, Int32);
+        read(&go->objectDefinition, Int32);
+        read(&go->instanceID, UInt32);
+        read(&go->creationCode, Int32);
+        read(&go->scaleX, Float32);
+        read(&go->scaleY, Float32);
         if (DataWin_isVersionAtLeast(dw, 2, 2, 2, 302)) {
-            Reader_readFloat32(reader, &go->imageSpeed);
-            Reader_readInt32(reader, &go->imageIndex);
+            read(&go->imageSpeed, Float32);
+            read(&go->imageIndex, Int32);
         } else {
             go->imageSpeed = 1.0f;
             go->imageIndex = 0;
         }
-        Reader_readUInt32(reader, &go->color);
-        Reader_readFloat32(reader, &go->rotation);
+        read(&go->color, UInt32);
+        read(&go->rotation, Float32);
         if (dw->gen8.wadVersion >= 16) {
-            Reader_readInt32(reader, &go->preCreateCode);
+            read(&go->preCreateCode, Int32);
         } else {
             go->preCreateCode = -1;
         }
@@ -245,18 +247,19 @@ static int RoomTiles_parse(Reader *reader, DataWin *dw, Room *room) {
         tile->x = 0;
         tile->y = 0;
         tile->useSpriteDefinition = DataWin_isVersionAtLeast(dw, 2, 0, 0, 0);
-        Reader_readInt32(reader, &tile->x);
-        Reader_readInt32(reader, &tile->y);
-        Reader_readInt32(reader, &tile->backgroundDefinition);
-        Reader_readInt32(reader, &tile->sourceX);
-        Reader_readInt32(reader, &tile->sourceY);
-        Reader_readUInt32(reader, &tile->width);
-        Reader_readUInt32(reader, &tile->height);
-        Reader_readInt32(reader, &tile->tileDepth);
-        Reader_readUInt32(reader, &tile->instanceID);
-        Reader_readFloat32(reader, &tile->scaleX);
-        Reader_readFloat32(reader, &tile->scaleY);
-        Reader_readUInt32(reader, &tile->color);
+
+        read(&tile->x, Int32);
+        read(&tile->y, Int32);
+        read(&tile->backgroundDefinition, Int32);
+        read(&tile->sourceX, Int32);
+        read(&tile->sourceY, Int32);
+        read(&tile->width, UInt32);
+        read(&tile->height, UInt32);
+        read(&tile->tileDepth, Int32);
+        read(&tile->instanceID, UInt32);
+        read(&tile->scaleX, Float32);
+        read(&tile->scaleY, Float32);
+        read(&tile->color, UInt32);
         tile->alpha = RoomTile_alphaFromColor(tile->color);
     }
 
@@ -272,8 +275,8 @@ static int RoomLayerAssetsData_parse(Reader *reader, DataWin *dw, RoomLayerAsset
     assets->sprites = NULL;
     assets->spriteCount = 0;
 
-    Reader_readUInt32(reader, &legacyTilesPtr);
-    Reader_readUInt32(reader, &spritesPtr);
+    read(&legacyTilesPtr, UInt32);
+    read(&spritesPtr, UInt32);
 
     if (legacyTilesPtr != 0) {
         Reader_seek(reader, legacyTilesPtr);
@@ -288,18 +291,20 @@ static int RoomLayerAssetsData_parse(Reader *reader, DataWin *dw, RoomLayerAsset
                 RoomTile *tile = &assets->legacyTiles[k];
                 memset(tile, 0, sizeof(*tile));
                 tile->useSpriteDefinition = DataWin_isVersionAtLeast(dw, 2, 0, 0, 0);
-                Reader_readInt32(reader, &tile->x);
-                Reader_readInt32(reader, &tile->y);
-                Reader_readInt32(reader, &tile->backgroundDefinition);
-                Reader_readInt32(reader, &tile->sourceX);
-                Reader_readInt32(reader, &tile->sourceY);
-                Reader_readUInt32(reader, &tile->width);
-                Reader_readUInt32(reader, &tile->height);
-                Reader_readInt32(reader, &tile->tileDepth);
-                Reader_readUInt32(reader, &tile->instanceID);
-                Reader_readFloat32(reader, &tile->scaleX);
-                Reader_readFloat32(reader, &tile->scaleY);
-                Reader_readUInt32(reader, &tile->color);
+
+                read(&tile->x, Int32);
+                read(&tile->y, Int32);
+                read(&tile->backgroundDefinition, Int32);
+                read(&tile->sourceX, Int32);
+                read(&tile->sourceY, Int32);
+                read(&tile->width, UInt32);
+                read(&tile->height, UInt32);
+                read(&tile->tileDepth, Int32);
+                read(&tile->instanceID, UInt32);
+                read(&tile->scaleX, Float32);
+                read(&tile->scaleY, Float32);
+                read(&tile->color, UInt32);
+
                 tile->alpha = RoomTile_alphaFromColor(tile->color);
             }
         }
@@ -318,17 +323,18 @@ static int RoomLayerAssetsData_parse(Reader *reader, DataWin *dw, RoomLayerAsset
                 Reader_seek(reader, spritePtrs[k]);
                 SpriteInstance *sprite = &assets->sprites[k];
                 memset(sprite, 0, sizeof(*sprite));
-                Reader_readString(reader, dw, &sprite->name);
-                Reader_readInt32(reader, &sprite->spriteIndex);
-                Reader_readInt32(reader, &sprite->x);
-                Reader_readInt32(reader, &sprite->y);
-                Reader_readFloat32(reader, &sprite->scaleX);
-                Reader_readFloat32(reader, &sprite->scaleY);
-                Reader_readUInt32(reader, &sprite->color);
-                Reader_readFloat32(reader, &sprite->animationSpeed);
-                Reader_readUInt32(reader, &sprite->animationSpeedType);
-                Reader_readFloat32(reader, &sprite->frameIndex);
-                Reader_readFloat32(reader, &sprite->rotation);
+
+                readString(&sprite->name, dw);
+                read(&sprite->spriteIndex, Int32);
+                read(&sprite->x, Int32);
+                read(&sprite->y, Int32);
+                read(&sprite->scaleX, Float32);
+                read(&sprite->scaleY, Float32);
+                read(&sprite->color, UInt32);
+                read(&sprite->animationSpeed, Float32);
+                read(&sprite->animationSpeedType, UInt32);
+                read(&sprite->frameIndex, Float32);
+                read(&sprite->rotation, Float32);
             }
         }
         free(spritePtrs);
@@ -339,26 +345,30 @@ static int RoomLayerAssetsData_parse(Reader *reader, DataWin *dw, RoomLayerAsset
 
 static int RoomLayerBackgroundData_parse(Reader *reader, RoomLayerBackgroundData *bg) {
     memset(bg, 0, sizeof(*bg));
-    Reader_readBool32(reader, &bg->visible);
-    Reader_readBool32(reader, &bg->foreground);
-    Reader_readInt32(reader, &bg->spriteIndex);
-    Reader_readBool32(reader, &bg->hTiled);
-    Reader_readBool32(reader, &bg->vTiled);
-    Reader_readBool32(reader, &bg->stretch);
-    Reader_readUInt32(reader, &bg->color);
-    Reader_readFloat32(reader, &bg->firstFrame);
-    Reader_readFloat32(reader, &bg->animSpeed);
-    Reader_readUInt32(reader, &bg->animSpeedType);
+
+    read(&bg->visible, Bool32);
+    read(&bg->foreground, Bool32);
+    read(&bg->spriteIndex, Int32);
+    read(&bg->hTiled, Bool32);
+    read(&bg->vTiled, Bool32);
+    read(&bg->stretch, Bool32);
+    read(&bg->color, UInt32);
+    read(&bg->firstFrame, Float32);
+    read(&bg->animSpeed, Float32);
+    read(&bg->animSpeedType, UInt32);
+    
     return 0;
 }
 
 static int RoomLayerInstancesData_parse(Reader *reader, RoomLayerInstancesData *inst) {
     memset(inst, 0, sizeof(*inst));
-    Reader_readUInt32(reader, &inst->instanceCount);
+
+    read(&inst->instanceCount, UInt32);
+    
     if (inst->instanceCount > 0) {
         inst->instanceIds = (uint32_t *)safeMalloc(inst->instanceCount * sizeof(uint32_t));
         repeat(inst->instanceCount, k) {
-            Reader_readUInt32(reader, &inst->instanceIds[k]);
+            read(&inst->instanceIds[k], UInt32);
         }
     } else {
         inst->instanceIds = NULL;
@@ -368,9 +378,10 @@ static int RoomLayerInstancesData_parse(Reader *reader, RoomLayerInstancesData *
 
 static int RoomLayerTilesData_parse(Reader *reader, DataWin *dw, RoomLayerTilesData *tiles) {
     memset(tiles, 0, sizeof(*tiles));
-    Reader_readInt32(reader, &tiles->backgroundIndex);
-    Reader_readUInt32(reader, &tiles->tilesX);
-    Reader_readUInt32(reader, &tiles->tilesY);
+    
+    read(&tiles->backgroundIndex, Int32);
+    read(&tiles->tilesX, UInt32);
+    read(&tiles->tilesY, UInt32);
 
     uint32_t totalTiles = tiles->tilesX * tiles->tilesY;
     if (totalTiles == 0) {
@@ -383,11 +394,13 @@ static int RoomLayerTilesData_parse(Reader *reader, DataWin *dw, RoomLayerTilesD
         uint32_t produced = 0;
         while (produced < totalTiles) {
             uint8_t length = 0;
-            Reader_readUInt8(reader, &length);
+            read(&length, UInt8);
+
             if (length >= 128) {
                 uint32_t runLength = ((uint32_t)(length & 0x7F)) + 1U;
                 uint32_t tile = 0;
-                Reader_readUInt32(reader, &tile);
+                read(&tile, UInt32);
+
                 if (runLength > totalTiles - produced) runLength = totalTiles - produced;
                 for (uint32_t k = 0; k < runLength; k++) {
                     tiles->tileData[produced + k] = tile;
@@ -397,7 +410,7 @@ static int RoomLayerTilesData_parse(Reader *reader, DataWin *dw, RoomLayerTilesD
                 uint32_t runLength = (uint32_t)length;
                 if (runLength > totalTiles - produced) runLength = totalTiles - produced;
                 for (uint32_t k = 0; k < runLength; k++) {
-                    Reader_readUInt32(reader, &tiles->tileData[produced + k]);
+                    read(&tiles->tileData[produced + k], UInt32);
                 }
                 produced += runLength;
             }
@@ -412,8 +425,8 @@ static int RoomLayerTilesData_parse(Reader *reader, DataWin *dw, RoomLayerTilesD
         if (hasPadding) {
             uint8_t padLength = 0;
             uint32_t padTile = 0;
-            Reader_readUInt8(reader, &padLength);
-            Reader_readUInt32(reader, &padTile);
+            read(&padLength, UInt8);
+            read(&padTile, UInt32);
             (void)padLength;
             (void)padTile;
         }
@@ -426,7 +439,7 @@ static int RoomLayerTilesData_parse(Reader *reader, DataWin *dw, RoomLayerTilesD
         }
     } else {
         repeat(totalTiles, k) {
-            Reader_readUInt32(reader, &tiles->tileData[k]);
+            read(&tiles->tileData[k], UInt32);
         }
     }
 
@@ -436,22 +449,24 @@ static int RoomLayerTilesData_parse(Reader *reader, DataWin *dw, RoomLayerTilesD
 static int RoomLayer_parse(Reader *reader, DataWin *dw, Room *room, RoomLayer *layer) {
     (void)room;
     memset(layer, 0, sizeof(*layer));
-    Reader_readString(reader, dw, &layer->name);
-    Reader_readUInt32(reader, &layer->id);
-    Reader_readUInt32(reader, &layer->type);
-    Reader_readInt32(reader, &layer->depth);
-    Reader_readFloat32(reader, &layer->xOffset);
-    Reader_readFloat32(reader, &layer->yOffset);
-    Reader_readFloat32(reader, &layer->hSpeed);
-    Reader_readFloat32(reader, &layer->vSpeed);
-    Reader_readBool32(reader, &layer->visible);
+
+    readString(&layer->name, dw);
+    read(&layer->id, UInt32);
+    read(&layer->type, UInt32);
+    read(&layer->depth, Int32);
+    read(&layer->xOffset, Float32);
+    read(&layer->yOffset, Float32);
+    read(&layer->hSpeed, Float32);
+    read(&layer->vSpeed, Float32);
+    read(&layer->visible, Bool32);
+    
     if (DataWin_isVersionAtLeast(dw, 2022, 1, 0, 0)) {
         bool effectEnabled = false;
         uint32_t effectTypeOffset = 0;
         uint32_t effectPropCount = 0;
-        Reader_readBool32(reader, &effectEnabled);
-        Reader_readUInt32(reader, &effectTypeOffset);
-        Reader_readUInt32(reader, &effectPropCount);
+        read(&effectEnabled, Bool32);
+        read(&effectTypeOffset, UInt32);
+        read(&effectPropCount, UInt32);
         if (effectPropCount > 0) {
             uint32_t skip = effectPropCount * 12u;
             Reader_skip(reader, (int)skip);
@@ -468,8 +483,8 @@ static int RoomLayer_parse(Reader *reader, DataWin *dw, Room *room, RoomLayer *l
             if (!DataWin_isVersionAtLeast(dw, 2022, 1, 0, 0)) {
                 uint32_t effectTypeOffset = 0;
                 uint32_t propCount = 0;
-                Reader_readUInt32(reader, &effectTypeOffset);
-                Reader_readUInt32(reader, &propCount);
+                read(&effectTypeOffset, UInt32);
+                read(&propCount, UInt32);
                 if (propCount > 0) {
                     Reader_skip(reader, (int)(propCount * 12u));
                 }

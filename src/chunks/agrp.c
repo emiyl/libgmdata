@@ -76,9 +76,9 @@ int AGRP_parse(DataWin *dw) {
 
 static int AudioGroup_parse(Reader *reader, DataWin *dw, AudioGroup *ag) {
     ag->present = true;
-    if (Reader_readString(reader, dw, &ag->name) != 0) return -1;
+    readString(&ag->name, dw);
     if (DataWin_isVersionAtLeast(dw, 2024, 14, 0, 0)) {
-        if (Reader_readString(reader, dw, &ag->path) != 0) return -1;
+        readString(&ag->path, dw);
     }
     return 0;
 }

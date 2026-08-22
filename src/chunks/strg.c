@@ -25,23 +25,6 @@ static const char *STRG_dup_string(const DataWin *dw, uint32_t absolute_offset) 
     return copy;
 }
 
-static int STRG_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void *extraData) {
-    (void)extraData;
-    const char **str = (const char **)out;
-    if (Reader_readUInt32(reader, &(uint32_t){0}) != 0) {
-        return -1;
-    }
-    *str = NULL;
-    return 0;
-}
-
-static int STRG_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void *extraData) {
-    (void)reader; (void)dw; (void)extraData;
-    const char **str = (const char **)out;
-    *str = NULL;
-    return 0;
-}
-
 int STRG_parse(DataWin *dw) {
     Chunk chunk = {0};
     StrgChunk *s = &dw->strg;
