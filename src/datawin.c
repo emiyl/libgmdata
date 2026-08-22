@@ -18,6 +18,28 @@ static void DataWin_reset(DataWin *dw) {
 
     string_table_free(&dw->strings);
     chunk_table_free(&dw->chunks);
+    memset(&dw->gen8, 0, sizeof(dw->gen8));
+    memset(&dw->optn, 0, sizeof(dw->optn));
+    memset(&dw->lang, 0, sizeof(dw->lang));
+    memset(&dw->extn, 0, sizeof(dw->extn));
+    memset(&dw->sond, 0, sizeof(dw->sond));
+    memset(&dw->agrp, 0, sizeof(dw->agrp));
+    memset(&dw->sprt, 0, sizeof(dw->sprt));
+    memset(&dw->bgnd, 0, sizeof(dw->bgnd));
+    memset(&dw->tpag, 0, sizeof(dw->tpag));
+    memset(&dw->path, 0, sizeof(dw->path));
+    memset(&dw->scpt, 0, sizeof(dw->scpt));
+    memset(&dw->glob, 0, sizeof(dw->glob));
+    memset(&dw->code, 0, sizeof(dw->code));
+    memset(&dw->vari, 0, sizeof(dw->vari));
+    memset(&dw->func, 0, sizeof(dw->func));
+    memset(&dw->shdr, 0, sizeof(dw->shdr));
+    memset(&dw->font, 0, sizeof(dw->font));
+    memset(&dw->tmln, 0, sizeof(dw->tmln));
+    memset(&dw->objt, 0, sizeof(dw->objt));
+    memset(&dw->room, 0, sizeof(dw->room));
+    memset(&dw->detectedFormat, 0, sizeof(dw->detectedFormat));
+    dw->mappedFile = NULL;
     dw->file_data = NULL;
     dw->file_size = 0;
     dw->initialized = false;
@@ -26,6 +48,10 @@ static void DataWin_reset(DataWin *dw) {
 int DataWin_loadFile(DataWin *dw, const char *path) {
     if (dw == NULL || path == NULL) {
         return -1;
+    }
+
+    if (dw->initialized || dw->file_data != NULL || dw->chunks.count != 0 || dw->strings.count != 0) {
+        DataWin_free(dw);
     }
 
     FILE *fp = fopen(path, "rb");

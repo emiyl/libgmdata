@@ -316,10 +316,15 @@ int Reader_readString(Reader *reader, DataWin *dw, const char **out) {
         return -1;
     }
 
+    if (offset == 0U) {
+        *out = NULL;
+        return 0;
+    }
+
     const char *source = get_string(dw, offset);
     if (source == NULL) {
         *out = NULL;
-        return -1;
+        return 0;
     }
 
     size_t length = strlen(source);
@@ -423,7 +428,11 @@ int Reader_parsePointerTable(
         void *item = (uint8_t *)*items + i * itemSize;
         
         if (ptrs[i] == 0) {
-            missingHandler(reader, dw, item, extraData);
+            if (missingHandler != NULL) {
+                missingHandler(reader, dw, item, extraData);
+            } else {
+                memset(item, 0, itemSize);
+            }
             continue;
         }
 

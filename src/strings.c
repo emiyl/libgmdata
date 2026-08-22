@@ -77,6 +77,14 @@ const char *resolve_string_ptr(const DataWin *dw, const uint8_t *base, uint32_t 
         return NULL;
     }
 
+    uint32_t prefix_offset = offset;
+    if (prefix_offset >= 4U && prefix_offset <= dw->file_size) {
+        uint32_t maybe_length = read_u32_le_at(dw->file_data, dw->file_size, prefix_offset - 4U);
+        if (prefix_offset >= 4U && prefix_offset - 4U + sizeof(uint32_t) <= dw->file_size && maybe_length <= dw->file_size - (prefix_offset - 4U) - sizeof(uint32_t)) {
+            return (const char *)(dw->file_data + (prefix_offset - 4U) + sizeof(uint32_t));
+        }
+    }
+
     if (offset + sizeof(uint32_t) > dw->file_size) {
         return NULL;
     }
@@ -99,10 +107,12 @@ const char *get_string(const DataWin *dw, uint32_t offset) {
         return NULL;
     }
 
-    offset -= 4; // idk they just seemed to be off by 4
-
     for (size_t i = 0; i < dw->strings.count; ++i) {
         if (dw->strings.entries[i].offset == offset) {
+            return dw->strings.entries[i].text;
+        }
+
+        if (dw->strings.entries[i].offset + 4U == offset) {
             return dw->strings.entries[i].text;
         }
     }
