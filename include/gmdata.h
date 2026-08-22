@@ -876,6 +876,8 @@ typedef struct {
     bool initialized;
 } DataWin;
 
+uint8_t *TextureDecode_decodeToRgba(const uint8_t *blob, size_t blob_size, bool gm2022_5, int *out_w, int *out_h);
+
 int DataWin_loadFile(DataWin *dw, const char *path);
 int DataWin_parse(DataWin *dw);
 int DataWin_free(DataWin *dw);

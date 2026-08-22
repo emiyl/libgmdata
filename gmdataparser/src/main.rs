@@ -1,5 +1,6 @@
 mod bindings;
 
+use std::collections::HashMap;
 use std::ffi::{CStr, CString, c_char};
 use bindings::*;
 use eframe::egui;
@@ -74,6 +75,96 @@ fn checked_ptr_slice<T: Copy>(ptr: *mut T, count: usize) -> Option<Vec<T>> {
         let slice = std::slice::from_raw_parts(ptr, count);
         Some(slice.to_vec())
     }
+}
+
+fn texture_bytes(texture: &Texture) -> Option<&[u8]> {
+    if !texture.present || texture.blobData.is_null() || texture.blobSize == 0 {
+        return None;
+    }
+
+    let len = texture.blobSize as usize;
+    unsafe { Some(std::slice::from_raw_parts(texture.blobData, len)) }
+}
+
+fn decode_native_texture_rgba(data: &[u8], gm2022_5: bool) -> Option<Vec<u8>> {
+    if data.is_empty() {
+        return None;
+    }
+
+    let mut out_w = 0i32;
+    let mut out_h = 0i32;
+
+    let ptr = unsafe {
+        bindings::TextureDecode_decodeToRgba(data.as_ptr(), data.len(), gm2022_5, &mut out_w, &mut out_h)
+    };
+    if ptr.is_null() {
+        return None;
+    }
+
+    let width = usize::try_from(out_w).ok()?;
+    let height = usize::try_from(out_h).ok()?;
+    let pixel_count = if out_w > 0 && out_h > 0 {
+        width.checked_mul(height)?.checked_mul(4)?
+    } else {
+        data.len().checked_div(4)? * 4
+    };
+
+    let rgba = unsafe { std::slice::from_raw_parts(ptr, pixel_count).to_vec() };
+    unsafe {
+        unsafe extern "C" {
+            fn free(ptr: *mut std::ffi::c_void);
+        }
+        free(ptr as *mut std::ffi::c_void);
+    }
+    Some(rgba)
+}
+
+fn fallback_texture_image(width: usize, height: usize) -> egui::ColorImage {
+    let mut pixels = vec![0u8; width.saturating_mul(height).saturating_mul(4)];
+    let dark = [24, 24, 28, 255];
+    let light = [50, 50, 56, 255];
+    let accent = [190, 64, 255, 255];
+
+    for y in 0..height {
+        for x in 0..width {
+            let idx = (y * width + x) * 4;
+            let checker = ((x / 8) + (y / 8)) % 2 == 0;
+            let color = if checker { dark } else { light };
+            pixels[idx..idx + 4].copy_from_slice(&color);
+
+            if x < 2 || y < 2 || x + 2 >= width || y + 2 >= height {
+                pixels[idx..idx + 4].copy_from_slice(&accent);
+            }
+        }
+    }
+
+    egui::ColorImage::from_rgba_unmultiplied([width, height], &pixels)
+}
+
+fn texture_preview_image(texture: &Texture, gm2022_5: bool) -> Option<egui::ColorImage> {
+    if !texture.present || texture.blobData.is_null() {
+        return None;
+    }
+
+    let bytes = texture_bytes(texture)?;
+    if bytes.is_empty() {
+        return None;
+    }
+
+    let width = if texture.textureWidth > 0 { texture.textureWidth as usize } else { 1 };
+    let height = if texture.textureHeight > 0 { texture.textureHeight as usize } else { 1 };
+
+    let decoded = match decode_native_texture_rgba(bytes, gm2022_5) {
+        Some(pixels) => pixels,
+        None => return Some(fallback_texture_image(width, height)),
+    };
+
+    let expected = width.checked_mul(height)?.checked_mul(4)?;
+    if decoded.len() != expected {
+        return Some(fallback_texture_image(width, height));
+    }
+
+    Some(egui::ColorImage::from_rgba_unmultiplied([width, height], &decoded))
 }
 
 fn matches_item_query(item: &ChunkItem, query: &str) -> bool {
@@ -593,6 +684,10 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
                 push_field(&mut fields, "blobOffset", texture.blobOffset);
                 push_field(&mut fields, "blobSize", texture.blobSize);
                 push_field(&mut fields, "mapped", texture.mapped);
+                match texture_bytes(texture) {
+                    Some(bytes) => push_field(&mut fields, "bytes", format!("{} bytes", bytes.len())),
+                    None => push_field(&mut fields, "bytes", "unloaded"),
+                }
                 items.push(ChunkItem {
                     name: format!("Texture {}", idx),
                     fields,
@@ -807,6 +902,16 @@ struct App {
     file_path: String,
     chunks: Vec<ChunkInfo>,
     active_chunk: usize,
+    dw: DataWin,
+    texture_preview_cache: HashMap<usize, Option<egui::ColorImage>>,
+}
+
+impl Drop for App {
+    fn drop(&mut self) {
+        unsafe {
+            let _ = DataWin_free(&mut self.dw);
+        }
+    }
 }
 
 impl eframe::App for App {
@@ -997,6 +1102,34 @@ impl eframe::App for App {
                             ui.label(format!("Item: {}", active_item.name));
                             ui.separator();
 
+                            if active_chunk_name == "TXTR" {
+                                let texture_slice = unsafe {
+                                    std::slice::from_raw_parts(self.dw.txtr.textures, self.dw.txtr.count as usize)
+                                };
+
+                                let gm2022_5 = self.dw.detectedFormat.major >= 2022 && self.dw.detectedFormat.minor >= 5;
+                                let preview_image = if let Some(texture) = texture_slice.get(active_item_idx) {
+                                    self.texture_preview_cache
+                                        .entry(active_item_idx)
+                                        .or_insert_with(|| texture_preview_image(texture, gm2022_5))
+                                        .clone()
+                                } else {
+                                    None
+                                };
+
+                                if let Some(image) = preview_image {
+                                    let handle = ui.ctx().load_texture(
+                                        format!("txtr-preview-{}", active_item_idx),
+                                        image,
+                                        egui::TextureOptions::LINEAR,
+                                    );
+                                    let texture = texture_slice.get(active_item_idx).unwrap();
+                                    let size = [texture.textureWidth.max(1) as f32, texture.textureHeight.max(1) as f32];
+                                    ui.add_sized(size, egui::Image::new(&handle).fit_to_original_size(1.0));
+                                    ui.separator();
+                                }
+                            }
+
                             egui::ScrollArea::vertical().max_height(260.0).show(ui, |ui| {
                                 egui::Grid::new(format!("chunk-item-fields-{}-{}", active_chunk_name, active_item.name))
                                     .num_columns(2)
@@ -1108,13 +1241,11 @@ fn main() {
                 file_path,
                 chunks,
                 active_chunk: 0,
+                dw,
+                texture_preview_cache: HashMap::new(),
             }))
         }),
     );
-
-    unsafe {
-        DataWin_free(&mut dw);
-    }
 
     run_result.expect("Failed to start GUI");
 }

@@ -2529,6 +2529,15 @@ const _: () = {
         [::std::mem::offset_of!(DataWin, initialized) - 771usize];
 };
 unsafe extern "C" {
+    pub fn TextureDecode_decodeToRgba(
+        blob: *const u8,
+        blob_size: usize,
+        gm2022_5: bool,
+        out_w: *mut ::std::os::raw::c_int,
+        out_h: *mut ::std::os::raw::c_int,
+    ) -> *mut u8;
+}
+unsafe extern "C" {
     pub fn DataWin_loadFile(
         dw: *mut DataWin,
         path: *const ::std::os::raw::c_char,

@@ -1,6 +1,7 @@
 fn main() {
     println!("cargo:rustc-link-search=native=../build/lib");
     println!("cargo:rustc-link-lib=static=gmdata");
+    println!("cargo:rustc-link-lib=bz2");
 
     let bindings = bindgen::Builder::default()
         .header("../include/gmdata.h")

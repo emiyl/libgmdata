@@ -135,6 +135,13 @@ int TXTR_parse(DataWin *dw) {
             } else {
                 uint32_t offset = t->textures[i].blobOffset - chunk.offset;
                 Reader_seek(&reader, offset);
+                t->textures[i].blobData = (uint8_t *)safeMalloc(t->textures[i].blobSize);
+                if (t->textures[i].blobData == NULL) {
+                    logWarn("TXTR: Failed to allocate %u bytes for texture %u\n",
+                            t->textures[i].blobSize, i);
+                    continue;
+                }
+                t->textures[i].mapped = false;
                 Reader_readBytes(&reader, t->textures[i].blobData, t->textures[i].blobSize);
             }
         }

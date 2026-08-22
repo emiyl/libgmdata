@@ -3,6 +3,7 @@ AR = /usr/bin/ar
 RANLIB = /usr/bin/ranlib
 CPPFLAGS = -Isrc -Iinclude
 CFLAGS = -Wall -Wextra -std=c11
+LDLIBS = -lbz2
 
 PREFIX ?= /usr/local
 INSTALL_LIB_DIR ?= $(PREFIX)/lib
@@ -46,7 +47,7 @@ $(LIB_TARGET): $(LIB_OBJS) | prepare_public_headers
 
 $(CLI_TARGET): $(CLI_SRC) $(LIB_TARGET) | prepare_public_headers
 	mkdir -p $(BIN_DIR)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $(CLI_SRC) $(LIB_TARGET)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $(CLI_SRC) $(LIB_TARGET) $(LDLIBS)
 
 $(BUILD_DIR)/%.o: %.c
 	mkdir -p $(dir $@)
