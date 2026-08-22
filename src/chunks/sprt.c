@@ -71,6 +71,9 @@ static int Sprite_parse(Reader *reader, DataWin *dw, Sprite *spr) {
                     Reader_skip(reader, 4); //sequenceOffset;
                     if (spr->sVersion >= 3) {
                         read(&nineSliceOffset, UInt32);
+                        if (nineSliceOffset != 0) {
+                            nineSliceOffset -= reader->offset; // Convert to relative offset
+                        }
                     }
                 }
                 read(&check, Int32);

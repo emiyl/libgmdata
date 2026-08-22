@@ -192,7 +192,7 @@ int Reader_readBool32At(Reader *reader, size_t offset, bool *out) {
     if (value != 0 && value != 1) {
         logWarn("[Reader_readBool32At] (%s): Invalid boolean value %u at offset %zu\n", reader->name, value, offset);
         *out = false;
-        return 0;
+        return -1;
     }
 
     *out = value != 0;
