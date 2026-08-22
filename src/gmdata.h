@@ -749,6 +749,76 @@ typedef struct {
 } FuncChunk;
 
 typedef struct {
+    float x;
+    float value;
+    float bezierX0;
+    float bezierY0;
+    float bezierX1;
+    float bezierY1;
+} AnimCurvePoint;
+
+typedef struct {
+    const char* name;
+    uint32_t curveType;
+    uint32_t iterations;
+    uint32_t pointCount;
+    AnimCurvePoint* points;
+    int32_t globalId;
+} AnimCurveChannel;
+
+typedef struct {
+    bool present;
+    const char* name;
+    uint32_t graphType;
+    uint32_t channelCount;
+    AnimCurveChannel* channels;
+    int32_t globalId;
+} AnimCurve;
+
+typedef struct {
+    uint32_t count;
+    AnimCurve* curves;
+    AnimCurveChannel** allChannels;
+    uint32_t allChannelsCount;
+} AcrvChunk;
+
+typedef struct {
+    uint32_t count;
+    const char** strings;
+} StrgChunk;
+
+typedef struct {
+    bool present;
+    uint32_t scaled;
+    uint32_t generatedMips;
+    uint32_t textureBlockSize;
+    int32_t textureWidth;
+    int32_t textureHeight;
+    int32_t indexInGroup;
+    uint32_t blobOffset;
+    uint32_t blobSize;
+    uint8_t* blobData;
+    bool mapped;
+} Texture;
+
+typedef struct {
+    uint32_t count;
+    Texture* textures;
+} TxtrChunk;
+
+typedef struct {
+    bool present;
+    uint32_t dataSize;
+    uint32_t dataOffset;
+    uint8_t* data;
+} AudioEntry;
+
+typedef struct {
+    uint32_t count;
+    AudioEntry* entries;
+} AudoChunk;
+
+typedef struct {
     bool present;
     const char* name;
     uint32_t length;
@@ -792,6 +862,10 @@ typedef struct {
     TmlnChunk tmln;
     ObjtChunk objt;
     RoomChunk room;
+    AcrvChunk acrv;
+    StrgChunk strg;
+    TxtrChunk txtr;
+    AudoChunk audo;
 
     DetectedFormat detectedFormat;
     uint8_t* mappedFile;

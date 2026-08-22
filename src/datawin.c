@@ -38,6 +38,10 @@ static void DataWin_reset(DataWin *dw) {
     memset(&dw->tmln, 0, sizeof(dw->tmln));
     memset(&dw->objt, 0, sizeof(dw->objt));
     memset(&dw->room, 0, sizeof(dw->room));
+    memset(&dw->acrv, 0, sizeof(dw->acrv));
+    memset(&dw->strg, 0, sizeof(dw->strg));
+    memset(&dw->txtr, 0, sizeof(dw->txtr));
+    memset(&dw->audo, 0, sizeof(dw->audo));
     memset(&dw->detectedFormat, 0, sizeof(dw->detectedFormat));
     dw->mappedFile = NULL;
     dw->file_data = NULL;
@@ -167,6 +171,12 @@ int DataWin_parse(DataWin *dw) {
     logInfo("Parsed chunk OBJT\n");
     assert(ROOM_parse(dw) == 0);
     logInfo("Parsed chunk ROOM\n");
+    assert(ACRV_parse(dw) == 0);
+    logInfo("Parsed chunk ACRV\n");
+    assert(TXTR_parse(dw) == 0);
+    logInfo("Parsed chunk TXTR\n");
+    assert(AUDO_parse(dw) == 0);
+    logInfo("Parsed chunk AUDO\n");
 
     return 0;
 }
@@ -265,6 +275,18 @@ int DataWin_free(DataWin *dw) {
     }
     if (ROOM_free(&dw->room)) {
         logWarn("[DataWin_free] Failed to free ROOM chunk\n");
+        result = -1;
+    }
+    if (ACRV_free(&dw->acrv)) {
+        logWarn("[DataWin_free] Failed to free ACRV chunk\n");
+        result = -1;
+    }
+    if (TXTR_free(&dw->txtr)) {
+        logWarn("[DataWin_free] Failed to free TXTR chunk\n");
+        result = -1;
+    }
+    if (AUDO_free(&dw->audo)) {
+        logWarn("[DataWin_free] Failed to free AUDO chunk\n");
         result = -1;
     }
 

@@ -2210,6 +2210,195 @@ const _: () = {
 };
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct AnimCurvePoint {
+    pub x: f32,
+    pub value: f32,
+    pub bezierX0: f32,
+    pub bezierY0: f32,
+    pub bezierX1: f32,
+    pub bezierY1: f32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of AnimCurvePoint"][::std::mem::size_of::<AnimCurvePoint>() - 24usize];
+    ["Alignment of AnimCurvePoint"][::std::mem::align_of::<AnimCurvePoint>() - 4usize];
+    ["Offset of field: AnimCurvePoint::x"][::std::mem::offset_of!(AnimCurvePoint, x) - 0usize];
+    ["Offset of field: AnimCurvePoint::value"]
+        [::std::mem::offset_of!(AnimCurvePoint, value) - 4usize];
+    ["Offset of field: AnimCurvePoint::bezierX0"]
+        [::std::mem::offset_of!(AnimCurvePoint, bezierX0) - 8usize];
+    ["Offset of field: AnimCurvePoint::bezierY0"]
+        [::std::mem::offset_of!(AnimCurvePoint, bezierY0) - 12usize];
+    ["Offset of field: AnimCurvePoint::bezierX1"]
+        [::std::mem::offset_of!(AnimCurvePoint, bezierX1) - 16usize];
+    ["Offset of field: AnimCurvePoint::bezierY1"]
+        [::std::mem::offset_of!(AnimCurvePoint, bezierY1) - 20usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct AnimCurveChannel {
+    pub name: *const ::std::os::raw::c_char,
+    pub curveType: u32,
+    pub iterations: u32,
+    pub pointCount: u32,
+    pub points: *mut AnimCurvePoint,
+    pub globalId: i32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of AnimCurveChannel"][::std::mem::size_of::<AnimCurveChannel>() - 40usize];
+    ["Alignment of AnimCurveChannel"][::std::mem::align_of::<AnimCurveChannel>() - 8usize];
+    ["Offset of field: AnimCurveChannel::name"]
+        [::std::mem::offset_of!(AnimCurveChannel, name) - 0usize];
+    ["Offset of field: AnimCurveChannel::curveType"]
+        [::std::mem::offset_of!(AnimCurveChannel, curveType) - 8usize];
+    ["Offset of field: AnimCurveChannel::iterations"]
+        [::std::mem::offset_of!(AnimCurveChannel, iterations) - 12usize];
+    ["Offset of field: AnimCurveChannel::pointCount"]
+        [::std::mem::offset_of!(AnimCurveChannel, pointCount) - 16usize];
+    ["Offset of field: AnimCurveChannel::points"]
+        [::std::mem::offset_of!(AnimCurveChannel, points) - 24usize];
+    ["Offset of field: AnimCurveChannel::globalId"]
+        [::std::mem::offset_of!(AnimCurveChannel, globalId) - 32usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct AnimCurve {
+    pub present: bool,
+    pub name: *const ::std::os::raw::c_char,
+    pub graphType: u32,
+    pub channelCount: u32,
+    pub channels: *mut AnimCurveChannel,
+    pub globalId: i32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of AnimCurve"][::std::mem::size_of::<AnimCurve>() - 40usize];
+    ["Alignment of AnimCurve"][::std::mem::align_of::<AnimCurve>() - 8usize];
+    ["Offset of field: AnimCurve::present"][::std::mem::offset_of!(AnimCurve, present) - 0usize];
+    ["Offset of field: AnimCurve::name"][::std::mem::offset_of!(AnimCurve, name) - 8usize];
+    ["Offset of field: AnimCurve::graphType"]
+        [::std::mem::offset_of!(AnimCurve, graphType) - 16usize];
+    ["Offset of field: AnimCurve::channelCount"]
+        [::std::mem::offset_of!(AnimCurve, channelCount) - 20usize];
+    ["Offset of field: AnimCurve::channels"][::std::mem::offset_of!(AnimCurve, channels) - 24usize];
+    ["Offset of field: AnimCurve::globalId"][::std::mem::offset_of!(AnimCurve, globalId) - 32usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct AcrvChunk {
+    pub count: u32,
+    pub curves: *mut AnimCurve,
+    pub allChannels: *mut *mut AnimCurveChannel,
+    pub allChannelsCount: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of AcrvChunk"][::std::mem::size_of::<AcrvChunk>() - 32usize];
+    ["Alignment of AcrvChunk"][::std::mem::align_of::<AcrvChunk>() - 8usize];
+    ["Offset of field: AcrvChunk::count"][::std::mem::offset_of!(AcrvChunk, count) - 0usize];
+    ["Offset of field: AcrvChunk::curves"][::std::mem::offset_of!(AcrvChunk, curves) - 8usize];
+    ["Offset of field: AcrvChunk::allChannels"]
+        [::std::mem::offset_of!(AcrvChunk, allChannels) - 16usize];
+    ["Offset of field: AcrvChunk::allChannelsCount"]
+        [::std::mem::offset_of!(AcrvChunk, allChannelsCount) - 24usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct StrgChunk {
+    pub count: u32,
+    pub strings: *mut *const ::std::os::raw::c_char,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of StrgChunk"][::std::mem::size_of::<StrgChunk>() - 16usize];
+    ["Alignment of StrgChunk"][::std::mem::align_of::<StrgChunk>() - 8usize];
+    ["Offset of field: StrgChunk::count"][::std::mem::offset_of!(StrgChunk, count) - 0usize];
+    ["Offset of field: StrgChunk::strings"][::std::mem::offset_of!(StrgChunk, strings) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct Texture {
+    pub present: bool,
+    pub scaled: u32,
+    pub generatedMips: u32,
+    pub textureBlockSize: u32,
+    pub textureWidth: i32,
+    pub textureHeight: i32,
+    pub indexInGroup: i32,
+    pub blobOffset: u32,
+    pub blobSize: u32,
+    pub blobData: *mut u8,
+    pub mapped: bool,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of Texture"][::std::mem::size_of::<Texture>() - 56usize];
+    ["Alignment of Texture"][::std::mem::align_of::<Texture>() - 8usize];
+    ["Offset of field: Texture::present"][::std::mem::offset_of!(Texture, present) - 0usize];
+    ["Offset of field: Texture::scaled"][::std::mem::offset_of!(Texture, scaled) - 4usize];
+    ["Offset of field: Texture::generatedMips"]
+        [::std::mem::offset_of!(Texture, generatedMips) - 8usize];
+    ["Offset of field: Texture::textureBlockSize"]
+        [::std::mem::offset_of!(Texture, textureBlockSize) - 12usize];
+    ["Offset of field: Texture::textureWidth"]
+        [::std::mem::offset_of!(Texture, textureWidth) - 16usize];
+    ["Offset of field: Texture::textureHeight"]
+        [::std::mem::offset_of!(Texture, textureHeight) - 20usize];
+    ["Offset of field: Texture::indexInGroup"]
+        [::std::mem::offset_of!(Texture, indexInGroup) - 24usize];
+    ["Offset of field: Texture::blobOffset"][::std::mem::offset_of!(Texture, blobOffset) - 28usize];
+    ["Offset of field: Texture::blobSize"][::std::mem::offset_of!(Texture, blobSize) - 32usize];
+    ["Offset of field: Texture::blobData"][::std::mem::offset_of!(Texture, blobData) - 40usize];
+    ["Offset of field: Texture::mapped"][::std::mem::offset_of!(Texture, mapped) - 48usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct TxtrChunk {
+    pub count: u32,
+    pub textures: *mut Texture,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of TxtrChunk"][::std::mem::size_of::<TxtrChunk>() - 16usize];
+    ["Alignment of TxtrChunk"][::std::mem::align_of::<TxtrChunk>() - 8usize];
+    ["Offset of field: TxtrChunk::count"][::std::mem::offset_of!(TxtrChunk, count) - 0usize];
+    ["Offset of field: TxtrChunk::textures"][::std::mem::offset_of!(TxtrChunk, textures) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct AudioEntry {
+    pub present: bool,
+    pub dataSize: u32,
+    pub dataOffset: u32,
+    pub data: *mut u8,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of AudioEntry"][::std::mem::size_of::<AudioEntry>() - 24usize];
+    ["Alignment of AudioEntry"][::std::mem::align_of::<AudioEntry>() - 8usize];
+    ["Offset of field: AudioEntry::present"][::std::mem::offset_of!(AudioEntry, present) - 0usize];
+    ["Offset of field: AudioEntry::dataSize"]
+        [::std::mem::offset_of!(AudioEntry, dataSize) - 4usize];
+    ["Offset of field: AudioEntry::dataOffset"]
+        [::std::mem::offset_of!(AudioEntry, dataOffset) - 8usize];
+    ["Offset of field: AudioEntry::data"][::std::mem::offset_of!(AudioEntry, data) - 16usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct AudoChunk {
+    pub count: u32,
+    pub entries: *mut AudioEntry,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of AudoChunk"][::std::mem::size_of::<AudoChunk>() - 16usize];
+    ["Alignment of AudoChunk"][::std::mem::align_of::<AudoChunk>() - 8usize];
+    ["Offset of field: AudoChunk::count"][::std::mem::offset_of!(AudoChunk, count) - 0usize];
+    ["Offset of field: AudoChunk::entries"][::std::mem::offset_of!(AudoChunk, entries) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct CodeEntry {
     pub present: bool,
     pub name: *const ::std::os::raw::c_char,
@@ -2283,13 +2472,17 @@ pub struct DataWin {
     pub tmln: TmlnChunk,
     pub objt: ObjtChunk,
     pub room: RoomChunk,
+    pub acrv: AcrvChunk,
+    pub strg: StrgChunk,
+    pub txtr: TxtrChunk,
+    pub audo: AudoChunk,
     pub detectedFormat: DetectedFormat,
     pub mappedFile: *mut u8,
     pub initialized: bool,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 696usize];
+    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 776usize];
     ["Alignment of DataWin"][::std::mem::align_of::<DataWin>() - 8usize];
     ["Offset of field: DataWin::file_data"][::std::mem::offset_of!(DataWin, file_data) - 0usize];
     ["Offset of field: DataWin::file_size"][::std::mem::offset_of!(DataWin, file_size) - 8usize];
@@ -2315,12 +2508,16 @@ const _: () = {
     ["Offset of field: DataWin::tmln"][::std::mem::offset_of!(DataWin, tmln) - 616usize];
     ["Offset of field: DataWin::objt"][::std::mem::offset_of!(DataWin, objt) - 632usize];
     ["Offset of field: DataWin::room"][::std::mem::offset_of!(DataWin, room) - 648usize];
+    ["Offset of field: DataWin::acrv"][::std::mem::offset_of!(DataWin, acrv) - 664usize];
+    ["Offset of field: DataWin::strg"][::std::mem::offset_of!(DataWin, strg) - 696usize];
+    ["Offset of field: DataWin::txtr"][::std::mem::offset_of!(DataWin, txtr) - 712usize];
+    ["Offset of field: DataWin::audo"][::std::mem::offset_of!(DataWin, audo) - 728usize];
     ["Offset of field: DataWin::detectedFormat"]
-        [::std::mem::offset_of!(DataWin, detectedFormat) - 664usize];
+        [::std::mem::offset_of!(DataWin, detectedFormat) - 744usize];
     ["Offset of field: DataWin::mappedFile"]
-        [::std::mem::offset_of!(DataWin, mappedFile) - 680usize];
+        [::std::mem::offset_of!(DataWin, mappedFile) - 760usize];
     ["Offset of field: DataWin::initialized"]
-        [::std::mem::offset_of!(DataWin, initialized) - 688usize];
+        [::std::mem::offset_of!(DataWin, initialized) - 768usize];
 };
 unsafe extern "C" {
     pub fn DataWin_loadFile(

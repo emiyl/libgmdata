@@ -535,6 +535,89 @@ fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
                 });
             }
         }
+        "ACRV" => {
+            let count = dw.acrv.count as usize;
+            if count == 0 || dw.acrv.curves.is_null() {
+                return items;
+            }
+            let Some(curves) = checked_ptr_slice(dw.acrv.curves, count) else {
+                return items;
+            };
+            for (idx, curve) in curves.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "present", curve.present);
+                push_field(&mut fields, "name", cstr_or_null(curve.name));
+                push_field(&mut fields, "graphType", curve.graphType);
+                push_field(&mut fields, "channelCount", curve.channelCount);
+                push_field(&mut fields, "globalId", curve.globalId);
+                items.push(ChunkItem {
+                    name: item_label(&cstr_or_null(curve.name), idx),
+                    fields,
+                });
+            }
+        }
+        "STRG" => {
+            let count = dw.strg.count as usize;
+            if count == 0 || dw.strg.strings.is_null() {
+                return items;
+            }
+            let Some(strings) = checked_ptr_slice(dw.strg.strings, count) else {
+                return items;
+            };
+            for (idx, string) in strings.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "value", cstr_or_null(*string));
+                items.push(ChunkItem {
+                    name: format!("String {}", idx),
+                    fields,
+                });
+            }
+        }
+        "TXTR" => {
+            let count = dw.txtr.count as usize;
+            if count == 0 || dw.txtr.textures.is_null() {
+                return items;
+            }
+            let Some(textures) = checked_ptr_slice(dw.txtr.textures, count) else {
+                return items;
+            };
+            for (idx, texture) in textures.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "present", texture.present);
+                push_field(&mut fields, "scaled", texture.scaled);
+                push_field(&mut fields, "generatedMips", texture.generatedMips);
+                push_field(&mut fields, "textureBlockSize", texture.textureBlockSize);
+                push_field(&mut fields, "textureWidth", texture.textureWidth);
+                push_field(&mut fields, "textureHeight", texture.textureHeight);
+                push_field(&mut fields, "indexInGroup", texture.indexInGroup);
+                push_field(&mut fields, "blobOffset", texture.blobOffset);
+                push_field(&mut fields, "blobSize", texture.blobSize);
+                push_field(&mut fields, "mapped", texture.mapped);
+                items.push(ChunkItem {
+                    name: format!("Texture {}", idx),
+                    fields,
+                });
+            }
+        }
+        "AUDO" => {
+            let count = dw.audo.count as usize;
+            if count == 0 || dw.audo.entries.is_null() {
+                return items;
+            }
+            let Some(entries) = checked_ptr_slice(dw.audo.entries, count) else {
+                return items;
+            };
+            for (idx, entry) in entries.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "present", entry.present);
+                push_field(&mut fields, "dataSize", entry.dataSize);
+                push_field(&mut fields, "dataOffset", entry.dataOffset);
+                items.push(ChunkItem {
+                    name: format!("Audio {}", idx),
+                    fields,
+                });
+            }
+        }
         _ => {}
     }
 
@@ -691,6 +774,28 @@ fn build_chunk_fields(name: &str, dw: &DataWin) -> Vec<ChunkField> {
             push_field(&mut fields, "count", r.count);
             add_count_field(&mut fields, "rooms", r.rooms as *mut std::ffi::c_void, r.count as usize);
         }
+        "ACRV" => {
+            let a = &dw.acrv;
+            push_field(&mut fields, "count", a.count);
+            add_count_field(&mut fields, "curves", a.curves as *mut std::ffi::c_void, a.count as usize);
+            push_field(&mut fields, "allChannelsCount", a.allChannelsCount);
+            add_count_field(&mut fields, "allChannels", a.allChannels as *mut std::ffi::c_void, a.allChannelsCount as usize);
+        }
+        "STRG" => {
+            let s = &dw.strg;
+            push_field(&mut fields, "count", s.count);
+            add_count_field(&mut fields, "strings", s.strings as *mut std::ffi::c_void, s.count as usize);
+        }
+        "TXTR" => {
+            let t = &dw.txtr;
+            push_field(&mut fields, "count", t.count);
+            add_count_field(&mut fields, "textures", t.textures as *mut std::ffi::c_void, t.count as usize);
+        }
+        "AUDO" => {
+            let a = &dw.audo;
+            push_field(&mut fields, "count", a.count);
+            add_count_field(&mut fields, "entries", a.entries as *mut std::ffi::c_void, a.count as usize);
+        }
         _ => {}
     }
 
@@ -747,6 +852,10 @@ impl eframe::App for App {
                             "TPAG" => "Texture Pages",
                             "OBJT" => "Objects",
                             "ROOM" => "Rooms",
+                            "ACRV" => "Animation Curves",
+                            "STRG" => "Strings",
+                            "TXTR" => "Textures",
+                            "AUDO" => "Audio",
                             name => name,
                         };
 

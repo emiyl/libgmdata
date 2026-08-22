@@ -63,4 +63,16 @@ int OBJT_free(ObjtChunk *o);
 int ROOM_parse(DataWin *dw);
 int ROOM_free(RoomChunk *r);
 
+int STRG_parse(DataWin *dw);
+int STRG_free(StrgChunk *s);
+
+int ACRV_parse(DataWin *dw);
+int ACRV_free(AcrvChunk *a);
+
+int TXTR_parse(DataWin *dw);
+int TXTR_free(TxtrChunk *t);
+
+int AUDO_parse(DataWin *dw);
+int AUDO_free(AudoChunk *a);
+
 #endif
