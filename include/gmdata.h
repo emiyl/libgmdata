@@ -870,6 +870,9 @@ typedef struct {
     DetectedFormat detectedFormat;
     uint8_t* mappedFile;
 
+    bool lazyLoadRooms;
+    bool lazyLoadTextures;
+    bool lazyLoadAudio;
     bool initialized;
 } DataWin;
 
