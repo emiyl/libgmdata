@@ -197,7 +197,7 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
         DataWin_bumpVersionTo(dw, dw->gen8.major, dw->gen8.minor, dw->gen8.release, dw->gen8.build);
     }
 
-    #define parse(option, chunk) if (effective.parse##option) { assert(chunk##_parse(dw) == 0); logInfo("Parsed chunk " #chunk "\n"); }
+    #define parse(option, chunk) if (effective.parse##option) { logInfo("Parsing chunk " #chunk "\n"); assert(chunk##_parse(dw) == 0); }
     parse(Optn, OPTN);
     parse(Lang, LANG);
     parse(Extn, EXTN);
