@@ -151,8 +151,6 @@ static uint8_t *decode_qoi_rgba(const uint8_t *data, size_t data_size, int *out_
         *out_h = height;
     }
 
-    logInfo("decode_qoi_rgba: Successfully decoded QOI image: width=%d, height=%d, pixel_count=%zu\n", width, height, (size_t)width * (size_t)height);
-
     return raw;
 }
 
