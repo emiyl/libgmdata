@@ -1,7 +1,20 @@
+use std::process::Command;
+
 fn main() {
+    let status = Command::new("make")
+        .current_dir("..")
+        .status()
+        .expect("failed to invoke native C build via make");
+    if !status.success() {
+        panic!("native C library build failed");
+    }
+
     println!("cargo:rustc-link-search=native=../build/lib");
     println!("cargo:rustc-link-lib=static=gmdata");
     println!("cargo:rustc-link-lib=bz2");
+    println!("cargo:rerun-if-changed=../Makefile");
+    println!("cargo:rerun-if-changed=../src");
+    println!("cargo:rerun-if-changed=../include");
 
     let bindings = bindgen::Builder::default()
         .header("../include/gmdata.h")
