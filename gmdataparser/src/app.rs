@@ -949,120 +949,133 @@ impl eframe::App for App {
                     });
 
                 let pane_height = ui.available_height().max(260.0);
-                ui.columns(2, |columns| {
-                    columns[0].set_min_width(180.0);
-                    columns[0].set_min_height(pane_height);
-                    columns[0].vertical(|ui| {
-                        let fill_height = ui.available_height().max(240.0);
-                        ui.set_min_height(fill_height);
-                        ui.heading("Items");
-                        ui.separator();
+                let total_width = ui.available_width().max(1.0);
+                let list_width = (total_width * 0.25).clamp(180.0, 360.0);
+                let data_width = total_width - list_width;
+                let row_width = list_width;
 
-                        let mut filter_text = self.chunks[active_chunk_idx].item_filter.clone();
-                        ui.horizontal(|ui| {
-                            ui.label("Search");
-                            ui.add_sized([150.0, 0.0], egui::TextEdit::singleline(&mut filter_text));
-                        });
-                        if filter_text != self.chunks[active_chunk_idx].item_filter {
-                            self.chunks[active_chunk_idx].item_filter = filter_text;
-                            self.chunks[active_chunk_idx].visible_item_count = 0;
-                        }
+                ui.horizontal(|ui| {
+                    ui.allocate_ui(egui::vec2(list_width, pane_height), |ui| {
+                        ui.set_min_height(pane_height);
+                        ui.vertical(|ui| {
+                            ui.heading("Items");
+                            ui.separator();
 
-                        let query = self.chunks[active_chunk_idx].item_filter.trim().to_ascii_lowercase();
-                        let filtered_indices: Vec<usize> = self.chunks[active_chunk_idx]
-                            .items
-                            .iter()
-                            .enumerate()
-                            .filter_map(|(idx, item)| {
-                                if matches_item_query(item, &query) {
-                                    Some(idx)
-                                } else {
-                                    None
-                                }
-                            })
-                            .collect();
-
-                        if filtered_indices.is_empty() {
-                            ui.label("No matching items.");
-                            return;
-                        }
-
-                        let item_height = 24.0;
-                        let window_size = 100usize;
-                        let step_size = 25usize;
-
-                        let fill_height = ui.available_height().max(240.0);
-                        ui.set_min_height(fill_height);
-
-                        egui::ScrollArea::vertical().show_viewport(ui, |ui, viewport| {
-                            let active_chunk = &mut self.chunks[active_chunk_idx];
-                            let total_height = filtered_indices.len() as f32 * item_height;
-                            ui.set_min_height(total_height.max(fill_height));
-
-                            let scroll_index = (viewport.min.y / item_height).floor() as usize;
-                            let mut window_start = (scroll_index / step_size) * step_size;
-                            window_start = window_start.min(filtered_indices.len().saturating_sub(window_size));
-                            active_chunk.visible_item_count = window_start;
-
-                            let render_start = window_start;
-                            let render_end = (render_start + window_size).min(filtered_indices.len());
-
-                            ui.add_space(render_start as f32 * item_height);
-                            for &idx in &filtered_indices[render_start..render_end] {
-                                let item = &active_chunk.items[idx];
-                                let selected = active_chunk.active_item == idx;
-                                if ui.selectable_label(selected, item.name.clone()).clicked() {
-                                    active_chunk.active_item = idx;
-                                }
+                            let mut filter_text = self.chunks[active_chunk_idx].item_filter.clone();
+                            ui.horizontal(|ui| {
+                                ui.label("Search");
+                                ui.add_sized([150.0, 0.0], egui::TextEdit::singleline(&mut filter_text));
+                            });
+                            if filter_text != self.chunks[active_chunk_idx].item_filter {
+                                self.chunks[active_chunk_idx].item_filter = filter_text;
+                                self.chunks[active_chunk_idx].visible_item_count = 0;
                             }
-                            ui.add_space((filtered_indices.len() - render_end) as f32 * item_height);
 
-                            if render_end < filtered_indices.len() {
-                                ui.label("Scroll for more...");
+                            let query = self.chunks[active_chunk_idx].item_filter.trim().to_ascii_lowercase();
+                            let filtered_indices: Vec<usize> = self.chunks[active_chunk_idx]
+                                .items
+                                .iter()
+                                .enumerate()
+                                .filter_map(|(idx, item)| {
+                                    if matches_item_query(item, &query) {
+                                        Some(idx)
+                                    } else {
+                                        None
+                                    }
+                                })
+                                .collect();
+
+                            if filtered_indices.is_empty() {
+                                ui.label("No matching items.");
+                                return;
                             }
+
+                            let item_height = 24.0;
+                            let window_size = 100usize;
+                            let step_size = 25usize;
+
+                            let fill_height = ui.available_height().max(240.0);
+                            ui.set_min_height(fill_height);
+
+                            egui::ScrollArea::vertical()
+                                .min_scrolled_width(row_width)
+                                .show_viewport(ui, |ui, viewport| {
+                                    let active_chunk = &mut self.chunks[active_chunk_idx];
+                                    let total_height = filtered_indices.len() as f32 * item_height;
+                                    ui.set_min_height(total_height.max(fill_height));
+
+                                    let scroll_index = (viewport.min.y / item_height).floor() as usize;
+                                    let mut window_start = (scroll_index / step_size) * step_size;
+                                    window_start = window_start.min(filtered_indices.len().saturating_sub(window_size));
+                                    active_chunk.visible_item_count = window_start;
+
+                                    let render_start = window_start;
+                                    let render_end = (render_start + window_size).min(filtered_indices.len());
+
+                                    ui.add_space(render_start as f32 * item_height);
+                                    for &idx in &filtered_indices[render_start..render_end] {
+                                        let item = &active_chunk.items[idx];
+                                        let selected = active_chunk.active_item == idx;
+                                        let row_response = ui.allocate_ui(egui::vec2(row_width, item_height), |ui| {
+                                            ui.set_min_width(row_width);
+                                            ui.set_max_width(row_width);
+                                            ui.selectable_label(selected, item.name.clone())
+                                        });
+                                        if row_response.response.clicked() {
+                                            active_chunk.active_item = idx;
+                                        }
+                                    }
+                                    ui.add_space((filtered_indices.len() - render_end) as f32 * item_height);
+
+                                    if render_end < filtered_indices.len() {
+                                        ui.label("Scroll for more...");
+                                    }
+                                });
                         });
                     });
 
-                    columns[1].set_min_height(pane_height);
-                    columns[1].vertical(|ui| {
-                        let fill_height = ui.available_height().max(240.0);
-                        ui.set_min_height(fill_height);
-                        egui::ScrollArea::vertical()
-                            .id_salt("chunk-item-scroll")
-                            .auto_shrink([false, false])
-                            .show(ui, |ui| {
-                                ui.group(|ui| {
-                                    ui.label(format!("Chunk: {}", active_chunk_name));
-                                    ui.label(format!("Offset: {}", active_chunk_offset));
-                                    ui.label(format!("Length: {}", active_chunk_length));
-                                    ui.label(format!("Item: {}", active_item.name));
-                                    ui.separator();
+                    ui.allocate_ui(egui::vec2(data_width, pane_height), |ui| {
+                        ui.set_min_height(pane_height);
+                        ui.vertical(|ui| {
+                            let fill_height = ui.available_height().max(240.0);
+                            ui.set_min_height(fill_height);
+                            egui::ScrollArea::vertical()
+                                .id_salt("chunk-item-scroll")
+                                .auto_shrink([false, false])
+                                .show(ui, |ui| {
+                                    ui.group(|ui| {
+                                        ui.label(format!("Chunk: {}", active_chunk_name));
+                                        ui.label(format!("Offset: {}", active_chunk_offset));
+                                        ui.label(format!("Length: {}", active_chunk_length));
+                                        ui.label(format!("Item: {}", active_item.name));
+                                        ui.separator();
 
-                                    egui::Grid::new(format!(
-                                        "chunk-item-fields-{}-{}",
-                                        active_chunk_name,
-                                        active_item.name
-                                    ))
-                                    .num_columns(2)
-                                    .spacing([12.0, 4.0])
-                                    .show(ui, |ui| {
-                                        for field in &active_item.fields {
-                                            ui.label(&field.name);
-                                            ui.label(&field.value);
-                                            ui.end_row();
+                                        egui::Grid::new(format!(
+                                            "chunk-item-fields-{}-{}",
+                                            active_chunk_name,
+                                            active_item.name
+                                        ))
+                                        .num_columns(2)
+                                        .spacing([12.0, 4.0])
+                                        .show(ui, |ui| {
+                                            for field in &active_item.fields {
+                                                ui.label(&field.name);
+                                                ui.label(&field.value);
+                                                ui.end_row();
+                                            }
+                                        });
+
+                                        if active_chunk_name == "TXTR" || active_chunk_name == "TPAG" || active_chunk_name == "EMBI" {
+                                            ui.separator();
+                                            self.render_texture_preview(ui, &active_chunk_name, active_item_idx, None);
+                                        }
+
+                                        if active_chunk_name == "SOND" || active_chunk_name == "AUDO" {
+                                            self.render_audio_player_ui(ui, active_item_idx, &active_chunk_name);
                                         }
                                     });
-
-                                    if active_chunk_name == "TXTR" || active_chunk_name == "TPAG" || active_chunk_name == "EMBI" {
-                                        ui.separator();
-                                        self.render_texture_preview(ui, &active_chunk_name, active_item_idx, None);
-                                    }
-
-                                    if active_chunk_name == "SOND" || active_chunk_name == "AUDO" {
-                                        self.render_audio_player_ui(ui, active_item_idx, &active_chunk_name);
-                                    }
                                 });
-                            });
+                        });
                     });
                 });
             });
