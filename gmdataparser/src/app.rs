@@ -397,23 +397,27 @@ impl App {
 
         ui.ctx().request_repaint_after(Duration::from_millis(60));
 
-        ui.centered_and_justified(|ui| {
-            ui.vertical_centered(|ui| {
-                ui.heading("Loading data.win");
-                ui.add_space(12.0);
-                ui.label(format!("File: {}", self.file_path));
-                if let Some(state) = self.loading.as_ref() {
-                    if state.total_chunks > 0 {
-                        ui.label(format!(
-                            "Chunks: {}/{} parsed",
-                            state.parsed_chunks, state.total_chunks
-                        ));
-                    }
-                }
-                ui.add_space(18.0);
-                ui.add(egui::ProgressBar::new(progress).text(message));
+        egui::Frame::default()
+            .inner_margin(egui::Margin::same(20))
+            .show(ui, |ui| {
+                ui.centered_and_justified(|ui| {
+                    ui.vertical_centered(|ui| {
+                        ui.heading("Loading data.win");
+                        ui.add_space(12.0);
+                        ui.label(format!("File: {}", self.file_path));
+                        if let Some(state) = self.loading.as_ref() {
+                            if state.total_chunks > 0 {
+                                ui.label(format!(
+                                    "Chunks: {}/{} parsed",
+                                    state.parsed_chunks, state.total_chunks
+                                ));
+                            }
+                        }
+                        ui.add_space(18.0);
+                        ui.add(egui::ProgressBar::new(progress).text(message));
+                    });
+                });
             });
-        });
     }
 
     fn texture_preview_size(&self, chunk_name: &str, active_item_idx: usize) -> Option<egui::Vec2> {
