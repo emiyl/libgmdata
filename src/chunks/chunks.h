@@ -78,6 +78,24 @@ int FEDS_free(FedsChunk *f);
 int FEAT_parse(DataWin *dw);
 int FEAT_free(FeatChunk *f);
 
+int SEQN_parse(DataWin *dw);
+int SEQN_free(SeqnChunk *s);
+
+int TAGS_parse(DataWin *dw);
+int TAGS_free(TagsChunk *t);
+
+int EMBI_parse(DataWin *dw);
+int EMBI_free(EmbiChunk *e);
+
+int PSEM_parse(DataWin *dw);
+int PSEM_free(PsemChunk *p);
+
+int PSYS_parse(DataWin *dw);
+int PSYS_free(PsysChunk *p);
+
+int GMEN_parse(DataWin *dw);
+int GMEN_free(GmenChunk *g);
+
 int DAFL_parse(DataWin *dw);
 int DAFL_free(DaflChunk *d);
 

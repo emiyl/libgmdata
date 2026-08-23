@@ -41,6 +41,12 @@ static void DataWin_reset(DataWin *dw) {
     memset(&dw->acrv, 0, sizeof(dw->acrv));
     memset(&dw->feds, 0, sizeof(dw->feds));
     memset(&dw->feat, 0, sizeof(dw->feat));
+    memset(&dw->seqn, 0, sizeof(dw->seqn));
+    memset(&dw->tags, 0, sizeof(dw->tags));
+    memset(&dw->embi, 0, sizeof(dw->embi));
+    memset(&dw->psem, 0, sizeof(dw->psem));
+    memset(&dw->psys, 0, sizeof(dw->psys));
+    memset(&dw->gmen, 0, sizeof(dw->gmen));
     memset(&dw->dafl, 0, sizeof(dw->dafl));
     memset(&dw->uilr, 0, sizeof(dw->uilr));
     memset(&dw->tgin, 0, sizeof(dw->tgin));
@@ -90,6 +96,12 @@ void DataWin_initParserOptions(DataWinParserOptions *options) {
     options->parseAcrv = true;
     options->parseFeds = true;
     options->parseFeat = true;
+    options->parseSeqn = true;
+    options->parseTags = true;
+    options->parseEmbi = true;
+    options->parsePsem = true;
+    options->parsePsys = true;
+    options->parseGmen = true;
     options->parseDafl = true;
     options->parseUilr = true;
     options->loadType = DATAWINLOADTYPE_LOAD_PER_CHUNK;
@@ -259,6 +271,12 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
     parse(Acrv, ACRV);
     parse(Feds, FEDS);
     parse(Feat, FEAT);
+    parse(Seqn, SEQN);
+    parse(Tags, TAGS);
+    parse(Embi, EMBI);
+    parse(Psem, PSEM);
+    parse(Psys, PSYS);
+    parse(Gmen, GMEN);
     parse(Dafl, DAFL);
     parse(Uilr, UILR);
 
@@ -379,6 +397,30 @@ int DataWin_free(DataWin *dw) {
     }
     if (FEAT_free(&dw->feat)) {
         logWarn("[DataWin_free] Failed to free FEAT chunk\n");
+        result = -1;
+    }
+    if (SEQN_free(&dw->seqn)) {
+        logWarn("[DataWin_free] Failed to free SEQN chunk\n");
+        result = -1;
+    }
+    if (TAGS_free(&dw->tags)) {
+        logWarn("[DataWin_free] Failed to free TAGS chunk\n");
+        result = -1;
+    }
+    if (EMBI_free(&dw->embi)) {
+        logWarn("[DataWin_free] Failed to free EMBI chunk\n");
+        result = -1;
+    }
+    if (PSEM_free(&dw->psem)) {
+        logWarn("[DataWin_free] Failed to free PSEM chunk\n");
+        result = -1;
+    }
+    if (PSYS_free(&dw->psys)) {
+        logWarn("[DataWin_free] Failed to free PSYS chunk\n");
+        result = -1;
+    }
+    if (GMEN_free(&dw->gmen)) {
+        logWarn("[DataWin_free] Failed to free GMEN chunk\n");
         result = -1;
     }
     if (DAFL_free(&dw->dafl)) {

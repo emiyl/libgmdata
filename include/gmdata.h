@@ -800,6 +800,31 @@ typedef struct {
 
 typedef struct {
     uint32_t count;
+} SeqnChunk;
+
+typedef struct {
+    uint32_t count;
+    const char** strings;
+} TagsChunk;
+
+typedef struct {
+    uint32_t count;
+} EmbiChunk;
+
+typedef struct {
+    uint32_t count;
+} PsemChunk;
+
+typedef struct {
+    uint32_t count;
+} PsysChunk;
+
+typedef struct {
+    uint32_t count;
+} GmenChunk;
+
+typedef struct {
+    uint32_t count;
 } DaflChunk;
 
 typedef struct {
@@ -912,6 +937,12 @@ typedef struct {
     AcrvChunk acrv;
     FedsChunk feds;
     FeatChunk feat;
+    SeqnChunk seqn;
+    TagsChunk tags;
+    EmbiChunk embi;
+    PsemChunk psem;
+    PsysChunk psys;
+    GmenChunk gmen;
     DaflChunk dafl;
     UilrChunk uilr;
     TginChunk tgin;
@@ -969,6 +1000,12 @@ typedef struct {
     bool parseAcrv;
     bool parseFeds;
     bool parseFeat;
+    bool parseSeqn;
+    bool parseTags;
+    bool parseEmbi;
+    bool parsePsem;
+    bool parsePsys;
+    bool parseGmen;
     bool parseDafl;
     bool parseUilr;
     bool skipLoadingPreciseMasksForNonPreciseSprites;
