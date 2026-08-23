@@ -7,9 +7,7 @@ static void TGIN_group_free(TextureGroupInfo *group);
 
 static int TGIN_simpleList_parse(Reader *reader, DataWin *dw, int32_t **out_items, uint32_t *out_count) {
     uint32_t count = 0;
-    if (Reader_readUInt32(reader, &count) != 0) {
-        return -1;
-    }
+    read(&count, UInt32);
 
     if (count == 0) {
         *out_items = NULL;
@@ -21,6 +19,7 @@ static int TGIN_simpleList_parse(Reader *reader, DataWin *dw, int32_t **out_item
     for (uint32_t i = 0; i < count; ++i) {
         if (Reader_readInt32(reader, &items[i]) != 0) {
             free(items);
+            logError("[TGIN_simpleList_parse] Failed to read item %u of %u\n", i, count);
             return -1;
         }
     }
@@ -53,49 +52,68 @@ static int TGIN_group_parse(Reader *reader, DataWin *dw, TextureGroupInfo *group
     uint32_t fontsPtr = 0;
     uint32_t tilesetsPtr = 0;
 
-    if (Reader_readUInt32(reader, &texturePagesPtr) != 0) return -1;
-    if (Reader_readUInt32(reader, &spritesPtr) != 0) return -1;
+    read(&texturePagesPtr, UInt32);
+    read(&spritesPtr, UInt32);
     if (!DataWin_isVersionAtLeast(dw, 2023, 1, 0, 0)) {
-        if (Reader_readUInt32(reader, &spineSpritesPtr) != 0) return -1;
+        read(&spineSpritesPtr, UInt32);
     }
-    if (Reader_readUInt32(reader, &fontsPtr) != 0) return -1;
-    if (Reader_readUInt32(reader, &tilesetsPtr) != 0) return -1;
+    read(&fontsPtr, UInt32);
+    read(&tilesetsPtr, UInt32);
+
+    const uint32_t baseOffset = reader->offset;
+    #define TGIN_REL_PTR(ptr) ((ptr) == 0U ? 0U : ((ptr) >= baseOffset ? ((ptr) - baseOffset) : (ptr)))
 
     if (texturePagesPtr != 0) {
-        Reader_seek(reader, texturePagesPtr);
+        uint32_t relativePtr = TGIN_REL_PTR(texturePagesPtr);
+        if (Reader_seek(reader, relativePtr) != 0) {
+            return -1;
+        }
         if (TGIN_simpleList_parse(reader, dw, &group->texturePages, &group->texturePageCount) != 0) {
             return -1;
         }
     }
 
     if (spritesPtr != 0) {
-        Reader_seek(reader, spritesPtr);
+        uint32_t relativePtr = TGIN_REL_PTR(spritesPtr);
+        if (Reader_seek(reader, relativePtr) != 0) {
+            return -1;
+        }
         if (TGIN_simpleList_parse(reader, dw, &group->sprites, &group->spriteCount) != 0) {
             return -1;
         }
     }
 
     if (spineSpritesPtr != 0) {
-        Reader_seek(reader, spineSpritesPtr);
+        uint32_t relativePtr = TGIN_REL_PTR(spineSpritesPtr);
+        if (Reader_seek(reader, relativePtr) != 0) {
+            return -1;
+        }
         if (TGIN_simpleList_parse(reader, dw, &group->spineSprites, &group->spineSpriteCount) != 0) {
             return -1;
         }
     }
 
     if (fontsPtr != 0) {
-        Reader_seek(reader, fontsPtr);
+        uint32_t relativePtr = TGIN_REL_PTR(fontsPtr);
+        if (Reader_seek(reader, relativePtr) != 0) {
+            return -1;
+        }
         if (TGIN_simpleList_parse(reader, dw, &group->fonts, &group->fontCount) != 0) {
             return -1;
         }
     }
 
     if (tilesetsPtr != 0) {
-        Reader_seek(reader, tilesetsPtr);
+        uint32_t relativePtr = TGIN_REL_PTR(tilesetsPtr);
+        if (Reader_seek(reader, relativePtr) != 0) {
+            return -1;
+        }
         if (TGIN_simpleList_parse(reader, dw, &group->tilesets, &group->tileSetCount) != 0) {
             return -1;
         }
     }
 
+    #undef TGIN_REL_PTR
     return 0;
 }
 
@@ -107,19 +125,17 @@ int TGIN_parse(DataWin *dw) {
     if (chunk.offset + chunk.length > dw->file_size) return -1;
 
     const uint8_t *base = dw->file_data + chunk.offset;
-    Reader reader;
-    Reader_init(&reader, base, chunk.length, chunk.offset, "TGIN");
+    Reader re; Reader *reader = &re;
+    Reader_init(reader, base, chunk.length, chunk.offset, "TGIN");
 
     uint32_t version = 0;
-    if (Reader_readUInt32(&reader, &version) != 0) {
-        return -1;
-    }
+    read(&version, UInt32);
     if (version != 1U) {
         logWarn("[TGIN_parse] Unexpected TGIN version: %u\n", version);
     }
 
     return Reader_readAndParsePointerTable(
-        &reader, dw,
+        reader, dw,
         (void **)&t->groups, NULL,
         &t->count, sizeof(TextureGroupInfo),
         TGIN_pointerTable_parse,
