@@ -15,6 +15,8 @@ int TAGS_parse(DataWin *dw) {
         return 0;
     }
     if (chunk.offset + chunk.length > dw->file_size) {
+        logError("[TAGS_parse] Invalid chunk offset/length: offset=%zu length=%zu file_size=%zu\n",
+                 chunk.offset, chunk.length, dw->file_size);
         return -1;
     }
 
@@ -39,70 +41,77 @@ int TAGS_parse(DataWin *dw) {
     t->asset_tag_count = 0;
     t->asset_tags = NULL;
 
-    if (Reader_readUInt32(reader, &t->count) != 0) {
-        TAGS_free(t);
-        return -1;
-    }
+    read(&t->count, UInt32);
 
     if (t->count > 0U) {
         t->strings = (char **)safeCalloc(t->count, sizeof(char *));
-        if (t->strings == NULL) {
-            t->count = 0;
-            return -1;
-        }
 
         for (uint32_t i = 0; i < t->count; ++i) {
-            if (Reader_readString(reader, dw, (const char **)&t->strings[i]) != 0) {
-                TAGS_free(t);
-                return -1;
-            }
+            readString((const char**)&t->strings[i], dw);
         }
     }
 
-    if (Reader_readUInt32(reader, &t->asset_tag_count) != 0) {
-        TAGS_free(t);
-        return -1;
-    }
+    read(&t->asset_tag_count, UInt32);
 
     if (t->asset_tag_count > 0U) {
-        t->asset_tags = (AssetTagEntry *)safeCalloc(t->asset_tag_count, sizeof(AssetTagEntry));
-        if (t->asset_tags == NULL) {
-            TAGS_free(t);
-            return -1;
-        }
+        uint32_t *asset_record_offsets = (uint32_t *)safeCalloc(t->asset_tag_count, sizeof(uint32_t));
 
         for (uint32_t i = 0; i < t->asset_tag_count; ++i) {
-            uint32_t id = 0;
-            uint32_t tag_count = 0;
+            read(&asset_record_offsets[i], UInt32);
+        }
 
-            if (Reader_readUInt32(reader, &id) != 0) {
-                TAGS_free(t);
-                return -1;
+        t->asset_tags = (AssetTagEntry *)safeCalloc(t->asset_tag_count, sizeof(AssetTagEntry));
+
+        for (uint32_t i = 0; i < t->asset_tag_count; ++i) {
+            const uint32_t absolute_offset = asset_record_offsets[i];
+            if (absolute_offset == 0U) {
+                continue;
             }
-            if (Reader_readUInt32(reader, &tag_count) != 0) {
-                TAGS_free(t);
-                return -1;
+
+            if (absolute_offset < chunk.offset || absolute_offset + 8U > chunk.offset + chunk.length) {
+                logWarn("[TAGS_parse] Asset tag record pointer out of range at index=%u offset=%u chunk_offset=%zu chunk_length=%u\n",
+                        i, absolute_offset, chunk.offset, chunk.length);
+                continue;
             }
+
+            const uint8_t *record = dw->file_data + absolute_offset;
+            const uint32_t id = read_u32_le_at(record, dw->file_size, 0U);
+            const uint32_t tag_count = read_u32_le_at(record, dw->file_size, 4U);
 
             t->asset_tags[i].id = id;
             t->asset_tags[i].tag_count = tag_count;
             t->asset_tags[i].tags = NULL;
 
             if (tag_count > 0U) {
-                t->asset_tags[i].tags = (char **)safeCalloc(tag_count, sizeof(char *));
-                if (t->asset_tags[i].tags == NULL) {
-                    TAGS_free(t);
-                    return -1;
-                }
+                if (absolute_offset + 8U + tag_count * sizeof(uint32_t) > chunk.offset + chunk.length) {
+                    logWarn("[TAGS_parse] Asset tag record exceeds chunk bounds at index=%u offset=%u tag_count=%u\n",
+                            i, absolute_offset, tag_count);
+                    t->asset_tags[i].tag_count = 0U;
+                } else {
+                    t->asset_tags[i].tags = (char **)safeCalloc(tag_count, sizeof(char *));
 
-                for (uint32_t j = 0; j < tag_count; ++j) {
-                    if (Reader_readString(reader, dw, (const char **)&t->asset_tags[i].tags[j]) != 0) {
-                        TAGS_free(t);
-                        return -1;
+                    for (uint32_t j = 0; j < tag_count; ++j) {
+                        const uint8_t *tag_slot = record + 8U + j * sizeof(uint32_t);
+                        uint32_t tag_offset = read_u32_le_at(tag_slot, dw->file_size, 0U);
+
+                        if (tag_offset == 0U) {
+                            t->asset_tags[i].tags[j] = NULL;
+                            continue;
+                        }
+
+                        Reader tag_reader;
+                        Reader_init(&tag_reader, tag_slot, sizeof(uint32_t), absolute_offset + 8U + j * sizeof(uint32_t), "TAGS tag");
+                        if (Reader_readString(&tag_reader, dw, (const char**)&t->asset_tags[i].tags[j]) != 0) {
+                            logWarn("[TAGS_parse] Failed to read tag string at asset index=%u tag index=%u offset=%u\n",
+                                    i, j, tag_offset);
+                            t->asset_tags[i].tags[j] = NULL;
+                        }
                     }
                 }
             }
         }
+
+        free(asset_record_offsets);
     }
 
     return 0;
