@@ -46,6 +46,60 @@ pub(crate) enum LoadResult {
     Failed(String),
 }
 
+fn chunk_bytes_for_view(dw: &DataWin, offset: u32, length: u32) -> &[u8] {
+    if dw.file_data.is_null() || dw.file_size == 0 {
+        return &[];
+    }
+
+    let start = offset as usize;
+    if start >= dw.file_size {
+        return &[];
+    }
+
+    let remaining = dw.file_size.saturating_sub(start);
+    let chunk_len = length as usize;
+    let view_len = remaining.min(chunk_len);
+
+    unsafe { std::slice::from_raw_parts(dw.file_data.add(start), view_len) }
+}
+
+fn format_hex_dump(bytes: &[u8], start_offset: usize) -> String {
+    const BYTES_PER_LINE: usize = 16;
+
+    let mut output = String::new();
+    for (line_index, line) in bytes.chunks(BYTES_PER_LINE).enumerate() {
+        let offset = start_offset + line_index * BYTES_PER_LINE;
+        let mut hex_bytes = String::new();
+        let mut ascii = String::new();
+
+        for (i, &byte) in line.iter().enumerate() {
+            if i > 0 {
+                hex_bytes.push(' ');
+            }
+            hex_bytes.push_str(&format!("{:02x}", byte));
+            ascii.push(if byte.is_ascii_graphic() || byte == b' ' {
+                byte as char
+            } else {
+                '.'
+            });
+        }
+
+        if line.len() < BYTES_PER_LINE {
+            let padding = (BYTES_PER_LINE - line.len()) * 3;
+            hex_bytes.push_str(&" ".repeat(padding));
+            ascii.push_str(&" ".repeat(BYTES_PER_LINE - line.len()));
+        }
+
+        output.push_str(&format!("{:08x}: {:<47} |{:<16}|\n", offset, hex_bytes, ascii));
+    }
+
+    if output.is_empty() {
+        output.push_str("00000000: <empty chunk>\n");
+    }
+
+    output.trim_end().to_string()
+}
+
 pub struct App {
     pub version: String,
     pub file_path: String,
@@ -445,6 +499,19 @@ impl App {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::format_hex_dump;
+
+    #[test]
+    fn format_hex_dump_includes_offset_and_ascii() {
+        let dump = format_hex_dump(&[0x00, 0x10, 0xFF, 0x41, 0x42], 0x100);
+        assert!(dump.contains("0100"));
+        assert!(dump.contains("00 10 ff 41 42"));
+        assert!(dump.contains("..A B"));
+    }
+}
+
 impl Drop for App {
     fn drop(&mut self) {
         if self.load_complete {
@@ -586,7 +653,22 @@ impl eframe::App for App {
                         ui.separator();
 
                         if active_chunk_fields.is_empty() {
+                            let chunk_bytes = chunk_bytes_for_view(
+                                &self.dw,
+                                active_chunk_offset,
+                                active_chunk_length,
+                            );
+
                             ui.label("No structured fields are available for this chunk.");
+                            ui.add_space(6.0);
+                            ui.label("Raw bytes:");
+                            ui.add_space(6.0);
+
+                            egui::ScrollArea::both()
+                                .max_height(320.0)
+                                .show(ui, |ui| {
+                                    ui.monospace(format_hex_dump(chunk_bytes, active_chunk_offset as usize));
+                                });
                             return;
                         }
 
