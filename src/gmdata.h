@@ -976,6 +976,36 @@ typedef struct {
 } UilrChunk;
 
 typedef struct {
+    char *name;
+    int32_t type;
+} StatEventField;
+
+typedef struct {
+    char *name;
+    char *version;
+    int32_t latency;
+    int32_t priority;
+    int32_t enabled;
+    int32_t populationSampleRate;
+    uint32_t id;
+    int32_t partCVersion;
+    uint32_t fieldCount;
+    StatEventField *fields;
+} StatEvent;
+
+typedef struct {
+    char *providerName;
+    uint8_t providerGuid[16];
+    int32_t providerLatency;
+    int32_t providerPriority;
+    int32_t providerEnabled;
+    uint32_t populationSampleRateCount;
+    int32_t *populationSampleRates;
+    uint32_t eventCount;
+    StatEvent *events;
+} StatChunk;
+
+typedef struct {
     uint32_t count;
     char **strings;
 } StrgChunk;
@@ -1089,6 +1119,7 @@ typedef struct {
     GmenChunk gmen;
     DaflChunk dafl;
     UilrChunk uilr;
+    StatChunk stat;
     TginChunk tgin;
     StrgChunk strg;
     TxtrChunk txtr;
@@ -1152,6 +1183,7 @@ typedef struct {
     bool parseGmen;
     bool parseDafl;
     bool parseUilr;
+    bool parseStat;
     bool skipLoadingPreciseMasksForNonPreciseSprites;
     bool lazyLoadRooms;
     bool lazyLoadTextures;

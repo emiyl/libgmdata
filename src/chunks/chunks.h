@@ -102,6 +102,9 @@ int DAFL_free(DaflChunk *d);
 int UILR_parse(DataWin *dw);
 int UILR_free(UilrChunk *u);
 
+int STAT_parse(DataWin *dw);
+int STAT_free(StatChunk *s);
+
 int TXTR_parse(DataWin *dw);
 int TXTR_free(TxtrChunk *t);
 

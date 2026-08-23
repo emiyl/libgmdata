@@ -772,6 +772,42 @@ pub fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
                 });
             }
         }
+        "STAT" => {
+            let count = dw.stat.eventCount as usize;
+            if count == 0 || dw.stat.events.is_null() {
+                return items;
+            }
+            let Some(events) = checked_ptr_slice(dw.stat.events, count) else {
+                return items;
+            };
+            for (idx, event) in events.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "name", cstr_or_null(event.name));
+                push_field(&mut fields, "version", cstr_or_null(event.version));
+                push_field(&mut fields, "latency", event.latency);
+                push_field(&mut fields, "priority", event.priority);
+                push_field(&mut fields, "enabled", event.enabled);
+                push_field(&mut fields, "populationSampleRate", event.populationSampleRate);
+                push_field(&mut fields, "id", event.id);
+                push_field(&mut fields, "partCVersion", event.partCVersion);
+                push_field(&mut fields, "fieldCount", event.fieldCount);
+                if event.fieldCount > 0 && !event.fields.is_null() {
+                    let field_count = event.fieldCount as usize;
+                    let Some(fields_ptr) = checked_ptr_slice(event.fields, field_count) else {
+                        return items;
+                    };
+                    let field_names: Vec<String> = fields_ptr
+                        .iter()
+                        .map(|field| format!("{}:{}", cstr_or_null(field.name), field.type_))
+                        .collect();
+                    push_field(&mut fields, "fields", field_names.join(", "));
+                }
+                items.push(ChunkItem {
+                    name: item_label(&cstr_or_null(event.name), idx),
+                    fields,
+                });
+            }
+        }
         "DAFL" => {
             let count = dw.dafl.count as usize;
             if count == 0 {
@@ -1100,6 +1136,25 @@ pub fn build_chunk_fields(name: &str, dw: &DataWin) -> Vec<ChunkField> {
             push_field(&mut fields, "count", g.count);
             add_count_field(&mut fields, "codeIds", g.code_ids as *mut std::ffi::c_void, g.count as usize);
         }
+        "STAT" => {
+            let s = &dw.stat;
+            push_field(&mut fields, "providerName", cstr_or_null(s.providerName));
+            let guid_hex: String = s.providerGuid.iter().map(|b| format!("{:02x}", b)).collect();
+            push_field(&mut fields, "providerGuid", guid_hex);
+            push_field(&mut fields, "providerLatency", s.providerLatency);
+            push_field(&mut fields, "providerPriority", s.providerPriority);
+            push_field(&mut fields, "providerEnabled", s.providerEnabled);
+            push_field(&mut fields, "populationSampleRateCount", s.populationSampleRateCount);
+            if s.populationSampleRateCount > 0 && !s.populationSampleRates.is_null() {
+                let count = s.populationSampleRateCount as usize;
+                let Some(samples) = checked_ptr_slice(s.populationSampleRates, count) else {
+                    return fields;
+                };
+                push_field(&mut fields, "populationSampleRates", samples.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(", "));
+            }
+            push_field(&mut fields, "eventCount", s.eventCount);
+            add_count_field(&mut fields, "events", s.events as *mut std::ffi::c_void, s.eventCount as usize);
+        }
         "DAFL" => {
             let d = &dw.dafl;
             push_field(&mut fields, "count", d.count);
@@ -1196,7 +1251,7 @@ mod tests {
         dw.uilr.count = 8;
 
         for name in [
-            "FEAT", "SEQN", "TAGS", "EMBI", "PSEM", "PSYS", "GMEN", "DAFL", "UILR",
+            "FEAT", "SEQN", "TAGS", "EMBI", "PSEM", "PSYS", "GMEN", "STAT", "DAFL", "UILR",
         ] {
             let fields = build_chunk_fields(name, &dw);
             assert!(

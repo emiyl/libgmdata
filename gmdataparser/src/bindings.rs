@@ -2838,6 +2838,88 @@ const _: () = {
 };
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct StatEventField {
+    pub name: *mut ::std::os::raw::c_char,
+    pub type_: i32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of StatEventField"][::std::mem::size_of::<StatEventField>() - 16usize];
+    ["Alignment of StatEventField"][::std::mem::align_of::<StatEventField>() - 8usize];
+    ["Offset of field: StatEventField::name"]
+        [::std::mem::offset_of!(StatEventField, name) - 0usize];
+    ["Offset of field: StatEventField::type_"]
+        [::std::mem::offset_of!(StatEventField, type_) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct StatEvent {
+    pub name: *mut ::std::os::raw::c_char,
+    pub version: *mut ::std::os::raw::c_char,
+    pub latency: i32,
+    pub priority: i32,
+    pub enabled: i32,
+    pub populationSampleRate: i32,
+    pub id: u32,
+    pub partCVersion: i32,
+    pub fieldCount: u32,
+    pub fields: *mut StatEventField,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of StatEvent"][::std::mem::size_of::<StatEvent>() - 56usize];
+    ["Alignment of StatEvent"][::std::mem::align_of::<StatEvent>() - 8usize];
+    ["Offset of field: StatEvent::name"][::std::mem::offset_of!(StatEvent, name) - 0usize];
+    ["Offset of field: StatEvent::version"][::std::mem::offset_of!(StatEvent, version) - 8usize];
+    ["Offset of field: StatEvent::latency"][::std::mem::offset_of!(StatEvent, latency) - 16usize];
+    ["Offset of field: StatEvent::priority"][::std::mem::offset_of!(StatEvent, priority) - 20usize];
+    ["Offset of field: StatEvent::enabled"][::std::mem::offset_of!(StatEvent, enabled) - 24usize];
+    ["Offset of field: StatEvent::populationSampleRate"]
+        [::std::mem::offset_of!(StatEvent, populationSampleRate) - 28usize];
+    ["Offset of field: StatEvent::id"][::std::mem::offset_of!(StatEvent, id) - 32usize];
+    ["Offset of field: StatEvent::partCVersion"]
+        [::std::mem::offset_of!(StatEvent, partCVersion) - 36usize];
+    ["Offset of field: StatEvent::fieldCount"]
+        [::std::mem::offset_of!(StatEvent, fieldCount) - 40usize];
+    ["Offset of field: StatEvent::fields"][::std::mem::offset_of!(StatEvent, fields) - 48usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct StatChunk {
+    pub providerName: *mut ::std::os::raw::c_char,
+    pub providerGuid: [u8; 16usize],
+    pub providerLatency: i32,
+    pub providerPriority: i32,
+    pub providerEnabled: i32,
+    pub populationSampleRateCount: u32,
+    pub populationSampleRates: *mut i32,
+    pub eventCount: u32,
+    pub events: *mut StatEvent,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of StatChunk"][::std::mem::size_of::<StatChunk>() - 64usize];
+    ["Alignment of StatChunk"][::std::mem::align_of::<StatChunk>() - 8usize];
+    ["Offset of field: StatChunk::providerName"]
+        [::std::mem::offset_of!(StatChunk, providerName) - 0usize];
+    ["Offset of field: StatChunk::providerGuid"]
+        [::std::mem::offset_of!(StatChunk, providerGuid) - 8usize];
+    ["Offset of field: StatChunk::providerLatency"]
+        [::std::mem::offset_of!(StatChunk, providerLatency) - 24usize];
+    ["Offset of field: StatChunk::providerPriority"]
+        [::std::mem::offset_of!(StatChunk, providerPriority) - 28usize];
+    ["Offset of field: StatChunk::providerEnabled"]
+        [::std::mem::offset_of!(StatChunk, providerEnabled) - 32usize];
+    ["Offset of field: StatChunk::populationSampleRateCount"]
+        [::std::mem::offset_of!(StatChunk, populationSampleRateCount) - 36usize];
+    ["Offset of field: StatChunk::populationSampleRates"]
+        [::std::mem::offset_of!(StatChunk, populationSampleRates) - 40usize];
+    ["Offset of field: StatChunk::eventCount"]
+        [::std::mem::offset_of!(StatChunk, eventCount) - 48usize];
+    ["Offset of field: StatChunk::events"][::std::mem::offset_of!(StatChunk, events) - 56usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct StrgChunk {
     pub count: u32,
     pub strings: *mut *mut ::std::os::raw::c_char,
@@ -3083,6 +3165,7 @@ pub struct DataWin {
     pub gmen: GmenChunk,
     pub dafl: DaflChunk,
     pub uilr: UilrChunk,
+    pub stat: StatChunk,
     pub tgin: TginChunk,
     pub strg: StrgChunk,
     pub txtr: TxtrChunk,
@@ -3096,7 +3179,7 @@ pub struct DataWin {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 944usize];
+    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 1008usize];
     ["Alignment of DataWin"][::std::mem::align_of::<DataWin>() - 8usize];
     ["Offset of field: DataWin::file_data"][::std::mem::offset_of!(DataWin, file_data) - 0usize];
     ["Offset of field: DataWin::file_size"][::std::mem::offset_of!(DataWin, file_size) - 8usize];
@@ -3133,22 +3216,23 @@ const _: () = {
     ["Offset of field: DataWin::gmen"][::std::mem::offset_of!(DataWin, gmen) - 824usize];
     ["Offset of field: DataWin::dafl"][::std::mem::offset_of!(DataWin, dafl) - 840usize];
     ["Offset of field: DataWin::uilr"][::std::mem::offset_of!(DataWin, uilr) - 844usize];
-    ["Offset of field: DataWin::tgin"][::std::mem::offset_of!(DataWin, tgin) - 848usize];
-    ["Offset of field: DataWin::strg"][::std::mem::offset_of!(DataWin, strg) - 864usize];
-    ["Offset of field: DataWin::txtr"][::std::mem::offset_of!(DataWin, txtr) - 880usize];
-    ["Offset of field: DataWin::audo"][::std::mem::offset_of!(DataWin, audo) - 896usize];
+    ["Offset of field: DataWin::stat"][::std::mem::offset_of!(DataWin, stat) - 848usize];
+    ["Offset of field: DataWin::tgin"][::std::mem::offset_of!(DataWin, tgin) - 912usize];
+    ["Offset of field: DataWin::strg"][::std::mem::offset_of!(DataWin, strg) - 928usize];
+    ["Offset of field: DataWin::txtr"][::std::mem::offset_of!(DataWin, txtr) - 944usize];
+    ["Offset of field: DataWin::audo"][::std::mem::offset_of!(DataWin, audo) - 960usize];
     ["Offset of field: DataWin::detectedFormat"]
-        [::std::mem::offset_of!(DataWin, detectedFormat) - 912usize];
+        [::std::mem::offset_of!(DataWin, detectedFormat) - 976usize];
     ["Offset of field: DataWin::mappedFile"]
-        [::std::mem::offset_of!(DataWin, mappedFile) - 928usize];
+        [::std::mem::offset_of!(DataWin, mappedFile) - 992usize];
     ["Offset of field: DataWin::lazyLoadRooms"]
-        [::std::mem::offset_of!(DataWin, lazyLoadRooms) - 936usize];
+        [::std::mem::offset_of!(DataWin, lazyLoadRooms) - 1000usize];
     ["Offset of field: DataWin::lazyLoadTextures"]
-        [::std::mem::offset_of!(DataWin, lazyLoadTextures) - 937usize];
+        [::std::mem::offset_of!(DataWin, lazyLoadTextures) - 1001usize];
     ["Offset of field: DataWin::lazyLoadAudio"]
-        [::std::mem::offset_of!(DataWin, lazyLoadAudio) - 938usize];
+        [::std::mem::offset_of!(DataWin, lazyLoadAudio) - 1002usize];
     ["Offset of field: DataWin::initialized"]
-        [::std::mem::offset_of!(DataWin, initialized) - 939usize];
+        [::std::mem::offset_of!(DataWin, initialized) - 1003usize];
 };
 unsafe extern "C" {
     pub fn TextureDecode_decodeToRgba(
@@ -3216,6 +3300,7 @@ pub struct DataWinParserOptions {
     pub parseGmen: bool,
     pub parseDafl: bool,
     pub parseUilr: bool,
+    pub parseStat: bool,
     pub skipLoadingPreciseMasksForNonPreciseSprites: bool,
     pub lazyLoadRooms: bool,
     pub lazyLoadTextures: bool,
@@ -3307,17 +3392,19 @@ const _: () = {
         [::std::mem::offset_of!(DataWinParserOptions, parseDafl) - 33usize];
     ["Offset of field: DataWinParserOptions::parseUilr"]
         [::std::mem::offset_of!(DataWinParserOptions, parseUilr) - 34usize];
+    ["Offset of field: DataWinParserOptions::parseStat"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseStat) - 35usize];
     ["Offset of field: DataWinParserOptions::skipLoadingPreciseMasksForNonPreciseSprites"][::std::mem::offset_of!(
         DataWinParserOptions,
         skipLoadingPreciseMasksForNonPreciseSprites
     )
-        - 35usize];
+        - 36usize];
     ["Offset of field: DataWinParserOptions::lazyLoadRooms"]
-        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadRooms) - 36usize];
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadRooms) - 37usize];
     ["Offset of field: DataWinParserOptions::lazyLoadTextures"]
-        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadTextures) - 37usize];
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadTextures) - 38usize];
     ["Offset of field: DataWinParserOptions::lazyLoadAudio"]
-        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadAudio) - 38usize];
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadAudio) - 39usize];
     ["Offset of field: DataWinParserOptions::eagerlyLoadedRooms"]
         [::std::mem::offset_of!(DataWinParserOptions, eagerlyLoadedRooms) - 40usize];
     ["Offset of field: DataWinParserOptions::loadType"]

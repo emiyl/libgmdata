@@ -1,16 +1,12 @@
 # libgmdata
 
-This project builds as a reusable C library plus a separate command-line executable.
+This project builds as a reusable C library, and a separate Rust utility.
 
-Build everything:
+Build:
 
     make
 
-Build just the library:
-
-    make lib
-
-Install the library, headers, and CLI to a standard prefix:
+Install the library and headers
 
     make install
 
@@ -61,6 +57,6 @@ Public headers are kept under `include/` and are intended for downstream consume
 | FUNC | ✅ | ✅ | ✅ |
 | FEAT | ✅ | ❌ | ✅ |
 | STRG | ✅ | ✅ | ✅ |
-| STAT | ❌ | ❌ | ❌ |
+| STAT | ✅ | ❌ | ❌ |
 
 Thank you to [Butterscotch](https://github.com/ButterscotchRunner/Butterscotch) for data.win parsing code.
