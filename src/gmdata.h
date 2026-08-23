@@ -800,6 +800,14 @@ typedef struct {
 
 typedef struct {
     uint32_t count;
+} DaflChunk;
+
+typedef struct {
+    uint32_t count;
+} UilrChunk;
+
+typedef struct {
+    uint32_t count;
     const char** strings;
 } StrgChunk;
 
@@ -904,6 +912,8 @@ typedef struct {
     AcrvChunk acrv;
     FedsChunk feds;
     FeatChunk feat;
+    DaflChunk dafl;
+    UilrChunk uilr;
     TginChunk tgin;
     StrgChunk strg;
     TxtrChunk txtr;
@@ -959,6 +969,8 @@ typedef struct {
     bool parseAcrv;
     bool parseFeds;
     bool parseFeat;
+    bool parseDafl;
+    bool parseUilr;
     bool skipLoadingPreciseMasksForNonPreciseSprites;
     bool lazyLoadRooms;
     bool lazyLoadTextures;

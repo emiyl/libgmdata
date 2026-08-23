@@ -78,6 +78,12 @@ int FEDS_free(FedsChunk *f);
 int FEAT_parse(DataWin *dw);
 int FEAT_free(FeatChunk *f);
 
+int DAFL_parse(DataWin *dw);
+int DAFL_free(DaflChunk *d);
+
+int UILR_parse(DataWin *dw);
+int UILR_free(UilrChunk *u);
+
 int TXTR_parse(DataWin *dw);
 int TXTR_free(TxtrChunk *t);
 

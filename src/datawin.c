@@ -41,6 +41,8 @@ static void DataWin_reset(DataWin *dw) {
     memset(&dw->acrv, 0, sizeof(dw->acrv));
     memset(&dw->feds, 0, sizeof(dw->feds));
     memset(&dw->feat, 0, sizeof(dw->feat));
+    memset(&dw->dafl, 0, sizeof(dw->dafl));
+    memset(&dw->uilr, 0, sizeof(dw->uilr));
     memset(&dw->tgin, 0, sizeof(dw->tgin));
     memset(&dw->strg, 0, sizeof(dw->strg));
     memset(&dw->txtr, 0, sizeof(dw->txtr));
@@ -88,6 +90,8 @@ void DataWin_initParserOptions(DataWinParserOptions *options) {
     options->parseAcrv = true;
     options->parseFeds = true;
     options->parseFeat = true;
+    options->parseDafl = true;
+    options->parseUilr = true;
     options->loadType = DATAWINLOADTYPE_LOAD_PER_CHUNK;
 }
 
@@ -255,6 +259,8 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
     parse(Acrv, ACRV);
     parse(Feds, FEDS);
     parse(Feat, FEAT);
+    parse(Dafl, DAFL);
+    parse(Uilr, UILR);
 
     if (effective.progressCallback != NULL && totalChunks > 0 && parsedChunkCount < totalChunks) {
         DataWin_emitProgress(dw, &effective, "DONE", totalChunks - 1, totalChunks);
@@ -373,6 +379,14 @@ int DataWin_free(DataWin *dw) {
     }
     if (FEAT_free(&dw->feat)) {
         logWarn("[DataWin_free] Failed to free FEAT chunk\n");
+        result = -1;
+    }
+    if (DAFL_free(&dw->dafl)) {
+        logWarn("[DataWin_free] Failed to free DAFL chunk\n");
+        result = -1;
+    }
+    if (UILR_free(&dw->uilr)) {
+        logWarn("[DataWin_free] Failed to free UILR chunk\n");
         result = -1;
     }
     if (TGIN_free(&dw->tgin)) {
