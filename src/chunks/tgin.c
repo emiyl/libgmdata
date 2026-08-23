@@ -60,8 +60,10 @@ static int TGIN_group_parse(Reader *reader, DataWin *dw, TextureGroupInfo *group
     read(&fontsPtr, UInt32);
     read(&tilesetsPtr, UInt32);
 
-    const uint32_t baseOffset = reader->offset;
-    #define TGIN_REL_PTR(ptr) ((ptr) == 0U ? 0U : ((ptr) >= baseOffset ? ((ptr) - baseOffset) : (ptr)))
+    const uint32_t baseOffset = (uint32_t)reader->offset;
+    const uint32_t chunkEnd = baseOffset + (uint32_t)reader->size;
+    #define TGIN_REL_PTR(ptr)                                                   \
+        ((ptr) == 0U ? 0U : (((ptr) >= baseOffset && (ptr) < chunkEnd) ? ((ptr) - baseOffset) : (ptr)))
 
     if (texturePagesPtr != 0) {
         uint32_t relativePtr = TGIN_REL_PTR(texturePagesPtr);
