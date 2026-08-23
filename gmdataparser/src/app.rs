@@ -948,9 +948,13 @@ impl eframe::App for App {
                         })
                     });
 
+                let pane_height = ui.available_height().max(260.0);
                 ui.columns(2, |columns| {
                     columns[0].set_min_width(180.0);
+                    columns[0].set_min_height(pane_height);
                     columns[0].vertical(|ui| {
+                        let fill_height = ui.available_height().max(240.0);
+                        ui.set_min_height(fill_height);
                         ui.heading("Items");
                         ui.separator();
 
@@ -987,10 +991,13 @@ impl eframe::App for App {
                         let window_size = 100usize;
                         let step_size = 25usize;
 
-                        egui::ScrollArea::vertical().max_height(340.0).show_viewport(ui, |ui, viewport| {
+                        let fill_height = ui.available_height().max(240.0);
+                        ui.set_min_height(fill_height);
+
+                        egui::ScrollArea::vertical().show_viewport(ui, |ui, viewport| {
                             let active_chunk = &mut self.chunks[active_chunk_idx];
                             let total_height = filtered_indices.len() as f32 * item_height;
-                            ui.set_min_height(total_height);
+                            ui.set_min_height(total_height.max(fill_height));
 
                             let scroll_index = (viewport.min.y / item_height).floor() as usize;
                             let mut window_start = (scroll_index / step_size) * step_size;
@@ -1016,7 +1023,10 @@ impl eframe::App for App {
                         });
                     });
 
+                    columns[1].set_min_height(pane_height);
                     columns[1].vertical(|ui| {
+                        let fill_height = ui.available_height().max(240.0);
+                        ui.set_min_height(fill_height);
                         egui::ScrollArea::vertical()
                             .id_salt("chunk-item-scroll")
                             .auto_shrink([false, false])
