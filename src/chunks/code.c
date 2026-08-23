@@ -39,25 +39,18 @@ int CODE_parse(DataWin *dw) {
     }
 
     bool oldFormat = dw->gen8.wadVersion <= 14;
-    c->entries = (CodeEntry *)safeCalloc(codeCount, sizeof(CodeEntry));
-
-    repeat(codeCount, i) {
-        if (codePtrs[i] == 0) {
-            if (CODE_pointerTable_missingHandler(&reader, dw, &c->entries[i], NULL) != 0) {
-                free(codePtrs);
-                CODE_free(c);
-                return -1;
-            }
-            continue;
-        }
-
-        Reader_seek(&reader, codePtrs[i]);
-        CodeEntry *entry = &c->entries[i];
-        if (CODE_pointerTable_parse(&reader, dw, entry, NULL) != 0) {
-            free(codePtrs);
-            CODE_free(c);
-            return -1;
-        }
+    if (Reader_parsePointerTable(
+        &reader, dw,
+        codePtrs, codeCount,
+        (void **)&c->entries, sizeof(CodeEntry),
+        NULL,
+        CODE_pointerTable_parse,
+        CODE_pointerTable_missingHandler,
+        NULL
+    ) != 0) {
+        free(codePtrs);
+        CODE_free(c);
+        return -1;
     }
 
     free(codePtrs);

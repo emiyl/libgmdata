@@ -1,5 +1,6 @@
 #include "common.h"
 
+static int VARI_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void *extraData);
 int VARI_free(VariChunk *v);
 
 int VARI_parse(DataWin *dw) {
@@ -33,25 +34,23 @@ int VARI_parse(DataWin *dw) {
             return 0;
         }
 
-        v->variables = (Variable *)safeMalloc(v->variableCount * sizeof(Variable));
+        uint32_t *ptrs = (uint32_t *)safeMalloc(v->variableCount * sizeof(uint32_t));
         repeat(v->variableCount, i) {
-            Variable *var = &v->variables[i];
-            if (Reader_readString(reader, dw, &var->name) != 0) {
-                VARI_free(v);
-                return -1;
-            }
-            if (Reader_readUInt32(reader, &var->occurrences) != 0) {
-                VARI_free(v);
-                return -1;
-            }
-            if (Reader_readUInt32(reader, &var->firstAddress) != 0) {
-                VARI_free(v);
-                return -1;
-            }
-            var->instanceType = 0;
-            var->varID = 0;
+            ptrs[i] = (uint32_t)(i * 12U);
         }
-        return 0;
+
+        int result = Reader_parsePointerTable(
+            reader, dw,
+            ptrs, v->variableCount,
+            (void **)&v->variables, sizeof(Variable),
+            NULL,
+            VARI_pointerTable_parse,
+            NULL,
+            NULL
+        );
+
+        free(ptrs);
+        return result;
     }
 
     read(&v->varCount1, UInt32);
@@ -70,30 +69,44 @@ int VARI_parse(DataWin *dw) {
         return 0;
     }
 
-    v->variables = (Variable *)safeMalloc(v->variableCount * sizeof(Variable));
+    uint32_t *ptrs = (uint32_t *)safeMalloc(v->variableCount * sizeof(uint32_t));
     repeat(v->variableCount, i) {
-        Variable *var = &v->variables[i];
-        if (Reader_readString(reader, dw, &var->name) != 0) {
-            VARI_free(v);
-            return -1;
-        }
-        if (Reader_readInt32(reader, &var->instanceType) != 0) {
-            VARI_free(v);
-            return -1;
-        }
-        if (Reader_readInt32(reader, &var->varID) != 0) {
-            VARI_free(v);
-            return -1;
-        }
-        if (Reader_readUInt32(reader, &var->occurrences) != 0) {
-            VARI_free(v);
-            return -1;
-        }
-        if (Reader_readUInt32(reader, &var->firstAddress) != 0) {
-            VARI_free(v);
-            return -1;
-        }
+        ptrs[i] = 12U + (uint32_t)(i * 20U);
     }
+
+    int result = Reader_parsePointerTable(
+        reader, dw,
+        ptrs, v->variableCount,
+        (void **)&v->variables, sizeof(Variable),
+        NULL,
+        VARI_pointerTable_parse,
+        NULL,
+        NULL
+    );
+
+    free(ptrs);
+    return result;
+}
+
+static int VARI_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void *extraData) {
+    (void)extraData;
+    Variable *var = (Variable *)out;
+    memset(var, 0, sizeof(*var));
+
+    if (dw->gen8.wadVersion <= 14) {
+        readString(&var->name, dw);
+        read(&var->occurrences, UInt32);
+        read(&var->firstAddress, UInt32);
+        var->instanceType = 0;
+        var->varID = 0;
+        return 0;
+    }
+
+    readString(&var->name, dw);
+    read(&var->instanceType, Int32);
+    read(&var->varID, Int32);
+    read(&var->occurrences, UInt32);
+    read(&var->firstAddress, UInt32);
 
     return 0;
 }
