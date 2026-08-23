@@ -335,6 +335,66 @@ static int detect_sond_version(Reader *reader, DataWin *state) {
     return 0;
 }
 
+static int detect_room_version(Reader *reader, DataWin *state) {
+    if (reader == NULL || state == NULL) {
+        return -1;
+    }
+
+    uint32_t *ptrs = NULL;
+    uint32_t count = 0U;
+    if (Reader_readPointerTable(reader, &ptrs, &count) != 0) {
+        return -1;
+    }
+    if (count == 0U) {
+        free(ptrs);
+        return 0;
+    }
+
+    for (uint32_t i = 0; i < count; ++i) {
+        if (ptrs[i] == 0U) {
+            continue;
+        }
+
+        const size_t savedPos = reader->cursor;
+        if (Reader_seek(reader, ptrs[i]) != 0) {
+            free(ptrs);
+            return -1;
+        }
+
+        skip(sizeof(uint32_t)); // width
+        skip(sizeof(uint32_t)); // height
+        skip(sizeof(uint32_t)); // speed
+        skip(sizeof(bool)); // persistent
+        skip(sizeof(uint32_t)); // backgroundColor
+        skip(sizeof(bool)); // drawBackgroundColor
+        skip(sizeof(int32_t)); // creationCodeId
+        skip(sizeof(uint32_t)); // flags
+        skip(sizeof(uint32_t)); // backgroundsFileOffset
+        skip(sizeof(uint32_t)); // viewsFileOffset
+        skip(sizeof(uint32_t)); // gameObjectsFileOffset
+        skip(sizeof(uint32_t)); // tilesFileOffset
+        skip(sizeof(bool)); // world
+        skip(sizeof(uint32_t)); // top
+        skip(sizeof(uint32_t)); // left
+        skip(sizeof(uint32_t)); // right
+        skip(sizeof(uint32_t)); // bottom
+        skip(sizeof(float)); // gravityX
+        skip(sizeof(float)); // gravityY
+        skip(sizeof(float)); // metersPerPixel
+
+        uint32_t roomVersionProbe = 0U;
+        if (Reader_readUInt32(reader, &roomVersionProbe) == 0) {
+            bump_version_from_candidate(state, 2024U, 13U, 0U, 0U);
+        }
+
+        seek(savedPos);
+        break;
+    }
+
+    free(ptrs);
+    return 0;
+}
+
 static int scan_chunk_table_for_version(const uint8_t *file_data, size_t file_size, DetectedFormat *out) {
     if (file_data == NULL || out == NULL) {
         return -1;
@@ -356,6 +416,7 @@ static int scan_chunk_table_for_version(const uint8_t *file_data, size_t file_si
     while (reader->cursor + 8U <= end && reader->cursor + 8U <= file_size) {
         char chunk_name[5] = {0};
         memcpy(chunk_name, file_data + reader->cursor, 4U);
+        skip(4); // Skip chunk name
 
         uint32_t chunk_length = 0U;
         read(&chunk_length, UInt32);
@@ -409,6 +470,10 @@ static int scan_chunk_table_for_version(const uint8_t *file_data, size_t file_si
             Reader chunk_reader;
             Reader_init(&chunk_reader, file_data + chunk_offset, chunk_length, chunk_offset, "SOND");
             detect_sond_version(&chunk_reader, &state);
+        } else if (memcmp(chunk_name, "ROOM", 4) == 0) {
+            Reader chunk_reader;
+            Reader_init(&chunk_reader, file_data + chunk_offset, chunk_length, chunk_offset, "ROOM");
+            detect_room_version(&chunk_reader, &state);
         }
 
         if (Reader_seek(reader, chunk_end) != 0) {
