@@ -884,7 +884,7 @@ typedef struct {
     char *name;
     bool enabled;
     int32_t mode;
-    int32_t emit_count;
+    float emit_count;
     bool emit_relative;
     float delay_min;
     float delay_max;
@@ -936,9 +936,9 @@ typedef struct {
     float orientation_increase;
     float orientation_wiggle;
     bool orientation_relative;
-    uint32_t spawn_on_death_id;
+    int32_t spawn_on_death_id;
     int32_t spawn_on_death_count;
-    uint32_t spawn_on_update_id;
+    int32_t spawn_on_update_id;
     int32_t spawn_on_update_count;
 } ParticleEmitter;
 

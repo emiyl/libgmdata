@@ -2565,7 +2565,7 @@ pub struct ParticleEmitter {
     pub name: *mut ::std::os::raw::c_char,
     pub enabled: bool,
     pub mode: i32,
-    pub emit_count: i32,
+    pub emit_count: f32,
     pub emit_relative: bool,
     pub delay_min: f32,
     pub delay_max: f32,
@@ -2617,9 +2617,9 @@ pub struct ParticleEmitter {
     pub orientation_increase: f32,
     pub orientation_wiggle: f32,
     pub orientation_relative: bool,
-    pub spawn_on_death_id: u32,
+    pub spawn_on_death_id: i32,
     pub spawn_on_death_count: i32,
-    pub spawn_on_update_id: u32,
+    pub spawn_on_update_id: i32,
     pub spawn_on_update_count: i32,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
