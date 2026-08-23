@@ -230,6 +230,55 @@ unsafe extern "C" fn parse_progress_callback(
     }
 }
 
+fn embi_texture_page_index(dw: &DataWin, active_item_idx: usize) -> Option<usize> {
+    let embi_entry_id = {
+        let embi_items = if dw.embi.count == 0 || dw.embi.items.is_null() {
+            return None;
+        } else {
+            unsafe { std::slice::from_raw_parts(dw.embi.items, dw.embi.count as usize) }
+        };
+
+        embi_items.get(active_item_idx)?.texture_page_entry_id
+    } as usize;
+
+    if dw.file_data.is_null() || dw.chunks.items.is_null() || dw.chunks.count == 0 {
+        return None;
+    }
+
+    let chunk_table = unsafe { std::slice::from_raw_parts(dw.chunks.items, dw.chunks.count) };
+    let tpag_chunk = chunk_table.iter().find(|chunk| {
+        chunk.name[0] == b'T' as i8
+            && chunk.name[1] == b'P' as i8
+            && chunk.name[2] == b'A' as i8
+            && chunk.name[3] == b'G' as i8
+    })?;
+
+    let payload_offset = tpag_chunk.offset as usize;
+    let payload_len = tpag_chunk.length as usize;
+    if payload_len < 4 {
+        return None;
+    }
+
+    let payload = unsafe { std::slice::from_raw_parts(dw.file_data.add(payload_offset), payload_len) };
+    let item_count = u32::from_le_bytes([payload[0], payload[1], payload[2], payload[3]]) as usize;
+
+    for i in 0..item_count.min((payload_len.saturating_sub(4)) / 4) {
+        let base = 4 + i * 4;
+        let pointer = u32::from_le_bytes([
+            payload[base],
+            payload.get(base + 1).copied().unwrap_or(0),
+            payload.get(base + 2).copied().unwrap_or(0),
+            payload.get(base + 3).copied().unwrap_or(0),
+        ]) as usize;
+
+        if pointer == embi_entry_id {
+            return Some(i);
+        }
+    }
+
+    None
+}
+
 impl App {
     pub fn new(file_path: String) -> Self {
         let (result_tx, result_rx) = mpsc::channel();
@@ -368,7 +417,7 @@ impl App {
     }
 
     fn texture_preview_size(&self, chunk_name: &str, active_item_idx: usize) -> Option<egui::Vec2> {
-        if chunk_name != "TXTR" && chunk_name != "TPAG" {
+        if chunk_name != "TXTR" && chunk_name != "TPAG" && chunk_name != "EMBI" {
             return None;
         }
 
@@ -401,7 +450,14 @@ impl App {
                     )
                 }
             };
-            page_data.get(active_item_idx).map(|page_item| {
+
+            let page_index = if chunk_name == "EMBI" {
+                embi_texture_page_index(&self.dw, active_item_idx)?
+            } else {
+                active_item_idx
+            };
+
+            page_data.get(page_index).map(|page_item| {
                 egui::vec2(
                     page_item.sourceWidth.max(1) as f32,
                     page_item.sourceHeight.max(1) as f32,
@@ -417,7 +473,7 @@ impl App {
         active_item_idx: usize,
         popup_zoom: Option<f32>,
     ) {
-        if chunk_name != "TXTR" && chunk_name != "TPAG" {
+        if chunk_name != "TXTR" && chunk_name != "TPAG" && chunk_name != "EMBI" {
             return;
         }
 
@@ -457,11 +513,19 @@ impl App {
                 }
             };
 
-            page_data.get(active_item_idx).and_then(|page_item| {
-                self.texture_preview_cache
-                    .entry(preview_key.clone())
-                    .or_insert_with(|| texture_page_item_preview_image(page_item, texture_slice, gm2022_5))
-                    .clone()
+            let page_index = if chunk_name == "EMBI" {
+                embi_texture_page_index(&self.dw, active_item_idx)
+            } else {
+                Some(active_item_idx)
+            };
+
+            page_index.and_then(|page_index| {
+                page_data.get(page_index).and_then(|page_item| {
+                    self.texture_preview_cache
+                        .entry(preview_key.clone())
+                        .or_insert_with(|| texture_page_item_preview_image(page_item, texture_slice, gm2022_5))
+                        .clone()
+                })
             })
         };
 
@@ -513,7 +577,8 @@ impl App {
 
 #[cfg(test)]
 mod tests {
-    use super::format_hex_dump;
+    use super::{format_hex_dump, embi_texture_page_index};
+    use crate::bindings::{Chunk, ChunkTable, DataWin, EmbiChunk, EmbiItem};
 
     #[test]
     fn format_hex_dump_includes_offset_and_ascii() {
@@ -521,6 +586,45 @@ mod tests {
         assert!(dump.contains("0100"));
         assert!(dump.contains("00 10 ff 41 42"));
         assert!(dump.contains("..A B"));
+    }
+
+    #[test]
+    fn embi_texture_page_index_uses_tpagn_pointer_match() {
+        let mut tpag_payload = vec![0u8; 4 + 4 * 4];
+        tpag_payload[0..4].copy_from_slice(&4u32.to_le_bytes());
+        tpag_payload[4..8].copy_from_slice(&0x1000u32.to_le_bytes());
+        tpag_payload[8..12].copy_from_slice(&0x2000u32.to_le_bytes());
+        tpag_payload[12..16].copy_from_slice(&0x3000u32.to_le_bytes());
+        tpag_payload[16..20].copy_from_slice(&0x4000u32.to_le_bytes());
+
+        let mut file_bytes = vec![0u8; 0x1000 + tpag_payload.len()];
+        let tpag_offset = 0x1000usize;
+        file_bytes[tpag_offset..tpag_offset + tpag_payload.len()].copy_from_slice(&tpag_payload);
+
+        let mut chunks = [Chunk {
+            name: [b'T' as i8, b'P' as i8, b'A' as i8, b'G' as i8, 0],
+            offset: tpag_offset as u32,
+            length: tpag_payload.len() as u32,
+        }];
+
+        let items = [EmbiItem {
+            name: std::ptr::null_mut(),
+            texture_page_entry_id: 0x3000,
+        }];
+        let mut dw: DataWin = unsafe { std::mem::zeroed() };
+        dw.file_data = file_bytes.as_mut_ptr();
+        dw.file_size = file_bytes.len() as usize;
+        dw.chunks = ChunkTable {
+            items: chunks.as_mut_ptr(),
+            count: chunks.len(),
+            capacity: chunks.len(),
+        };
+        dw.embi = EmbiChunk {
+            count: 1,
+            items: items.as_ptr() as *mut EmbiItem,
+        };
+
+        assert_eq!(embi_texture_page_index(&dw, 0), Some(2));
     }
 }
 
@@ -818,7 +922,7 @@ impl eframe::App for App {
                                         }
                                     });
 
-                                    if active_chunk_name == "TXTR" || active_chunk_name == "TPAG" {
+                                    if active_chunk_name == "TXTR" || active_chunk_name == "TPAG" || active_chunk_name == "EMBI" {
                                         ui.separator();
                                         self.render_texture_preview(ui, &active_chunk_name, active_item_idx, None);
                                     }
