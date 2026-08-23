@@ -25,6 +25,7 @@ pub(crate) struct LoadingProgress {
     value: f32,
     total_chunks: usize,
     parsed_chunks: usize,
+    linear: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -350,6 +351,7 @@ impl App {
                 value: 0.0,
                 total_chunks: 0,
                 parsed_chunks: 0,
+                linear: true,
             }),
             load_error: None,
             load_complete: false,
@@ -362,13 +364,21 @@ impl App {
                 match event {
                     LoadProgressEvent::Update { total, parsed, chunk_name } => {
                         if let Some(loading) = self.loading.as_mut() {
-                            loading.total_chunks = total;
-                            loading.parsed_chunks = parsed;
-                            loading.message = format!("Parsing {} ({}/{})", chunk_name, parsed, total);
-                            loading.value = if total == 0 {
+                            loading.total_chunks = total.max(loading.total_chunks);
+                            if parsed < loading.parsed_chunks {
+                                loading.linear = false;
+                            }
+                            let next_parsed = parsed.min(total).max(loading.parsed_chunks);
+                            loading.parsed_chunks = next_parsed;
+                            if loading.linear {
+                                loading.message = format!("Parsing {} ({}/{})", chunk_name, next_parsed, loading.total_chunks);
+                            } else {
+                                loading.message = format!("Parsing {} ({} finished / {} total)", chunk_name, next_parsed, loading.total_chunks);
+                            }
+                            loading.value = if loading.total_chunks == 0 {
                                 0.0
                             } else {
-                                (parsed as f32 / total as f32).min(1.0)
+                                (next_parsed as f32 / loading.total_chunks as f32).min(1.0)
                             };
                         }
                     }
@@ -426,6 +436,11 @@ impl App {
             .as_ref()
             .map(|state| state.message.as_str())
             .unwrap_or("Loading...");
+        let linear = self
+            .loading
+            .as_ref()
+            .map(|state| state.linear)
+            .unwrap_or(true);
 
         ui.ctx().request_repaint_after(Duration::from_millis(60));
 
@@ -439,14 +454,21 @@ impl App {
                         ui.label(format!("File: {}", self.file_path));
                         if let Some(state) = self.loading.as_ref() {
                             if state.total_chunks > 0 {
-                                ui.label(format!(
-                                    "Chunks: {}/{} parsed",
-                                    state.parsed_chunks, state.total_chunks
-                                ));
+                                let label = if state.linear {
+                                    format!("Chunks: {}/{} parsed", state.parsed_chunks, state.total_chunks)
+                                } else {
+                                    format!("Chunks: {} finished / {} total", state.parsed_chunks, state.total_chunks)
+                                };
+                                ui.label(label);
                             }
                         }
                         ui.add_space(18.0);
-                        ui.add(egui::ProgressBar::new(progress).text(message));
+                        let progress_bar = if linear {
+                            egui::ProgressBar::new(progress)
+                        } else {
+                            egui::ProgressBar::new(0.0).animate(true)
+                        };
+                        ui.add(progress_bar.text(message));
                     });
                 });
             });

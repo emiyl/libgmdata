@@ -155,9 +155,16 @@ typedef struct {
     size_t field_size;
     DataWin value;
     int status;
+    int *completedCount;
+    const DataWinParserOptions *options;
+    DataWin *owner;
+    int chunkIndex;
+    int totalChunks;
 } DataWinChunkParseTask;
 
 #ifdef MULTITHREAD
+static pthread_mutex_t DataWin_progressCallbackLock = PTHREAD_MUTEX_INITIALIZER;
+
 static void *DataWin_chunkParseTask_worker(void *arg) {
     DataWinChunkParseTask *task = (DataWinChunkParseTask *)arg;
     if (task == NULL) {
@@ -165,6 +172,27 @@ static void *DataWin_chunkParseTask_worker(void *arg) {
     }
 
     task->status = task->parser(&task->value);
+    if (task->status == 0 && task->options != NULL && task->options->progressCallback != NULL) {
+        int callbackChunkIndex = task->chunkIndex;
+
+        if (task->completedCount != NULL) {
+            pthread_mutex_lock(&DataWin_progressCallbackLock);
+            callbackChunkIndex = ++(*task->completedCount) - 1;
+            DataWin_emitProgress(task->owner != NULL ? task->owner : &task->value,
+                                task->options,
+                                task->name,
+                                callbackChunkIndex,
+                                task->totalChunks);
+            pthread_mutex_unlock(&DataWin_progressCallbackLock);
+            return NULL;
+        }
+
+        DataWin_emitProgress(task->owner != NULL ? task->owner : &task->value,
+                            task->options,
+                            task->name,
+                            callbackChunkIndex,
+                            task->totalChunks);
+    }
     return NULL;
 }
 
@@ -178,7 +206,15 @@ static int DataWin_parseChunkTasksParallel(
     }
 
     if (taskCount == 1U) {
-        return tasks[0].parser(dw);
+        if (tasks[0].parser(dw) != 0) {
+            return -1;
+        }
+        DataWin_emitProgress(dw,
+                            tasks[0].options,
+                            tasks[0].name,
+                            tasks[0].chunkIndex,
+                            tasks[0].totalChunks);
+        return 0;
     }
 
     pthread_t *threads = (pthread_t *)malloc(taskCount * sizeof(*threads));
@@ -189,10 +225,13 @@ static int DataWin_parseChunkTasksParallel(
         return -1;
     }
 
+    int completedCount = 0;
     for (size_t i = 0; i < taskCount; ++i) {
         runtime[i] = tasks[i];
         runtime[i].value = *dw;
         runtime[i].status = 0;
+        runtime[i].completedCount = &completedCount;
+        runtime[i].owner = dw;
         if (pthread_create(&threads[i], NULL, DataWin_chunkParseTask_worker, &runtime[i]) != 0) {
             for (size_t j = 0; j < i; ++j) {
                 pthread_join(threads[j], NULL);
@@ -236,6 +275,11 @@ static int DataWin_parseChunkTasksParallel(
         if (tasks[i].parser(dw) != 0) {
             return -1;
         }
+        DataWin_emitProgress(dw,
+                            tasks[i].options,
+                            tasks[i].name,
+                            tasks[i].chunkIndex,
+                            tasks[i].totalChunks);
     }
 
     return 0;
@@ -305,13 +349,7 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
     }
     DataWin_applyParserOptions(dw, &effective);
 
-    if (DataWin_detectVersionFromFile(dw->file_data, dw->file_size, &dw->detectedFormat) == 0) {
-        logInfo("[DataWin_parseWithOptions] Detected format: %u.%u.%u.%u\n",
-                dw->detectedFormat.major,
-                dw->detectedFormat.minor,
-                dw->detectedFormat.release,
-                dw->detectedFormat.build);
-    }
+    assert(DataWin_detectVersionFromFile(dw->file_data, dw->file_size, &dw->detectedFormat) == 0);
 
     if (parse_form_chunks(dw) != 0) {
         return -1;
@@ -342,12 +380,10 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
     if (effective.parseGen8) {
         assert(GEN8_parse(dw) == 0);
         DataWin_bumpVersionTo(dw, dw->gen8.major, dw->gen8.minor, dw->gen8.release, dw->gen8.build);
-        DataWin_emitProgress(dw, &effective, "GEN8", parsedChunkCount, totalChunks);
-        parsedChunkCount++;
     }
 
     #define DATAWIN_TASK(chunkName, chunkMember) \
-        (DataWinChunkParseTask){ #chunkName, chunkName##_parse, offsetof(DataWin, chunkMember), sizeof(((DataWin *)0)->chunkMember), NULL, 0 }
+        (DataWinChunkParseTask){ #chunkName, chunkName##_parse, offsetof(DataWin, chunkMember), sizeof(((DataWin *)0)->chunkMember), {0}, 0, NULL, NULL, NULL, 0, 0 }
 
     #define DATAWIN_COMMON_TASK_CAPACITY 48U
     DataWinChunkParseTask commonTasks[DATAWIN_COMMON_TASK_CAPACITY] = {{0}};
@@ -356,7 +392,12 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
     #define add_common_task(option, chunkName, chunkMember) do { \
         if (effective.parse##option) { \
             assert(commonTaskCount < DATAWIN_COMMON_TASK_CAPACITY); \
-            commonTasks[commonTaskCount++] = DATAWIN_TASK(chunkName, chunkMember); \
+            commonTasks[commonTaskCount] = DATAWIN_TASK(chunkName, chunkMember); \
+            commonTasks[commonTaskCount].options = &effective; \
+            commonTasks[commonTaskCount].owner = dw; \
+            commonTasks[commonTaskCount].chunkIndex = parsedChunkCount + (int)commonTaskCount; \
+            commonTasks[commonTaskCount].totalChunks = totalChunks; \
+            commonTaskCount++; \
         } \
     } while (0)
 
@@ -398,22 +439,14 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
         if (DataWin_parseChunkTasksParallel(dw, commonTasks, commonTaskCount) != 0) {
             return -1;
         }
-
-        for (size_t i = 0; i < commonTaskCount; ++i) {
-            DataWin_emitProgress(dw, &effective, commonTasks[i].name, parsedChunkCount, totalChunks);
-            parsedChunkCount++;
-        }
+        parsedChunkCount += (int)commonTaskCount;
     }
 
     if (effective.parsePsem) {
-        DataWin_emitProgress(dw, &effective, "PSEM", parsedChunkCount, totalChunks);
-        parsedChunkCount++;
         assert(PSEM_parse(dw) == 0);
     }
 
     if (effective.parsePsys) {
-        DataWin_emitProgress(dw, &effective, "PSYS", parsedChunkCount, totalChunks);
-        parsedChunkCount++;
         assert(PSYS_parse(dw) == 0);
     }
 
