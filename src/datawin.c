@@ -39,6 +39,7 @@ static void DataWin_reset(DataWin *dw) {
     memset(&dw->objt, 0, sizeof(dw->objt));
     memset(&dw->room, 0, sizeof(dw->room));
     memset(&dw->acrv, 0, sizeof(dw->acrv));
+    memset(&dw->tgin, 0, sizeof(dw->tgin));
     memset(&dw->strg, 0, sizeof(dw->strg));
     memset(&dw->txtr, 0, sizeof(dw->txtr));
     memset(&dw->audo, 0, sizeof(dw->audo));
@@ -79,6 +80,7 @@ void DataWin_initParserOptions(DataWinParserOptions *options) {
     options->parseVari = true;
     options->parseFunc = true;
     options->parseStrg = true;
+    options->parseTgin = true;
     options->parseTxtr = true;
     options->parseAudo = true;
     options->parseAcrv = true;
@@ -243,6 +245,7 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
     parse(Objt, OBJT);
     parse(Room, ROOM);
     parse(Strg, STRG);
+    parse(Tgin, TGIN);
     parse(Txtr, TXTR);
     parse(Audo, AUDO);
     parse(Acrv, ACRV);
@@ -356,6 +359,10 @@ int DataWin_free(DataWin *dw) {
     }
     if (ACRV_free(&dw->acrv)) {
         logWarn("[DataWin_free] Failed to free ACRV chunk\n");
+        result = -1;
+    }
+    if (TGIN_free(&dw->tgin)) {
+        logWarn("[DataWin_free] Failed to free TGIN chunk\n");
         result = -1;
     }
     if (STRG_free(&dw->strg)) {

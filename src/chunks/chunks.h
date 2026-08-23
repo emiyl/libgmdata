@@ -66,6 +66,9 @@ int ROOM_free(RoomChunk *r);
 int STRG_parse(DataWin *dw);
 int STRG_free(StrgChunk *s);
 
+int TGIN_parse(DataWin *dw);
+int TGIN_free(TginChunk *t);
+
 int ACRV_parse(DataWin *dw);
 int ACRV_free(AcrvChunk *a);
 

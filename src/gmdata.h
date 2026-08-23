@@ -789,6 +789,29 @@ typedef struct {
 
 typedef struct {
     bool present;
+    const char* name;
+    const char* directory;
+    const char* extension;
+    int32_t loadType;
+    uint32_t texturePageCount;
+    int32_t* texturePages;
+    uint32_t spriteCount;
+    int32_t* sprites;
+    uint32_t spineSpriteCount;
+    int32_t* spineSprites;
+    uint32_t fontCount;
+    int32_t* fonts;
+    uint32_t tileSetCount;
+    int32_t* tilesets;
+} TextureGroupInfo;
+
+typedef struct {
+    uint32_t count;
+    TextureGroupInfo* groups;
+} TginChunk;
+
+typedef struct {
+    bool present;
     uint32_t scaled;
     uint32_t generatedMips;
     uint32_t textureBlockSize;
@@ -863,6 +886,7 @@ typedef struct {
     ObjtChunk objt;
     RoomChunk room;
     AcrvChunk acrv;
+    TginChunk tgin;
     StrgChunk strg;
     TxtrChunk txtr;
     AudoChunk audo;
@@ -911,6 +935,7 @@ typedef struct {
     bool parseVari;
     bool parseFunc;
     bool parseStrg;
+    bool parseTgin;
     bool parseTxtr;
     bool parseAudo;
     bool parseAcrv;
