@@ -26,6 +26,12 @@ By default this installs to `/usr/local`, producing:
 
 Public headers are kept under `include/` and are intended for downstream consumers.
 
+## Difference from other parsers
+
+While other projects such as Butterscotch and UndertaleModTool have their own parsers for GameMaker data.win files, this is a library that can be used in other C/C++ projects. Based on the Butterscotch parser, it has several improvements such as wider chunk coverage, better error handling and faster parsing via multithreading.
+
+Through my benchmarks, I measured a **4.05x speed-up** when parsing DELTARUNE Chapter 5 using the multithreaded parser compared to the single-threaded parser, which is nearly identical to Butterscotch's.
+
 ## Chunk coverage
 
 | Chunk | libgmdata | Butterscotch | UndertaleModTool |

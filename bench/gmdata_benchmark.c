@@ -292,6 +292,8 @@ int main(int argc, char **argv) {
     }
 
     for (i = 0; i < iterations; ++i) {
+        printf("[benchmark] iteration %d/%d\n", i + 1, iterations);
+        
         if (parse_once_and_measure(path, &sample_ns, &run_state) != 0) {
             return 1;
         }

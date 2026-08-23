@@ -192,7 +192,9 @@ static int SPRT_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void*
     if (Sprite_parse(reader, dw, (Sprite *)out) != 0) {
         logWarn("[SPRT_pointerTable_parse] Failed to parse Sprite\n");
         return -1;
-    };
+    }
+
+    return 0;
 }
 
 static int SPRT_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData) {

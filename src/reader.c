@@ -8,6 +8,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef MULTITHREAD
+#include <pthread.h>
+#endif
+
 void Reader_init(Reader *reader, const uint8_t *data, size_t size, size_t offset, const char* name) {
     if (reader == NULL) {
         return;
@@ -409,6 +413,58 @@ int Reader_readPointerTable(Reader *reader, uint32_t **out_ptrs, uint32_t *out_c
     return 0;
 }
 
+#ifndef READER_POINTER_TABLE_PARALLEL_THRESHOLD
+#define READER_POINTER_TABLE_PARALLEL_THRESHOLD 64U
+#endif
+
+#ifdef MULTITHREAD
+typedef struct {
+    Reader *reader;
+    DataWin *dw;
+    uint32_t ptr;
+    void *item;
+    size_t itemSize;
+    void *extraData;
+    PointerTableFunction parser;
+    PointerTableFunction missingHandler;
+    PointerTableFunction successHandler;
+    int status;
+} PointerTableParseTask;
+
+static void *Reader_parsePointerTable_worker(void *arg) {
+    PointerTableParseTask *task = (PointerTableParseTask *)arg;
+    if (task == NULL) {
+        return NULL;
+    }
+
+    if (task->ptr == 0U) {
+        if (task->missingHandler != NULL) {
+            task->missingHandler(task->reader, task->dw, task->item, task->extraData);
+        } else {
+            memset(task->item, 0, task->itemSize);
+        }
+        return NULL;
+    }
+
+    Reader local_reader = *task->reader;
+    if (Reader_seek(&local_reader, task->ptr) != 0) {
+        task->status = -1;
+        return NULL;
+    }
+
+    if (task->parser(&local_reader, task->dw, task->item, task->extraData) != 0) {
+        task->status = -1;
+        return NULL;
+    }
+
+    if (task->successHandler != NULL) {
+        task->successHandler(&local_reader, task->dw, task->item, task->extraData);
+    }
+
+    return NULL;
+}
+#endif
+
 int Reader_parsePointerTable(
     Reader *reader, DataWin *dw,
     uint32_t *ptrs, uint32_t count,
@@ -427,7 +483,106 @@ int Reader_parsePointerTable(
 
     repeat(count, i) {
         void *item = (uint8_t *)*items + i * itemSize;
-        
+
+        if (ptrs[i] == 0) {
+            if (missingHandler != NULL) {
+                missingHandler(reader, dw, item, extraData);
+            } else {
+                memset(item, 0, itemSize);
+            }
+            continue;
+        }
+
+        Reader_seek(reader, ptrs[i]);
+
+        if (parser(reader, dw, item, extraData) != 0) {
+            free(*items);
+            *items = NULL;
+            return -1;
+        } else {
+            if (successHandler != NULL) {
+                successHandler(reader, dw, item, extraData);
+            }
+        }
+    }
+
+    return 0;
+}
+
+int Reader_parsePointerTableParallel(
+    Reader *reader, DataWin *dw,
+    uint32_t *ptrs, uint32_t count,
+    void **items, size_t itemSize,
+    void* extraData,
+    PointerTableFunction parser,
+    PointerTableFunction missingHandler,
+    PointerTableFunction successHandler
+) {
+    if (count == 0) {
+        *items = NULL;
+        return 0;
+    }
+
+    *items = safeCalloc(count, itemSize);
+
+#ifdef MULTITHREAD
+    if (count >= READER_POINTER_TABLE_PARALLEL_THRESHOLD) {
+        PointerTableParseTask *tasks = (PointerTableParseTask *)malloc(sizeof(*tasks) * count);
+        pthread_t *threads = (pthread_t *)malloc(sizeof(*threads) * count);
+
+        if (tasks == NULL || threads == NULL) {
+            free(tasks);
+            free(threads);
+            free(*items);
+            *items = NULL;
+            return -1;
+        }
+
+        for (uint32_t i = 0; i < count; ++i) {
+            void *item = (uint8_t *)*items + i * itemSize;
+            tasks[i].reader = reader;
+            tasks[i].dw = dw;
+            tasks[i].ptr = ptrs[i];
+            tasks[i].item = item;
+            tasks[i].itemSize = itemSize;
+            tasks[i].extraData = extraData;
+            tasks[i].parser = parser;
+            tasks[i].missingHandler = missingHandler;
+            tasks[i].successHandler = successHandler;
+            tasks[i].status = 0;
+
+            if (pthread_create(&threads[i], NULL, Reader_parsePointerTable_worker, &tasks[i]) != 0) {
+                for (uint32_t j = 0; j < i; ++j) {
+                    pthread_join(threads[j], NULL);
+                }
+                free(tasks);
+                free(threads);
+                free(*items);
+                *items = NULL;
+                return -1;
+            }
+        }
+
+        for (uint32_t i = 0; i < count; ++i) {
+            pthread_join(threads[i], NULL);
+            if (tasks[i].status != 0) {
+                free(tasks);
+                free(threads);
+                free(*items);
+                *items = NULL;
+                return -1;
+            }
+        }
+
+        free(tasks);
+        free(threads);
+        return 0;
+    }
+#endif
+
+    repeat(count, i) {
+        void *item = (uint8_t *)*items + i * itemSize;
+
         if (ptrs[i] == 0) {
             if (missingHandler != NULL) {
                 missingHandler(reader, dw, item, extraData);

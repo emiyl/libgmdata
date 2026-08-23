@@ -47,6 +47,15 @@ int Reader_parsePointerTable(
     PointerTableFunction missingHandler,
     PointerTableFunction successHandler
 );
+int Reader_parsePointerTableParallel(
+    Reader *reader, DataWin *dw,
+    uint32_t *ptrs, uint32_t count,
+    void **items, size_t itemSize,
+    void* extraData,
+    PointerTableFunction parser,
+    PointerTableFunction missingHandler,
+    PointerTableFunction successHandler
+);
 int Reader_readAndParsePointerTable(
     Reader *reader,
     DataWin *dw,
