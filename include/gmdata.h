@@ -795,32 +795,176 @@ typedef struct {
 
 typedef struct {
     uint32_t count;
-    const char** strings;
+    char **strings;
 } FeatChunk;
+
+typedef enum {
+    SEQUENCE_PLAYBACK_ONESHOT = 0,
+    SEQUENCE_PLAYBACK_LOOP = 1,
+    SEQUENCE_PLAYBACK_PINGPONG = 2
+} SequencePlaybackType;
+
+typedef struct SequenceChannel {
+    uint32_t type;
+    uint32_t index;
+    uint32_t value_count;
+    float *values;
+} SequenceChannel;
+
+typedef struct SequenceTrack {
+    uint32_t track_type;
+    uint32_t channel_count;
+    SequenceChannel *channels;
+} SequenceTrack;
+
+typedef struct {
+    float key;
+    float length;
+    bool stretch;
+    bool disabled;
+    uint32_t channel_count;
+    SequenceChannel *channels;
+} SequenceKeyframe;
+
+typedef struct {
+    uint32_t function_id;
+    uint32_t value;
+} SequenceFunctionIdEntry;
+
+typedef struct {
+    char *name;
+    uint32_t playback;
+    float playback_speed;
+    uint32_t playback_speed_type;
+    float length;
+    int32_t origin_x;
+    int32_t origin_y;
+    float volume;
+    float width;
+    float height;
+    uint32_t broadcast_message_count;
+    SequenceKeyframe *broadcast_messages;
+    uint32_t track_count;
+    SequenceTrack *tracks;
+    uint32_t function_id_count;
+    SequenceFunctionIdEntry *function_ids;
+    uint32_t moment_count;
+    SequenceKeyframe *moments;
+} Sequence;
 
 typedef struct {
     uint32_t count;
+    Sequence *items;
 } SeqnChunk;
 
 typedef struct {
+    uint32_t id;
+    uint32_t tag_count;
+    char **tags;
+} AssetTagEntry;
+
+typedef struct {
     uint32_t count;
-    const char** strings;
+    char **strings;
+    uint32_t asset_tag_count;
+    AssetTagEntry *asset_tags;
 } TagsChunk;
 
 typedef struct {
+    char *name;
+    uint32_t texture_page_entry_id;
+} EmbiItem;
+
+typedef struct {
     uint32_t count;
+    EmbiItem *items;
 } EmbiChunk;
 
 typedef struct {
-    uint32_t count;
-} PsemChunk;
+    char *name;
+    bool enabled;
+    int32_t mode;
+    int32_t emit_count;
+    bool emit_relative;
+    float delay_min;
+    float delay_max;
+    int32_t delay_unit;
+    float interval_min;
+    float interval_max;
+    int32_t interval_unit;
+    int32_t distribution;
+    int32_t shape;
+    float region_x;
+    float region_y;
+    float region_width;
+    float region_height;
+    float rotation;
+    uint32_t sprite_id;
+    int32_t texture_enum;
+    float frame_index;
+    bool animate;
+    bool stretch;
+    bool is_random;
+    uint32_t start_color;
+    uint32_t mid_color;
+    uint32_t end_color;
+    bool additive_blend;
+    float lifetime_min;
+    float lifetime_max;
+    float scale_x;
+    float scale_y;
+    float size_min_x;
+    float size_max_x;
+    float size_min_y;
+    float size_max_y;
+    float size_increase_x;
+    float size_increase_y;
+    float size_wiggle_x;
+    float size_wiggle_y;
+    float speed_min;
+    float speed_max;
+    float speed_increase;
+    float speed_wiggle;
+    float gravity_force;
+    float gravity_direction;
+    float direction_min;
+    float direction_max;
+    float direction_increase;
+    float direction_wiggle;
+    float orientation_min;
+    float orientation_max;
+    float orientation_increase;
+    float orientation_wiggle;
+    bool orientation_relative;
+    uint32_t spawn_on_death_id;
+    int32_t spawn_on_death_count;
+    uint32_t spawn_on_update_id;
+    int32_t spawn_on_update_count;
+} ParticleEmitter;
 
 typedef struct {
     uint32_t count;
+    ParticleEmitter *items;
+} PsemChunk;
+
+typedef struct {
+    char *name;
+    int32_t origin_x;
+    int32_t origin_y;
+    int32_t draw_order;
+    bool global_space_particles;
+    uint32_t emitter_count;
+    ParticleEmitter *emitters;
+} ParticleSystem;
+
+typedef struct {
+    uint32_t count;
+    ParticleSystem *items;
 } PsysChunk;
 
 typedef struct {
     uint32_t count;
+    uint32_t *code_ids;
 } GmenChunk;
 
 typedef struct {
@@ -833,7 +977,7 @@ typedef struct {
 
 typedef struct {
     uint32_t count;
-    const char** strings;
+    char **strings;
 } StrgChunk;
 
 typedef struct {
