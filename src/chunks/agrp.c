@@ -1,5 +1,4 @@
 #include "common.h"
-#include "../datawin.h"
 
 static int AGRP_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void* extraData);
 static int AGRP_pointerTable_missingHandler(Reader *reader, DataWin *dw, void *out, void* extraData);

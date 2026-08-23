@@ -1,5 +1,4 @@
 #include "common.h"
-#include "../datawin.h"
 
 int VARI_free(VariChunk *v);
 

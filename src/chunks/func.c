@@ -1,5 +1,4 @@
 #include "common.h"
-#include "../datawin.h"
 
 int FUNC_free(FuncChunk *f);
 

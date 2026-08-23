@@ -1,5 +1,4 @@
 #include "common.h"
-#include "../datawin.h"
 
 typedef struct {
     bool hasGeneratedMips;
