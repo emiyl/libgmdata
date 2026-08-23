@@ -53,9 +53,24 @@ int AUDO_parse(DataWin *dw) {
     );
 }
 
+static int AudioEntry_free(AudioEntry *entry) {
+    if (entry == NULL) return -1;
+    free(entry->data);
+    entry->data = NULL;
+    entry->dataSize = 0;
+    entry->dataOffset = 0;
+    entry->present = false;
+    return 0;
+}
+
 int AUDO_free(AudoChunk *a) {
     if (a == NULL) return -1;
-    free(a->entries);
+    if (a->entries != NULL) {
+        repeat(a->count, i) {
+            AudioEntry_free(&a->entries[i]);
+        }
+        free(a->entries);
+    }
     a->entries = NULL;
     a->count = 0;
     return 0;
