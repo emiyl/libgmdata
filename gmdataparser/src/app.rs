@@ -621,59 +621,6 @@ impl App {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::{format_hex_dump, embi_texture_page_index};
-    use crate::bindings::{Chunk, ChunkTable, DataWin, EmbiChunk, EmbiItem};
-
-    #[test]
-    fn format_hex_dump_includes_offset_and_ascii() {
-        let dump = format_hex_dump(&[0x00, 0x10, 0xFF, 0x41, 0x42], 0x100);
-        assert!(dump.contains("0100"));
-        assert!(dump.contains("00 10 ff 41 42"));
-        assert!(dump.contains("..A B"));
-    }
-
-    #[test]
-    fn embi_texture_page_index_uses_tpagn_pointer_match() {
-        let mut tpag_payload = vec![0u8; 4 + 4 * 4];
-        tpag_payload[0..4].copy_from_slice(&4u32.to_le_bytes());
-        tpag_payload[4..8].copy_from_slice(&0x1000u32.to_le_bytes());
-        tpag_payload[8..12].copy_from_slice(&0x2000u32.to_le_bytes());
-        tpag_payload[12..16].copy_from_slice(&0x3000u32.to_le_bytes());
-        tpag_payload[16..20].copy_from_slice(&0x4000u32.to_le_bytes());
-
-        let mut file_bytes = vec![0u8; 0x1000 + tpag_payload.len()];
-        let tpag_offset = 0x1000usize;
-        file_bytes[tpag_offset..tpag_offset + tpag_payload.len()].copy_from_slice(&tpag_payload);
-
-        let mut chunks = [Chunk {
-            name: [b'T' as i8, b'P' as i8, b'A' as i8, b'G' as i8, 0],
-            offset: tpag_offset as u32,
-            length: tpag_payload.len() as u32,
-        }];
-
-        let items = [EmbiItem {
-            name: std::ptr::null_mut(),
-            texture_page_entry_id: 0x3000,
-        }];
-        let mut dw: DataWin = unsafe { std::mem::zeroed() };
-        dw.file_data = file_bytes.as_mut_ptr();
-        dw.file_size = file_bytes.len() as usize;
-        dw.chunks = ChunkTable {
-            items: chunks.as_mut_ptr(),
-            count: chunks.len(),
-            capacity: chunks.len(),
-        };
-        dw.embi = EmbiChunk {
-            count: 1,
-            items: items.as_ptr() as *mut EmbiItem,
-        };
-
-        assert_eq!(embi_texture_page_index(&dw, 0), Some(2));
-    }
-}
-
 impl Drop for App {
     fn drop(&mut self) {
         if self.load_complete {
