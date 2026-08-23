@@ -160,6 +160,7 @@ fn load_data_win(
             parseVari: true,
             parseFunc: true,
             parseStrg: true,
+            parseTgin: true,
             parseTxtr: true,
             parseAudo: true,
             parseAcrv: true,
