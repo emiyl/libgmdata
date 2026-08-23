@@ -1,4 +1,5 @@
 mod app;
+mod audio;
 mod bindings;
 mod models;
 mod texture;

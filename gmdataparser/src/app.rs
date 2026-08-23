@@ -5,6 +5,7 @@ use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 
+use crate::audio::AudioPlayer;
 use crate::bindings::*;
 use crate::models::{
     build_chunk_info_list, matches_item_query, ChunkInfo, ChunkItem,
@@ -109,6 +110,7 @@ pub struct App {
     pub texture_preview_cache: HashMap<String, Option<egui::ColorImage>>,
     pub texture_popup: Option<(String, usize)>,
     pub texture_popup_zoom: HashMap<(String, usize), f32>,
+    pub audio_player: AudioPlayer,
     pub load_rx: Option<mpsc::Receiver<LoadResult>>,
     pub progress_rx: Option<mpsc::Receiver<LoadProgressEvent>>,
     pub loading: Option<LoadingProgress>,
@@ -311,6 +313,7 @@ impl App {
             texture_preview_cache: HashMap::new(),
             texture_popup: None,
             texture_popup_zoom: HashMap::new(),
+            audio_player: AudioPlayer::new(),
             load_rx: Some(result_rx),
             progress_rx: Some(progress_rx),
             loading: Some(LoadingProgress {
@@ -467,6 +470,45 @@ impl App {
                     page_item.sourceHeight.max(1) as f32,
                 )
             })
+        }
+    }
+
+    fn render_audio_player_ui(&mut self, ui: &mut egui::Ui, active_item_idx: usize) {
+        ui.separator();
+        ui.horizontal(|ui| {
+            if ui.button("Play").clicked() {
+                if let Err(err) = self.audio_player.load_from_dw(&self.dw, active_item_idx) {
+                    ui.ctx().data_mut(|d| {
+                        d.insert_temp(
+                            egui::Id::new("audio_error"),
+                            err,
+                        );
+                    });
+                } else if let Err(err) = self.audio_player.play() {
+                    ui.ctx().data_mut(|d| {
+                        d.insert_temp(
+                            egui::Id::new("audio_error"),
+                            err,
+                        );
+                    });
+                }
+            }
+
+            if ui.button("Stop").clicked() {
+                self.audio_player.stop();
+            }
+        });
+
+        let status = if self.audio_player.is_playing() {
+            "Playing"
+        } else {
+            "Ready"
+        };
+        ui.label(format!("Status: {status}"));
+        ui.label(format!("Loaded bytes: {}", self.audio_player.bytes_len()));
+
+        if let Some(err) = ui.ctx().data_mut(|d| d.get_temp::<String>(egui::Id::new("audio_error"))) {
+            ui.colored_label(egui::Color32::LIGHT_RED, err);
         }
     }
 
@@ -929,6 +971,10 @@ impl eframe::App for App {
                                     if active_chunk_name == "TXTR" || active_chunk_name == "TPAG" || active_chunk_name == "EMBI" {
                                         ui.separator();
                                         self.render_texture_preview(ui, &active_chunk_name, active_item_idx, None);
+                                    }
+
+                                    if active_chunk_name == "AUDO" {
+                                        self.render_audio_player_ui(ui, active_item_idx);
                                     }
                                 });
                             });
