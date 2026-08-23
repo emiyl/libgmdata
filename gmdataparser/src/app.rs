@@ -118,6 +118,22 @@ pub struct App {
     pub load_complete: bool,
 }
 
+fn save_egui_color_image_png(image: &egui::ColorImage, path: &std::path::Path) -> Result<(), String> {
+    let [width, height] = image.size;
+    let rgba = image
+        .pixels
+        .iter()
+        .flat_map(|pixel| pixel.to_array())
+        .collect::<Vec<_>>();
+
+    let img = image::RgbaImage::from_raw(width as u32, height as u32, rgba)
+        .ok_or_else(|| format!("Failed to build PNG for {}x{} image.", width, height))?;
+
+    img.save(path)
+        .map_err(|err| format!("Failed to save PNG: {err}"))?;
+    Ok(())
+}
+
 fn load_data_win(
     path: &str,
     progress_tx: mpsc::Sender<LoadProgressEvent>,
@@ -602,15 +618,13 @@ impl App {
         }
     }
 
-    fn render_texture_preview(
+    fn resolve_texture_preview_image(
         &mut self,
-        ui: &mut egui::Ui,
         chunk_name: &str,
         active_item_idx: usize,
-        popup_zoom: Option<f32>,
-    ) {
+    ) -> Option<egui::ColorImage> {
         if chunk_name != "TXTR" && chunk_name != "TPAG" && chunk_name != "EMBI" {
-            return;
+            return None;
         }
 
         let preview_key = format!("{}-{}", chunk_name, active_item_idx);
@@ -628,10 +642,10 @@ impl App {
 
         let gm2022_5 = self.dw.detectedFormat.major >= 2022 && self.dw.detectedFormat.minor >= 5;
 
-        let preview_image = if chunk_name == "TXTR" {
+        if chunk_name == "TXTR" {
             if let Some(texture) = texture_slice.get(active_item_idx) {
                 self.texture_preview_cache
-                    .entry(preview_key.clone())
+                    .entry(preview_key)
                     .or_insert_with(|| texture_preview_image(texture, gm2022_5))
                     .clone()
             } else {
@@ -658,17 +672,41 @@ impl App {
             page_index.and_then(|page_index| {
                 page_data.get(page_index).and_then(|page_item| {
                     self.texture_preview_cache
-                        .entry(preview_key.clone())
+                        .entry(preview_key)
                         .or_insert_with(|| texture_page_item_preview_image(page_item, texture_slice, gm2022_5))
                         .clone()
                 })
             })
-        };
+        }
+    }
 
-        let Some(image) = preview_image else {
+    fn render_texture_preview(
+        &mut self,
+        ui: &mut egui::Ui,
+        chunk_name: &str,
+        active_item_idx: usize,
+        popup_zoom: Option<f32>,
+    ) {
+        let Some(image) = self.resolve_texture_preview_image(chunk_name, active_item_idx) else {
             ui.label("No preview available for this item.");
             return;
         };
+
+        ui.horizontal_wrapped(|ui| {
+            if ui.button("Save PNG").clicked() {
+                let suggested_name = format!("{}-{}-texture.png", chunk_name, active_item_idx);
+                if let Some(path) = rfd::FileDialog::new()
+                    .set_file_name(&suggested_name)
+                    .save_file()
+                {
+                    if let Err(err) = save_egui_color_image_png(&image, &path) {
+                        ui.ctx().data_mut(|d| {
+                            d.insert_temp(egui::Id::new("audio_error"), err);
+                        });
+                    }
+                }
+            }
+        });
 
         let handle = ui.ctx().load_texture(
             format!("{}-preview-{}", chunk_name, active_item_idx),
