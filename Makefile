@@ -3,7 +3,7 @@ AR = /usr/bin/ar
 RANLIB = /usr/bin/ranlib
 CPPFLAGS = -Isrc -Iinclude
 CFLAGS = -Wall -Wextra -std=c11
-MULTITHREAD ?= 0
+MULTITHREAD ?= 1
 
 ifeq ($(MULTITHREAD),1)
 CFLAGS += -pthread -DMULTITHREAD
@@ -24,12 +24,18 @@ LIB_TARGET = $(LIB_DIR)/libgmdata.a
 
 .DEFAULT_GOAL := all
 
-.PHONY: lib install clean prepare_public_headers
+.PHONY: lib install clean prepare_public_headers bench
 
 prepare_public_headers:
 	cp src/gmdata.h include/gmdata.h
 
 all: $(LIB_TARGET)
+
+bench: clean $(LIB_TARGET) bench/gmdata_benchmark
+
+bench/gmdata_benchmark: bench/gmdata_benchmark.c $(LIB_TARGET)
+	mkdir -p bench
+	$(CC) $(CPPFLAGS) $(CFLAGS) -I. -o $@ bench/gmdata_benchmark.c $(LIB_TARGET) $(LDLIBS)
 
 install: $(LIB_TARGET)
 	install -d "$(INSTALL_LIB_DIR)" "$(INSTALL_INC_DIR)"
@@ -48,6 +54,6 @@ $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) bench/gmdata_benchmark
 
-.PHONY: all install clean prepare_public_headers
+.PHONY: all install clean prepare_public_headers bench

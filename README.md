@@ -6,6 +6,14 @@ Build:
 
     make
 
+Benchmark the threaded vs single-threaded parser:
+
+    make bench MULTITHREAD=1
+    ./bench/gmdata_benchmark ./path/to/data.win 10 1
+
+    make bench MULTITHREAD=0
+    ./bench/gmdata_benchmark ./path/to/data.win 10 1
+
 Install the library and headers
 
     make install
