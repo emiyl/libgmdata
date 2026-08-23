@@ -100,13 +100,12 @@ int PSEM_parse(DataWin *dw) {
     }
 
     uint32_t version = 0;
-    if (Reader_readUInt32(reader, &version) != 0 || version != 1U) {
+    read(&version, UInt32);
+    if (version != 1U) {
         logWarn("[PSEM_parse] Unexpected version %u\n", version);
     }
 
-    if (Reader_readUInt32(reader, &p->count) != 0) {
-        return -1;
-    }
+    read(&p->count, UInt32);
 
     p->items = NULL;
     if (p->count == 0U) {
