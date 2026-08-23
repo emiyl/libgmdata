@@ -1018,6 +1018,8 @@ impl eframe::App for App {
 
                             let fill_height = ui.available_height().max(240.0);
                             ui.set_min_height(fill_height);
+                            ui.set_min_width(row_width);
+                            ui.set_max_width(row_width);
 
                             egui::ScrollArea::vertical()
                                 .min_scrolled_width(row_width)
@@ -1025,6 +1027,8 @@ impl eframe::App for App {
                                     let active_chunk = &mut self.chunks[active_chunk_idx];
                                     let total_height = filtered_indices.len() as f32 * item_height;
                                     ui.set_min_height(total_height.max(fill_height));
+                                    ui.set_min_width(row_width);
+                                    ui.set_max_width(row_width);
 
                                     let scroll_index = (viewport.min.y / item_height).floor() as usize;
                                     let mut window_start = (scroll_index / step_size) * step_size;
@@ -1036,12 +1040,11 @@ impl eframe::App for App {
 
                                     ui.add_space(render_start as f32 * item_height);
                                     for &idx in &filtered_indices[render_start..render_end] {
-                                        let item = &active_chunk.items[idx];
-                                        let selected = active_chunk.active_item == idx;
+                                        let item_name = active_chunk.items[idx].name.clone();
                                         let row_response = ui.allocate_ui(egui::vec2(row_width, item_height), |ui| {
                                             ui.set_min_width(row_width);
                                             ui.set_max_width(row_width);
-                                            ui.selectable_label(selected, item.name.clone())
+                                            ui.selectable_value(&mut active_chunk.active_item, idx, item_name)
                                         });
                                         if row_response.response.clicked() {
                                             active_chunk.active_item = idx;

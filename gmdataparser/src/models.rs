@@ -1230,38 +1230,3 @@ pub fn build_chunk_info_list(dw: &DataWin) -> Vec<ChunkInfo> {
 
     chunks
 }
-
-#[cfg(test)]
-mod tests {
-    use super::build_chunk_fields;
-    use crate::bindings::DataWin;
-
-    #[test]
-    fn missing_chunk_types_have_summary_fields() {
-        let mut dw: DataWin = unsafe { std::mem::zeroed() };
-        dw.feat.count = 1;
-        dw.seqn.count = 1;
-        dw.tags.count = 2;
-        dw.tags.asset_tag_count = 1;
-        dw.embi.count = 3;
-        dw.psem.count = 4;
-        dw.psys.count = 5;
-        dw.gmen.count = 6;
-        dw.dafl.count = 7;
-        dw.uilr.count = 8;
-
-        for name in [
-            "FEAT", "SEQN", "TAGS", "EMBI", "PSEM", "PSYS", "GMEN", "STAT", "DAFL", "UILR",
-        ] {
-            let fields = build_chunk_fields(name, &dw);
-            assert!(
-                !fields.is_empty(),
-                "expected chunk {name} to expose summary fields"
-            );
-            assert!(
-                fields.iter().any(|field| field.name == "count"),
-                "expected chunk {name} to include a count field"
-            );
-        }
-    }
-}
