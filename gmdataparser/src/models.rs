@@ -586,6 +586,218 @@ pub fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
                 });
             }
         }
+        "FEAT" => {
+            let count = dw.feat.count as usize;
+            if count == 0 || dw.feat.strings.is_null() {
+                return items;
+            }
+            let Some(strings) = checked_ptr_slice(dw.feat.strings, count) else {
+                return items;
+            };
+            for (idx, string) in strings.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "value", cstr_or_null(*string));
+                items.push(ChunkItem {
+                    name: format!("Feature {}", idx),
+                    fields,
+                });
+            }
+        }
+        "SEQN" => {
+            let count = dw.seqn.count as usize;
+            if count == 0 || dw.seqn.items.is_null() {
+                return items;
+            }
+            let Some(sequences) = checked_ptr_slice(dw.seqn.items, count) else {
+                return items;
+            };
+            for (idx, sequence) in sequences.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "name", cstr_or_null(sequence.name));
+                push_field(&mut fields, "playback", sequence.playback);
+                push_field(&mut fields, "playbackSpeed", sequence.playback_speed);
+                push_field(&mut fields, "playbackSpeedType", sequence.playback_speed_type);
+                push_field(&mut fields, "length", sequence.length);
+                push_field(&mut fields, "originX", sequence.origin_x);
+                push_field(&mut fields, "originY", sequence.origin_y);
+                push_field(&mut fields, "volume", sequence.volume);
+                push_field(&mut fields, "width", sequence.width);
+                push_field(&mut fields, "height", sequence.height);
+                push_field(&mut fields, "broadcastMessageCount", sequence.broadcast_message_count);
+                push_field(&mut fields, "trackCount", sequence.track_count);
+                push_field(&mut fields, "functionIdCount", sequence.function_id_count);
+                push_field(&mut fields, "momentCount", sequence.moment_count);
+                items.push(ChunkItem {
+                    name: item_label(&cstr_or_null(sequence.name), idx),
+                    fields,
+                });
+            }
+        }
+        "TAGS" => {
+            let count = dw.tags.count as usize;
+            if count > 0 && !dw.tags.strings.is_null() {
+                let Some(strings) = checked_ptr_slice(dw.tags.strings, count) else {
+                    return items;
+                };
+                for (idx, string) in strings.iter().enumerate() {
+                    let mut fields = Vec::new();
+                    push_field(&mut fields, "value", cstr_or_null(*string));
+                    items.push(ChunkItem {
+                        name: format!("String {}", idx),
+                        fields,
+                    });
+                }
+            }
+
+            let asset_count = dw.tags.asset_tag_count as usize;
+            if asset_count == 0 || dw.tags.asset_tags.is_null() {
+                return items;
+            }
+            let Some(asset_tags) = checked_ptr_slice(dw.tags.asset_tags, asset_count) else {
+                return items;
+            };
+            for (idx, asset_tag) in asset_tags.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "id", asset_tag.id);
+                push_field(&mut fields, "tagCount", asset_tag.tag_count);
+                let tag_count = asset_tag.tag_count as usize;
+                if tag_count > 0 && !asset_tag.tags.is_null() {
+                    let Some(tags) = checked_ptr_slice(asset_tag.tags, tag_count) else {
+                        return items;
+                    };
+                    let tag_names: Vec<String> = tags.iter().map(|tag| cstr_or_null(*tag)).collect();
+                    push_field(&mut fields, "tags", tag_names.join(", "));
+                }
+                items.push(ChunkItem {
+                    name: format!("Asset tag {}", idx),
+                    fields,
+                });
+            }
+        }
+        "EMBI" => {
+            let count = dw.embi.count as usize;
+            if count == 0 || dw.embi.items.is_null() {
+                return items;
+            }
+            let Some(entries) = checked_ptr_slice(dw.embi.items, count) else {
+                return items;
+            };
+            for (idx, entry) in entries.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "name", cstr_or_null(entry.name));
+                push_field(&mut fields, "texturePageEntryId", entry.texture_page_entry_id);
+                items.push(ChunkItem {
+                    name: item_label(&cstr_or_null(entry.name), idx),
+                    fields,
+                });
+            }
+        }
+        "PSEM" => {
+            let count = dw.psem.count as usize;
+            if count == 0 || dw.psem.items.is_null() {
+                return items;
+            }
+            let Some(emitter_items) = checked_ptr_slice(dw.psem.items, count) else {
+                return items;
+            };
+            for (idx, emitter) in emitter_items.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "name", cstr_or_null(emitter.name));
+                push_field(&mut fields, "enabled", emitter.enabled);
+                push_field(&mut fields, "mode", emitter.mode);
+                push_field(&mut fields, "emitCount", emitter.emit_count);
+                push_field(&mut fields, "emitRelative", emitter.emit_relative);
+                push_field(&mut fields, "delayMin", emitter.delay_min);
+                push_field(&mut fields, "delayMax", emitter.delay_max);
+                push_field(&mut fields, "distribution", emitter.distribution);
+                push_field(&mut fields, "shape", emitter.shape);
+                push_field(&mut fields, "spriteId", emitter.sprite_id);
+                push_field(&mut fields, "textureEnum", emitter.texture_enum);
+                push_field(&mut fields, "frameIndex", emitter.frame_index);
+                push_field(&mut fields, "lifetimeMin", emitter.lifetime_min);
+                push_field(&mut fields, "lifetimeMax", emitter.lifetime_max);
+                items.push(ChunkItem {
+                    name: item_label(&cstr_or_null(emitter.name), idx),
+                    fields,
+                });
+            }
+        }
+        "PSYS" => {
+            let count = dw.psys.count as usize;
+            if count == 0 || dw.psys.items.is_null() {
+                return items;
+            }
+            let Some(systems) = checked_ptr_slice(dw.psys.items, count) else {
+                return items;
+            };
+            for (idx, system) in systems.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "name", cstr_or_null(system.name));
+                push_field(&mut fields, "originX", system.origin_x);
+                push_field(&mut fields, "originY", system.origin_y);
+                push_field(&mut fields, "drawOrder", system.draw_order);
+                push_field(&mut fields, "globalSpaceParticles", system.global_space_particles);
+                push_field(&mut fields, "emitterCount", system.emitter_count);
+                if system.emitter_count > 0 && !system.emitters.is_null() {
+                    let emitters = system.emitters;
+                    let Some(emitter_slice) = checked_ptr_slice(emitters, system.emitter_count as usize) else {
+                        return items;
+                    };
+                    let emitter_names: Vec<String> = emitter_slice
+                        .iter()
+                        .map(|emitter| cstr_or_null(emitter.name))
+                        .collect();
+                    push_field(&mut fields, "emitters", emitter_names.join(", "));
+                }
+                items.push(ChunkItem {
+                    name: item_label(&cstr_or_null(system.name), idx),
+                    fields,
+                });
+            }
+        }
+        "GMEN" => {
+            let count = dw.gmen.count as usize;
+            if count == 0 || dw.gmen.code_ids.is_null() {
+                return items;
+            }
+            let Some(code_ids) = checked_ptr_slice(dw.gmen.code_ids, count) else {
+                return items;
+            };
+            for (idx, code_id) in code_ids.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "codeId", *code_id);
+                items.push(ChunkItem {
+                    name: format!("Code ID {}", idx),
+                    fields,
+                });
+            }
+        }
+        "DAFL" => {
+            let count = dw.dafl.count as usize;
+            if count == 0 {
+                return items;
+            }
+            items.push(ChunkItem {
+                name: "Data file list".to_string(),
+                fields: vec![ChunkField {
+                    name: "count".to_string(),
+                    value: count.to_string(),
+                }],
+            });
+        }
+        "UILR" => {
+            let count = dw.uilr.count as usize;
+            if count == 0 {
+                return items;
+            }
+            items.push(ChunkItem {
+                name: "UI layout".to_string(),
+                fields: vec![ChunkField {
+                    name: "count".to_string(),
+                    value: count.to_string(),
+                }],
+            });
+        }
         "STRG" => {
             let count = dw.strg.count as usize;
             if count == 0 || dw.strg.strings.is_null() {
@@ -851,6 +1063,51 @@ pub fn build_chunk_fields(name: &str, dw: &DataWin) -> Vec<ChunkField> {
             push_field(&mut fields, "count", f.count);
             add_count_field(&mut fields, "effects", f.effects as *mut std::ffi::c_void, f.count as usize);
         }
+        "FEAT" => {
+            let f = &dw.feat;
+            push_field(&mut fields, "count", f.count);
+            add_count_field(&mut fields, "strings", f.strings as *mut std::ffi::c_void, f.count as usize);
+        }
+        "SEQN" => {
+            let s = &dw.seqn;
+            push_field(&mut fields, "count", s.count);
+            add_count_field(&mut fields, "sequences", s.items as *mut std::ffi::c_void, s.count as usize);
+        }
+        "TAGS" => {
+            let t = &dw.tags;
+            push_field(&mut fields, "count", t.count);
+            add_count_field(&mut fields, "strings", t.strings as *mut std::ffi::c_void, t.count as usize);
+            push_field(&mut fields, "assetTagCount", t.asset_tag_count);
+            add_count_field(&mut fields, "assetTags", t.asset_tags as *mut std::ffi::c_void, t.asset_tag_count as usize);
+        }
+        "EMBI" => {
+            let e = &dw.embi;
+            push_field(&mut fields, "count", e.count);
+            add_count_field(&mut fields, "items", e.items as *mut std::ffi::c_void, e.count as usize);
+        }
+        "PSEM" => {
+            let p = &dw.psem;
+            push_field(&mut fields, "count", p.count);
+            add_count_field(&mut fields, "emitters", p.items as *mut std::ffi::c_void, p.count as usize);
+        }
+        "PSYS" => {
+            let p = &dw.psys;
+            push_field(&mut fields, "count", p.count);
+            add_count_field(&mut fields, "systems", p.items as *mut std::ffi::c_void, p.count as usize);
+        }
+        "GMEN" => {
+            let g = &dw.gmen;
+            push_field(&mut fields, "count", g.count);
+            add_count_field(&mut fields, "codeIds", g.code_ids as *mut std::ffi::c_void, g.count as usize);
+        }
+        "DAFL" => {
+            let d = &dw.dafl;
+            push_field(&mut fields, "count", d.count);
+        }
+        "UILR" => {
+            let u = &dw.uilr;
+            push_field(&mut fields, "count", u.count);
+        }
         "STRG" => {
             let s = &dw.strg;
             push_field(&mut fields, "count", s.count);
@@ -917,4 +1174,39 @@ pub fn build_chunk_info_list(dw: &DataWin) -> Vec<ChunkInfo> {
     }
 
     chunks
+}
+
+#[cfg(test)]
+mod tests {
+    use super::build_chunk_fields;
+    use crate::bindings::DataWin;
+
+    #[test]
+    fn missing_chunk_types_have_summary_fields() {
+        let mut dw: DataWin = unsafe { std::mem::zeroed() };
+        dw.feat.count = 1;
+        dw.seqn.count = 1;
+        dw.tags.count = 2;
+        dw.tags.asset_tag_count = 1;
+        dw.embi.count = 3;
+        dw.psem.count = 4;
+        dw.psys.count = 5;
+        dw.gmen.count = 6;
+        dw.dafl.count = 7;
+        dw.uilr.count = 8;
+
+        for name in [
+            "FEAT", "SEQN", "TAGS", "EMBI", "PSEM", "PSYS", "GMEN", "DAFL", "UILR",
+        ] {
+            let fields = build_chunk_fields(name, &dw);
+            assert!(
+                !fields.is_empty(),
+                "expected chunk {name} to expose summary fields"
+            );
+            assert!(
+                fields.iter().any(|field| field.name == "count"),
+                "expected chunk {name} to include a count field"
+            );
+        }
+    }
 }
