@@ -7,7 +7,20 @@ static int AUDO_pointerTable_parse(Reader *reader, DataWin *dw, void *out, void 
     entry->present = true;
     read(&entry->dataSize, UInt32);
     entry->dataOffset = (uint32_t)reader->cursor;
-    entry->data = NULL;
+    if (dw->lazyLoadAudio) {
+        entry->data = NULL;
+    } else if (dw->mappedFile) {
+        entry->data = (uint8_t *)dw->file_data + entry->dataOffset;
+    } else if (entry->dataSize > 0) {
+        entry->data = safeMalloc(entry->dataSize);
+        if (Reader_readBytes(reader, entry->data, entry->dataSize) != 0) {
+            free(entry->data);
+            entry->data = NULL;
+            return -1;
+        }
+    } else {
+        entry->data = NULL;
+    }
     return 0;
 }
 
