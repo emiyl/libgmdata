@@ -1,4 +1,9 @@
 use std::collections::HashMap;
+use std::ffi::{CStr, CString};
+use std::os::raw::{c_char, c_int, c_void};
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
 
 use crate::bindings::*;
 use crate::models::{
@@ -9,6 +14,38 @@ use crate::texture::{
 };
 use eframe::egui;
 
+unsafe extern "C" {
+    fn parse_form_chunks(dw: *mut DataWin) -> c_int;
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct LoadingProgress {
+    message: String,
+    value: f32,
+    total_chunks: usize,
+    parsed_chunks: usize,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) enum LoadProgressEvent {
+    Update { total: usize, parsed: usize, chunk_name: String },
+    Complete,
+}
+
+pub(crate) struct ThreadSafeDataWin(DataWin);
+
+unsafe impl Send for ThreadSafeDataWin {}
+unsafe impl Sync for ThreadSafeDataWin {}
+
+pub(crate) enum LoadResult {
+    Loaded {
+        version: String,
+        dw: ThreadSafeDataWin,
+        chunks: Vec<ChunkInfo>,
+    },
+    Failed(String),
+}
+
 pub struct App {
     pub version: String,
     pub file_path: String,
@@ -18,20 +55,250 @@ pub struct App {
     pub texture_preview_cache: HashMap<String, Option<egui::ColorImage>>,
     pub texture_popup: Option<(String, usize)>,
     pub texture_popup_zoom: HashMap<(String, usize), f32>,
+    pub load_rx: Option<mpsc::Receiver<LoadResult>>,
+    pub progress_rx: Option<mpsc::Receiver<LoadProgressEvent>>,
+    pub loading: Option<LoadingProgress>,
+    pub load_error: Option<String>,
+    pub load_complete: bool,
+}
+
+fn load_data_win(
+    path: &str,
+    progress_tx: mpsc::Sender<LoadProgressEvent>,
+) -> Result<(String, DataWin, Vec<ChunkInfo>), String> {
+    let path_cstr = CString::new(path).map_err(|_| "File path contains a NUL byte".to_string())?;
+    let mut dw: DataWin = unsafe { std::mem::zeroed() };
+
+    unsafe {
+        println!("Loading file: {:?}", path_cstr);
+
+        if DataWin_loadFile(&mut dw, path_cstr.as_ptr()) != 0 {
+            return Err("Failed to load file".to_string());
+        }
+
+        if parse_form_chunks(&mut dw) != 0 {
+            return Err("Failed to enumerate file chunks".to_string());
+        }
+
+        let total = dw.chunks.count as usize;
+        let callback_tx = progress_tx.clone();
+        let callback_state = Box::into_raw(Box::new(callback_tx));
+
+        let options = DataWinParserOptions {
+            parseGen8: true,
+            parseOptn: true,
+            parseLang: true,
+            parseExtn: true,
+            parseSond: true,
+            parseAgrp: true,
+            parseSprt: true,
+            parseBgnd: true,
+            parsePath: true,
+            parseScpt: true,
+            parseGlob: true,
+            parseShdr: true,
+            parseFont: true,
+            parseTmln: true,
+            parseObjt: true,
+            parseRoom: true,
+            parseTpag: true,
+            parseCode: true,
+            parseVari: true,
+            parseFunc: true,
+            parseStrg: true,
+            parseTxtr: true,
+            parseAudo: true,
+            parseAcrv: true,
+            skipLoadingPreciseMasksForNonPreciseSprites: false,
+            lazyLoadRooms: false,
+            lazyLoadTextures: false,
+            lazyLoadAudio: false,
+            eagerlyLoadedRooms: std::ptr::null_mut(),
+            loadType: DataWinLoadType_DATAWINLOADTYPE_LOAD_PER_CHUNK,
+            progressCallback: Some(parse_progress_callback),
+            progressCallbackUserData: callback_state as *mut c_void,
+        };
+
+        if DataWin_parseWithOptions(&mut dw, &options) != 0 {
+            let _ = Box::from_raw(callback_state);
+            return Err("Failed to parse file".to_string());
+        }
+
+        let _ = Box::from_raw(callback_state);
+        let _ = progress_tx.send(LoadProgressEvent::Complete);
+
+        println!("Detected {} chunks in file", total);
+    }
+
+    let version = format!(
+        "{}.{}.{}.{}",
+        dw.detectedFormat.major,
+        dw.detectedFormat.minor,
+        dw.detectedFormat.release,
+        dw.detectedFormat.build
+    );
+
+    println!("Detected version: {}", version);
+
+    let chunks = build_chunk_info_list(&dw);
+    Ok((version, dw, chunks))
+}
+
+unsafe extern "C" fn parse_progress_callback(
+    chunk_name: *const c_char,
+    chunk_index: c_int,
+    total_chunks: c_int,
+    _dw: *mut DataWin,
+    user_data: *mut c_void,
+) {
+    unsafe {
+        let tx = &*(user_data as *const mpsc::Sender<LoadProgressEvent>);
+        let chunk_name = CStr::from_ptr(chunk_name).to_string_lossy().to_string();
+        let parsed = chunk_index as usize + 1;
+        let total = total_chunks as usize;
+        let _ = tx.send(LoadProgressEvent::Update {
+            total,
+            parsed,
+            chunk_name,
+        });
+    }
 }
 
 impl App {
-    pub fn new(file_path: String, version: String, dw: DataWin, chunks: Vec<ChunkInfo>) -> Self {
+    pub fn new(file_path: String) -> Self {
+        let (result_tx, result_rx) = mpsc::channel();
+        let (progress_tx, progress_rx) = mpsc::channel();
+        let worker_path = file_path.clone();
+
+        thread::spawn(move || {
+            let result = match load_data_win(&worker_path, progress_tx) {
+                Ok((version, dw, chunks)) => {
+                    LoadResult::Loaded {
+                        version,
+                        dw: ThreadSafeDataWin(dw),
+                        chunks,
+                    }
+                }
+                Err(err) => LoadResult::Failed(err),
+            };
+
+            if result_tx.send(result).is_err() {
+                eprintln!("Load result receiver dropped before completion");
+            }
+        });
+
         Self {
-            version,
+            version: String::new(),
             file_path,
-            chunks,
+            chunks: Vec::new(),
             active_chunk: 0,
-            dw,
+            dw: unsafe { std::mem::zeroed() },
             texture_preview_cache: HashMap::new(),
             texture_popup: None,
             texture_popup_zoom: HashMap::new(),
+            load_rx: Some(result_rx),
+            progress_rx: Some(progress_rx),
+            loading: Some(LoadingProgress {
+                message: "Loading file...".to_string(),
+                value: 0.0,
+                total_chunks: 0,
+                parsed_chunks: 0,
+            }),
+            load_error: None,
+            load_complete: false,
         }
+    }
+
+    fn poll_load_result(&mut self) {
+        if let Some(progress_rx) = self.progress_rx.as_ref() {
+            while let Ok(event) = progress_rx.try_recv() {
+                match event {
+                    LoadProgressEvent::Update { total, parsed, chunk_name } => {
+                        if let Some(loading) = self.loading.as_mut() {
+                            loading.total_chunks = total;
+                            loading.parsed_chunks = parsed;
+                            loading.message = format!("Parsing {} ({}/{})", chunk_name, parsed, total);
+                            loading.value = if total == 0 {
+                                0.0
+                            } else {
+                                (parsed as f32 / total as f32).min(1.0)
+                            };
+                        }
+                    }
+                    LoadProgressEvent::Complete => {
+                        if let Some(loading) = self.loading.as_mut() {
+                            loading.message = "Finalizing...".to_string();
+                            loading.value = 1.0;
+                        }
+                    }
+                }
+            }
+        }
+
+        let Some(rx) = self.load_rx.as_ref() else {
+            return;
+        };
+
+        match rx.try_recv() {
+            Ok(LoadResult::Loaded { version, dw, chunks }) => {
+                self.version = version;
+                self.dw = dw.0;
+                self.chunks = chunks;
+                self.active_chunk = 0;
+                self.load_complete = true;
+                self.loading = None;
+                self.load_rx = None;
+                self.progress_rx = None;
+            }
+            Ok(LoadResult::Failed(err)) => {
+                self.load_error = Some(err);
+                self.load_complete = true;
+                self.loading = None;
+                self.load_rx = None;
+                self.progress_rx = None;
+            }
+            Err(mpsc::TryRecvError::Empty) => {}
+            Err(mpsc::TryRecvError::Disconnected) => {
+                self.load_error = Some("Failed to load file data".to_string());
+                self.load_complete = true;
+                self.loading = None;
+                self.load_rx = None;
+                self.progress_rx = None;
+            }
+        }
+    }
+
+    fn render_loading_ui(&mut self, ui: &mut egui::Ui) {
+        let progress = self
+            .loading
+            .as_ref()
+            .map(|state| state.value)
+            .unwrap_or(0.0);
+        let message = self
+            .loading
+            .as_ref()
+            .map(|state| state.message.as_str())
+            .unwrap_or("Loading...");
+
+        ui.ctx().request_repaint_after(Duration::from_millis(60));
+
+        ui.centered_and_justified(|ui| {
+            ui.vertical_centered(|ui| {
+                ui.heading("Loading data.win");
+                ui.add_space(12.0);
+                ui.label(format!("File: {}", self.file_path));
+                if let Some(state) = self.loading.as_ref() {
+                    if state.total_chunks > 0 {
+                        ui.label(format!(
+                            "Chunks: {}/{} parsed",
+                            state.parsed_chunks, state.total_chunks
+                        ));
+                    }
+                }
+                ui.add_space(18.0);
+                ui.add(egui::ProgressBar::new(progress).text(message));
+            });
+        });
     }
 
     fn texture_preview_size(&self, chunk_name: &str, active_item_idx: usize) -> Option<egui::Vec2> {
@@ -180,14 +447,34 @@ impl App {
 
 impl Drop for App {
     fn drop(&mut self) {
-        unsafe {
-            let _ = DataWin_free(&mut self.dw);
+        if self.load_complete {
+            unsafe {
+                let _ = DataWin_free(&mut self.dw);
+            }
         }
     }
 }
 
 impl eframe::App for App {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        self.poll_load_result();
+
+        if let Some(err) = self.load_error.clone() {
+            ui.centered_and_justified(|ui| {
+                ui.vertical_centered(|ui| {
+                    ui.heading("Unable to load file");
+                    ui.add_space(12.0);
+                    ui.label(err);
+                });
+            });
+            return;
+        }
+
+        if !self.load_complete {
+            self.render_loading_ui(ui);
+            return;
+        }
+
         ui.ctx().set_visuals(egui::Visuals::dark());
         ui.ctx().set_theme(egui::ThemePreference::Dark);
 
@@ -437,6 +724,6 @@ impl eframe::App for App {
     }
 }
 
-pub fn create_app(file_path: String, version: String, dw: DataWin) -> App {
-    App::new(file_path, version, dw, build_chunk_info_list(&dw))
+pub fn create_app(file_path: String) -> App {
+    App::new(file_path)
 }

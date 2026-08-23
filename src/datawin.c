@@ -1,4 +1,4 @@
-#include "datawin.h"
+#include "gmdata.h"
 
 #include "chunk_table.h"
 #include "strings.h"
@@ -106,6 +106,20 @@ void DataWin_applyParserOptions(DataWin *dw, const DataWinParserOptions *options
     }
 }
 
+static void DataWin_emitProgress(
+    DataWin *dw,
+    const DataWinParserOptions *options,
+    const char *chunkName,
+    int chunkIndex,
+    int totalChunks
+) {
+    if (dw == NULL || options == NULL || options->progressCallback == NULL) {
+        return;
+    }
+
+    options->progressCallback(chunkName, chunkIndex, totalChunks, dw, options->progressCallbackUserData);
+}
+
 int DataWin_loadFile(DataWin *dw, const char *path) {
     if (dw == NULL || path == NULL) {
         return -1;
@@ -192,12 +206,23 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
         DataWin_bumpVersionTo(dw, 2023, 2, 0, 0);
     }
 
+    int totalChunks = (int)dw->chunks.count;
+    int parsedChunkCount = 0;
+
     if (effective.parseGen8) {
         assert(GEN8_parse(dw) == 0);
         DataWin_bumpVersionTo(dw, dw->gen8.major, dw->gen8.minor, dw->gen8.release, dw->gen8.build);
+        DataWin_emitProgress(dw, &effective, "GEN8", parsedChunkCount, totalChunks);
+        parsedChunkCount++;
     }
 
-    #define parse(option, chunk) if (effective.parse##option) { logInfo("Parsing chunk " #chunk "\n"); assert(chunk##_parse(dw) == 0); }
+    #define parse(option, chunk) do { \
+        if (effective.parse##option) { \
+            DataWin_emitProgress(dw, &effective, #chunk, parsedChunkCount, totalChunks); \
+            parsedChunkCount++; \
+            assert(chunk##_parse(dw) == 0); \
+        } \
+    } while (0)
     parse(Optn, OPTN);
     parse(Lang, LANG);
     parse(Extn, EXTN);
@@ -221,7 +246,11 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
     parse(Txtr, TXTR);
     parse(Audo, AUDO);
     parse(Acrv, ACRV);
-    
+
+    if (effective.progressCallback != NULL && totalChunks > 0 && parsedChunkCount < totalChunks) {
+        DataWin_emitProgress(dw, &effective, "DONE", totalChunks - 1, totalChunks);
+    }
+
     return 0;
 }
 

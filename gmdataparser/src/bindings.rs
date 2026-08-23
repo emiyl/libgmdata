@@ -2537,6 +2537,153 @@ unsafe extern "C" {
         out_h: *mut ::std::os::raw::c_int,
     ) -> *mut u8;
 }
+pub const DataWinLoadType_DATAWINLOADTYPE_LOAD_PER_CHUNK: DataWinLoadType = 0;
+pub const DataWinLoadType_DATAWINLOADTYPE_LOAD_IN_MEMORY_AHEAD_OF_TIME: DataWinLoadType = 1;
+pub const DataWinLoadType_DATAWINLOADTYPE_MAP_FILE: DataWinLoadType = 2;
+pub type DataWinLoadType = ::std::os::raw::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct StringBooleanEntry {
+    pub string: *const ::std::os::raw::c_char,
+    pub value: bool,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of StringBooleanEntry"][::std::mem::size_of::<StringBooleanEntry>() - 16usize];
+    ["Alignment of StringBooleanEntry"][::std::mem::align_of::<StringBooleanEntry>() - 8usize];
+    ["Offset of field: StringBooleanEntry::string"]
+        [::std::mem::offset_of!(StringBooleanEntry, string) - 0usize];
+    ["Offset of field: StringBooleanEntry::value"]
+        [::std::mem::offset_of!(StringBooleanEntry, value) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct DataWinParserOptions {
+    pub parseGen8: bool,
+    pub parseOptn: bool,
+    pub parseLang: bool,
+    pub parseExtn: bool,
+    pub parseSond: bool,
+    pub parseAgrp: bool,
+    pub parseSprt: bool,
+    pub parseBgnd: bool,
+    pub parsePath: bool,
+    pub parseScpt: bool,
+    pub parseGlob: bool,
+    pub parseShdr: bool,
+    pub parseFont: bool,
+    pub parseTmln: bool,
+    pub parseObjt: bool,
+    pub parseRoom: bool,
+    pub parseTpag: bool,
+    pub parseCode: bool,
+    pub parseVari: bool,
+    pub parseFunc: bool,
+    pub parseStrg: bool,
+    pub parseTxtr: bool,
+    pub parseAudo: bool,
+    pub parseAcrv: bool,
+    pub skipLoadingPreciseMasksForNonPreciseSprites: bool,
+    pub lazyLoadRooms: bool,
+    pub lazyLoadTextures: bool,
+    pub lazyLoadAudio: bool,
+    pub eagerlyLoadedRooms: *mut StringBooleanEntry,
+    pub loadType: DataWinLoadType,
+    pub progressCallback: ::std::option::Option<
+        unsafe extern "C" fn(
+            chunkName: *const ::std::os::raw::c_char,
+            chunkIndex: ::std::os::raw::c_int,
+            totalChunks: ::std::os::raw::c_int,
+            dataWin: *mut DataWin,
+            userData: *mut ::std::os::raw::c_void,
+        ),
+    >,
+    pub progressCallbackUserData: *mut ::std::os::raw::c_void,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of DataWinParserOptions"][::std::mem::size_of::<DataWinParserOptions>() - 64usize];
+    ["Alignment of DataWinParserOptions"][::std::mem::align_of::<DataWinParserOptions>() - 8usize];
+    ["Offset of field: DataWinParserOptions::parseGen8"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseGen8) - 0usize];
+    ["Offset of field: DataWinParserOptions::parseOptn"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseOptn) - 1usize];
+    ["Offset of field: DataWinParserOptions::parseLang"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseLang) - 2usize];
+    ["Offset of field: DataWinParserOptions::parseExtn"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseExtn) - 3usize];
+    ["Offset of field: DataWinParserOptions::parseSond"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseSond) - 4usize];
+    ["Offset of field: DataWinParserOptions::parseAgrp"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseAgrp) - 5usize];
+    ["Offset of field: DataWinParserOptions::parseSprt"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseSprt) - 6usize];
+    ["Offset of field: DataWinParserOptions::parseBgnd"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseBgnd) - 7usize];
+    ["Offset of field: DataWinParserOptions::parsePath"]
+        [::std::mem::offset_of!(DataWinParserOptions, parsePath) - 8usize];
+    ["Offset of field: DataWinParserOptions::parseScpt"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseScpt) - 9usize];
+    ["Offset of field: DataWinParserOptions::parseGlob"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseGlob) - 10usize];
+    ["Offset of field: DataWinParserOptions::parseShdr"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseShdr) - 11usize];
+    ["Offset of field: DataWinParserOptions::parseFont"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseFont) - 12usize];
+    ["Offset of field: DataWinParserOptions::parseTmln"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseTmln) - 13usize];
+    ["Offset of field: DataWinParserOptions::parseObjt"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseObjt) - 14usize];
+    ["Offset of field: DataWinParserOptions::parseRoom"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseRoom) - 15usize];
+    ["Offset of field: DataWinParserOptions::parseTpag"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseTpag) - 16usize];
+    ["Offset of field: DataWinParserOptions::parseCode"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseCode) - 17usize];
+    ["Offset of field: DataWinParserOptions::parseVari"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseVari) - 18usize];
+    ["Offset of field: DataWinParserOptions::parseFunc"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseFunc) - 19usize];
+    ["Offset of field: DataWinParserOptions::parseStrg"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseStrg) - 20usize];
+    ["Offset of field: DataWinParserOptions::parseTxtr"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseTxtr) - 21usize];
+    ["Offset of field: DataWinParserOptions::parseAudo"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseAudo) - 22usize];
+    ["Offset of field: DataWinParserOptions::parseAcrv"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseAcrv) - 23usize];
+    ["Offset of field: DataWinParserOptions::skipLoadingPreciseMasksForNonPreciseSprites"][::std::mem::offset_of!(
+        DataWinParserOptions,
+        skipLoadingPreciseMasksForNonPreciseSprites
+    )
+        - 24usize];
+    ["Offset of field: DataWinParserOptions::lazyLoadRooms"]
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadRooms) - 25usize];
+    ["Offset of field: DataWinParserOptions::lazyLoadTextures"]
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadTextures) - 26usize];
+    ["Offset of field: DataWinParserOptions::lazyLoadAudio"]
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadAudio) - 27usize];
+    ["Offset of field: DataWinParserOptions::eagerlyLoadedRooms"]
+        [::std::mem::offset_of!(DataWinParserOptions, eagerlyLoadedRooms) - 32usize];
+    ["Offset of field: DataWinParserOptions::loadType"]
+        [::std::mem::offset_of!(DataWinParserOptions, loadType) - 40usize];
+    ["Offset of field: DataWinParserOptions::progressCallback"]
+        [::std::mem::offset_of!(DataWinParserOptions, progressCallback) - 48usize];
+    ["Offset of field: DataWinParserOptions::progressCallbackUserData"]
+        [::std::mem::offset_of!(DataWinParserOptions, progressCallbackUserData) - 56usize];
+};
+unsafe extern "C" {
+    pub fn DataWin_initParserOptions(options: *mut DataWinParserOptions);
+}
+unsafe extern "C" {
+    pub fn DataWin_applyParserOptions(dw: *mut DataWin, options: *const DataWinParserOptions);
+}
+unsafe extern "C" {
+    pub fn DataWin_parseWithOptions(
+        dw: *mut DataWin,
+        options: *const DataWinParserOptions,
+    ) -> ::std::os::raw::c_int;
+}
 unsafe extern "C" {
     pub fn DataWin_loadFile(
         dw: *mut DataWin,
@@ -2548,5 +2695,23 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn DataWin_free(dw: *mut DataWin) -> ::std::os::raw::c_int;
+}
+unsafe extern "C" {
+    pub fn DataWin_isVersionAtLeast(
+        dw: *const DataWin,
+        major: u32,
+        minor: u32,
+        release: u32,
+        build: u32,
+    ) -> bool;
+}
+unsafe extern "C" {
+    pub fn DataWin_bumpVersionTo(
+        dw: *mut DataWin,
+        major: u32,
+        minor: u32,
+        release: u32,
+        build: u32,
+    );
 }
 pub type __builtin_va_list = *mut ::std::os::raw::c_char;
