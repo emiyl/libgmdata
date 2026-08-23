@@ -124,11 +124,59 @@ int TXTR_parse(DataWin *dw) {
     }
     }
 
-    // Load blob data into owned buffers
+    // Load texture payloads either as raw bytes or decoded RGBA depending on the parser option.
     if (!dw->lazyLoadTextures) {
         repeat(t->count, i) {
             if (t->textures[i].blobOffset == 0 || t->textures[i].blobSize == 0) continue;
-            if (dw->mappedFile) {
+
+            if (dw->decodeTextures) {
+                const uint8_t *blob = NULL;
+                uint32_t blobSize = t->textures[i].blobSize;
+                uint8_t *tempBlob = NULL;
+
+                if (dw->mappedFile) {
+                    blob = dw->mappedFile + t->textures[i].blobOffset;
+                    t->textures[i].mapped = true;
+                } else {
+                    uint32_t offset = t->textures[i].blobOffset - chunk.offset;
+                    Reader_seek(&reader, offset);
+                    tempBlob = (uint8_t *)safeMalloc(blobSize);
+                    if (tempBlob == NULL) {
+                        logWarn("TXTR: Failed to allocate %u bytes for texture %u\n", blobSize, i);
+                        continue;
+                    }
+                    Reader_readBytes(&reader, tempBlob, blobSize);
+                    blob = tempBlob;
+                    t->textures[i].mapped = false;
+                }
+
+                int decodedW = 0;
+                int decodedH = 0;
+                uint8_t *decoded = TextureDecode_decodeToRgba(
+                    blob,
+                    blobSize,
+                    DataWin_isVersionAtLeast(dw, 2022, 5, 0, 0),
+                    &decodedW,
+                    &decodedH
+                );
+
+                if (tempBlob != NULL) {
+                    free(tempBlob);
+                }
+
+                if (decoded == NULL) {
+                    logWarn("TXTR: Failed to decode texture %u to RGBA\n", i);
+                    continue;
+                }
+
+                uint32_t decodedSize = (decodedW > 0 && decodedH > 0)
+                    ? (uint32_t)((uint64_t)decodedW * (uint64_t)decodedH * 4ULL)
+                    : blobSize;
+
+                t->textures[i].blobData = decoded;
+                t->textures[i].blobSize = decodedSize;
+                t->textures[i].mapped = false;
+            } else if (dw->mappedFile) {
                 t->textures[i].blobData = dw->mappedFile + t->textures[i].blobOffset;
                 t->textures[i].mapped = true;
             } else {
@@ -151,6 +199,14 @@ int TXTR_parse(DataWin *dw) {
 
 int TXTR_free(TxtrChunk *t) {
     if (t == NULL) return -1;
+    if (t->textures != NULL) {
+        repeat(t->count, i) {
+            if (!t->textures[i].mapped && t->textures[i].blobData != NULL) {
+                free(t->textures[i].blobData);
+                t->textures[i].blobData = NULL;
+            }
+        }
+    }
     free(t->textures);
     t->textures = NULL;
     t->count = 0;

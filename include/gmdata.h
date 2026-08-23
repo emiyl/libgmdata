@@ -1130,6 +1130,7 @@ typedef struct {
 
     bool lazyLoadRooms;
     bool lazyLoadTextures;
+    bool decodeTextures;
     bool lazyLoadAudio;
     bool initialized;
 } DataWin;
@@ -1187,6 +1188,7 @@ typedef struct {
     bool skipLoadingPreciseMasksForNonPreciseSprites;
     bool lazyLoadRooms;
     bool lazyLoadTextures;
+    bool decodeTextures;
     bool lazyLoadAudio;
     StringBooleanEntry *eagerlyLoadedRooms;
     DataWinLoadType loadType;

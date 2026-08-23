@@ -65,6 +65,7 @@ static void DataWin_reset(DataWin *dw) {
     dw->lazyLoadRooms = false;
     dw->lazyLoadTextures = false;
     dw->lazyLoadAudio = false;
+    dw->decodeTextures = false;
     dw->initialized = false;
 }
 
@@ -110,6 +111,7 @@ void DataWin_initParserOptions(DataWinParserOptions *options) {
     options->parseDafl = true;
     options->parseUilr = true;
     options->parseStat = true;
+    options->decodeTextures = false;
     options->loadType = DATAWINLOADTYPE_LOAD_PER_CHUNK;
 }
 
@@ -127,6 +129,7 @@ void DataWin_applyParserOptions(DataWin *dw, const DataWinParserOptions *options
 
     dw->lazyLoadRooms = effective.lazyLoadRooms;
     dw->lazyLoadTextures = effective.lazyLoadTextures;
+    dw->decodeTextures = effective.decodeTextures;
     dw->lazyLoadAudio = effective.lazyLoadAudio;
 
     if (effective.loadType == DATAWINLOADTYPE_MAP_FILE) {

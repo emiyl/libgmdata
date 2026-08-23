@@ -3174,6 +3174,7 @@ pub struct DataWin {
     pub mappedFile: *mut u8,
     pub lazyLoadRooms: bool,
     pub lazyLoadTextures: bool,
+    pub decodeTextures: bool,
     pub lazyLoadAudio: bool,
     pub initialized: bool,
 }
@@ -3229,10 +3230,12 @@ const _: () = {
         [::std::mem::offset_of!(DataWin, lazyLoadRooms) - 1000usize];
     ["Offset of field: DataWin::lazyLoadTextures"]
         [::std::mem::offset_of!(DataWin, lazyLoadTextures) - 1001usize];
+    ["Offset of field: DataWin::decodeTextures"]
+        [::std::mem::offset_of!(DataWin, decodeTextures) - 1002usize];
     ["Offset of field: DataWin::lazyLoadAudio"]
-        [::std::mem::offset_of!(DataWin, lazyLoadAudio) - 1002usize];
+        [::std::mem::offset_of!(DataWin, lazyLoadAudio) - 1003usize];
     ["Offset of field: DataWin::initialized"]
-        [::std::mem::offset_of!(DataWin, initialized) - 1003usize];
+        [::std::mem::offset_of!(DataWin, initialized) - 1004usize];
 };
 unsafe extern "C" {
     pub fn TextureDecode_decodeToRgba(
@@ -3304,6 +3307,7 @@ pub struct DataWinParserOptions {
     pub skipLoadingPreciseMasksForNonPreciseSprites: bool,
     pub lazyLoadRooms: bool,
     pub lazyLoadTextures: bool,
+    pub decodeTextures: bool,
     pub lazyLoadAudio: bool,
     pub eagerlyLoadedRooms: *mut StringBooleanEntry,
     pub loadType: DataWinLoadType,
@@ -3320,7 +3324,7 @@ pub struct DataWinParserOptions {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of DataWinParserOptions"][::std::mem::size_of::<DataWinParserOptions>() - 72usize];
+    ["Size of DataWinParserOptions"][::std::mem::size_of::<DataWinParserOptions>() - 80usize];
     ["Alignment of DataWinParserOptions"][::std::mem::align_of::<DataWinParserOptions>() - 8usize];
     ["Offset of field: DataWinParserOptions::parseGen8"]
         [::std::mem::offset_of!(DataWinParserOptions, parseGen8) - 0usize];
@@ -3403,16 +3407,18 @@ const _: () = {
         [::std::mem::offset_of!(DataWinParserOptions, lazyLoadRooms) - 37usize];
     ["Offset of field: DataWinParserOptions::lazyLoadTextures"]
         [::std::mem::offset_of!(DataWinParserOptions, lazyLoadTextures) - 38usize];
+    ["Offset of field: DataWinParserOptions::decodeTextures"]
+        [::std::mem::offset_of!(DataWinParserOptions, decodeTextures) - 39usize];
     ["Offset of field: DataWinParserOptions::lazyLoadAudio"]
-        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadAudio) - 39usize];
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadAudio) - 40usize];
     ["Offset of field: DataWinParserOptions::eagerlyLoadedRooms"]
-        [::std::mem::offset_of!(DataWinParserOptions, eagerlyLoadedRooms) - 40usize];
+        [::std::mem::offset_of!(DataWinParserOptions, eagerlyLoadedRooms) - 48usize];
     ["Offset of field: DataWinParserOptions::loadType"]
-        [::std::mem::offset_of!(DataWinParserOptions, loadType) - 48usize];
+        [::std::mem::offset_of!(DataWinParserOptions, loadType) - 56usize];
     ["Offset of field: DataWinParserOptions::progressCallback"]
-        [::std::mem::offset_of!(DataWinParserOptions, progressCallback) - 56usize];
+        [::std::mem::offset_of!(DataWinParserOptions, progressCallback) - 64usize];
     ["Offset of field: DataWinParserOptions::progressCallbackUserData"]
-        [::std::mem::offset_of!(DataWinParserOptions, progressCallbackUserData) - 64usize];
+        [::std::mem::offset_of!(DataWinParserOptions, progressCallbackUserData) - 72usize];
 };
 unsafe extern "C" {
     pub fn DataWin_initParserOptions(options: *mut DataWinParserOptions);

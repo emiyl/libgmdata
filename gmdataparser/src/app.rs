@@ -198,6 +198,7 @@ fn load_data_win(
             lazyLoadRooms: false,
             lazyLoadTextures: false,
             lazyLoadAudio: false,
+            decodeTextures: true,
             eagerlyLoadedRooms: std::ptr::null_mut(),
             loadType: DataWinLoadType_DATAWINLOADTYPE_LOAD_PER_CHUNK,
             progressCallback: Some(parse_progress_callback),

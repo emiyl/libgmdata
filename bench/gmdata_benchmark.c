@@ -214,6 +214,7 @@ static int parse_once_and_measure(const char *path, uint64_t *elapsed_ns_out, Be
     DataWin_initParserOptions(&options);
     options.progressCallback = benchmark_progress_callback;
     options.progressCallbackUserData = run_state;
+    options.decodeTextures = true;
     run_state->parse_started_ns = monotonic_ns_now();
 
     if (clock_gettime(CLOCK_MONOTONIC, &start) != 0) {
