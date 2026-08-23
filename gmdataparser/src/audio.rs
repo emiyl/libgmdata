@@ -1,4 +1,5 @@
 use std::io::Cursor;
+use std::path::Path;
 
 use rodio::{Decoder, OutputStream, Sink};
 
@@ -41,6 +42,15 @@ impl AudioPlayer {
     }
 
     pub fn load_from_dw(&mut self, dw: &crate::bindings::DataWin, index: usize) -> Result<(), String> {
+        self.load_from_dw_with_name(dw, index, None)
+    }
+
+    pub fn load_from_dw_with_name(
+        &mut self,
+        dw: &crate::bindings::DataWin,
+        index: usize,
+        preferred_name: Option<&str>,
+    ) -> Result<(), String> {
         if dw.audo.entries.is_null() || dw.audo.count == 0 {
             return Err("No audio entries are available in this file.".to_string());
         }
@@ -64,7 +74,12 @@ impl AudioPlayer {
         }
 
         self.current_bytes = Some(bytes);
-        self.current_name = format!("Audio {index}");
+        let safe_name = preferred_name
+            .map(str::trim)
+            .filter(|name| !name.is_empty())
+            .map(Self::sanitize_filename)
+            .unwrap_or_else(|| format!("Audio {index}"));
+        self.current_name = safe_name;
         Ok(())
     }
 
@@ -93,6 +108,63 @@ impl AudioPlayer {
     pub fn stop(&mut self) {
         if let Some(sink) = self.sink.as_ref() {
             sink.stop();
+        }
+    }
+
+    pub fn save_to_file<P: AsRef<Path>>(&self, path: P) -> Result<(), String> {
+        let bytes = self
+            .current_bytes
+            .as_ref()
+            .ok_or_else(|| "No audio data loaded. Select an audio item first.".to_string())?;
+
+        std::fs::write(path, bytes)
+            .map_err(|err| format!("Failed to save audio file: {err}"))?;
+        Ok(())
+    }
+
+    pub fn suggested_filename(&self) -> String {
+        let extension = self
+            .current_bytes
+            .as_ref()
+            .map(Vec::as_slice)
+            .and_then(Self::detect_extension)
+            .unwrap_or("bin");
+
+        if self.current_name.is_empty() {
+            format!("audio.{extension}")
+        } else {
+            format!("{}.{}", self.current_name, extension)
+        }
+    }
+
+    fn sanitize_filename(name: &str) -> String {
+        let sanitized = name
+            .chars()
+            .map(|ch| {
+                if ch.is_ascii_control() || matches!(ch, '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|') {
+                    '_'
+                } else {
+                    ch
+                }
+            })
+            .collect::<String>();
+
+        sanitized.trim().trim_end_matches('.').to_string()
+    }
+
+    fn detect_extension(bytes: &[u8]) -> Option<&'static str> {
+        if bytes.starts_with(b"RIFF") && bytes[8..12].starts_with(b"WAVE") {
+            Some("wav")
+        } else if bytes.starts_with(b"OggS") {
+            Some("ogg")
+        } else if bytes.starts_with(b"ID3") {
+            Some("mp3")
+        } else if bytes.starts_with(b"\xFF\xFB") || bytes.starts_with(b"\xFF\xF3") {
+            Some("mp3")
+        } else if bytes.starts_with(b"fLaC") {
+            Some("flac")
+        } else {
+            None
         }
     }
 

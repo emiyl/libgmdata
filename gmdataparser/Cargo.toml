@@ -9,3 +9,4 @@ bindgen = "0.72.1"
 [dependencies]
 eframe = "0.35.0"
 rodio = "0.20.1"
+rfd = "0.15.3"

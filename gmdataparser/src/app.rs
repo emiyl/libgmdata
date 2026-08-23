@@ -511,7 +511,27 @@ impl App {
 
         ui.horizontal(|ui| {
             if ui.button("Play").clicked() {
-                if let Err(err) = self.audio_player.load_from_dw(&self.dw, audio_index) {
+                let preferred_name = if active_chunk_name == "SOND" {
+                    let sounds = if self.dw.sond.count == 0 || self.dw.sond.sounds.is_null() {
+                        &[][..]
+                    } else {
+                        unsafe { std::slice::from_raw_parts(self.dw.sond.sounds, self.dw.sond.count as usize) }
+                    };
+
+                    sounds
+                        .get(active_item_idx)
+                        .map(|sound| unsafe { std::ffi::CStr::from_ptr(sound.name) }.to_string_lossy().trim().to_owned())
+                } else {
+                    None
+                };
+
+                let load_result = if let Some(name) = preferred_name.as_deref() {
+                    self.audio_player.load_from_dw_with_name(&self.dw, audio_index, Some(name))
+                } else {
+                    self.audio_player.load_from_dw(&self.dw, audio_index)
+                };
+
+                if let Err(err) = load_result {
                     ui.ctx().data_mut(|d| {
                         d.insert_temp(egui::Id::new("audio_error"), err);
                     });
@@ -524,6 +544,47 @@ impl App {
 
             if ui.button("Stop").clicked() {
                 self.audio_player.stop();
+            }
+
+            if ui.button("Save").clicked() {
+                let preferred_name = if active_chunk_name == "SOND" {
+                    let sounds = if self.dw.sond.count == 0 || self.dw.sond.sounds.is_null() {
+                        &[][..]
+                    } else {
+                        unsafe { std::slice::from_raw_parts(self.dw.sond.sounds, self.dw.sond.count as usize) }
+                    };
+
+                    sounds
+                        .get(active_item_idx)
+                        .map(|sound| unsafe { std::ffi::CStr::from_ptr(sound.name) }.to_string_lossy().trim().to_owned())
+                } else {
+                    None
+                };
+
+                let load_result = if let Some(name) = preferred_name.as_deref() {
+                    self.audio_player.load_from_dw_with_name(&self.dw, audio_index, Some(name))
+                } else {
+                    self.audio_player.load_from_dw(&self.dw, audio_index)
+                };
+
+                if let Err(err) = load_result {
+                    ui.ctx().data_mut(|d| {
+                        d.insert_temp(egui::Id::new("audio_error"), err);
+                    });
+                    return;
+                }
+
+                let suggested_name = self.audio_player.suggested_filename();
+                if let Some(path) = rfd::FileDialog::new()
+                    .set_file_name(&suggested_name)
+                    .save_file()
+                {
+                    if let Err(err) = self.audio_player.save_to_file(&path) {
+                        ui.ctx().data_mut(|d| {
+                            d.insert_temp(egui::Id::new("audio_error"), err);
+                        });
+                    }
+                }
             }
         });
 
