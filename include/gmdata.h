@@ -796,6 +796,11 @@ typedef struct {
 typedef struct {
     uint32_t count;
     const char** strings;
+} FeatChunk;
+
+typedef struct {
+    uint32_t count;
+    const char** strings;
 } StrgChunk;
 
 typedef struct {
@@ -898,6 +903,7 @@ typedef struct {
     RoomChunk room;
     AcrvChunk acrv;
     FedsChunk feds;
+    FeatChunk feat;
     TginChunk tgin;
     StrgChunk strg;
     TxtrChunk txtr;
@@ -952,6 +958,7 @@ typedef struct {
     bool parseAudo;
     bool parseAcrv;
     bool parseFeds;
+    bool parseFeat;
     bool skipLoadingPreciseMasksForNonPreciseSprites;
     bool lazyLoadRooms;
     bool lazyLoadTextures;
