@@ -22,4 +22,45 @@ By default this installs to `/usr/local`, producing:
 
 Public headers are kept under `include/` and are intended for downstream consumers.
 
+## Chunk coverage
+
+| Chunk | libgmdata | Butterscotch | UndertaleModTool |
+| --- | --- | --- | --- |
+| GEN8 | ✅ | ✅ | ✅ |
+| TXTR | ✅ | ✅ | ✅ |
+| AUDO | ✅ | ✅ | ✅ |
+| OPTN | ✅ | ✅ | ✅ |
+| LANG | ✅ | ✅ | ✅ |
+| EXTN | ✅ | ✅ | ✅ |
+| SOND | ✅ | ✅ | ✅ |
+| AGRP | ✅ | ✅ | ✅ |
+| SPRT | ✅ | ✅ | ✅ |
+| BGND | ✅ | ✅ | ✅ |
+| PATH | ✅ | ✅ | ✅ |
+| SCPT | ✅ | ✅ | ✅ |
+| GLOB | ✅ | ✅ | ✅ |
+| GMEN | ✅ | ❌ | ✅ |
+| SHDR | ✅ | ✅ | ✅ |
+| FONT | ✅ | ✅ | ✅ |
+| TMLN | ✅ | ✅ | ✅ |
+| OBJT | ✅ | ✅ | ✅ |
+| FEDS | ✅ | ❌ | ✅ |
+| ACRV | ✅ | ✅ | ✅ |
+| SEQN | ✅ | ❌ | ✅ |
+| TAGS | ✅ | ❌ | ✅ |
+| ROOM | ✅ | ✅ | ✅ |
+| UILR | ✅ | ❌ | ✅ |
+| DAFL | ✅ | ❌ | ✅ |
+| EMBI | ✅ | ❌ | ✅ |
+| PSEM | ✅ | ❌ | ✅ |
+| PSYS | ✅ | ❌ | ✅ |
+| TPAG | ✅ | ✅ | ✅ |
+| TGIN | ✅ | ❌ | ✅ |
+| CODE | ✅ | ✅ | ✅ |
+| VARI | ✅ | ✅ | ✅ |
+| FUNC | ✅ | ✅ | ✅ |
+| FEAT | ✅ | ❌ | ✅ |
+| STRG | ✅ | ✅ | ✅ |
+| STAT | ❌ | ❌ | ❌ |
+
 Thank you to [Butterscotch](https://github.com/ButterscotchRunner/Butterscotch) for data.win parsing code.
