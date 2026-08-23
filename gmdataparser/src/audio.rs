@@ -103,10 +103,6 @@ impl AudioPlayer {
             .unwrap_or(false)
     }
 
-    pub fn current_name(&self) -> &str {
-        self.current_name.as_str()
-    }
-
     pub fn bytes_len(&self) -> usize {
         self.current_bytes.as_ref().map_or(0, |bytes| bytes.len())
     }

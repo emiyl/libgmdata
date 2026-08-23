@@ -232,6 +232,19 @@ unsafe extern "C" fn parse_progress_callback(
     }
 }
 
+fn resolve_sond_audio_index(dw: &DataWin, sound: &crate::bindings::Sound) -> Option<usize> {
+    let audio_index = sound.audioFile;
+    if audio_index < 0 {
+        return None;
+    }
+    let audio_index = audio_index as usize;
+    if dw.audo.entries.is_null() || dw.audo.count == 0 {
+        return None;
+    }
+    let entries = unsafe { std::slice::from_raw_parts(dw.audo.entries, dw.audo.count as usize) };
+    entries.get(audio_index).map(|_| audio_index)
+}
+
 fn embi_texture_page_index(dw: &DataWin, active_item_idx: usize) -> Option<usize> {
     let embi_entry_id = {
         let embi_items = if dw.embi.count == 0 || dw.embi.items.is_null() {
@@ -473,23 +486,38 @@ impl App {
         }
     }
 
-    fn render_audio_player_ui(&mut self, ui: &mut egui::Ui, active_item_idx: usize) {
+    fn render_audio_player_ui(&mut self, ui: &mut egui::Ui, active_item_idx: usize, active_chunk_name: &str) {
         ui.separator();
+
+        let resolved_audio_index = if active_chunk_name == "SOND" {
+            let sounds = if self.dw.sond.count == 0 || self.dw.sond.sounds.is_null() {
+                &[][..]
+            } else {
+                unsafe { std::slice::from_raw_parts(self.dw.sond.sounds, self.dw.sond.count as usize) }
+            };
+
+            sounds.get(active_item_idx).and_then(|sound| resolve_sond_audio_index(&self.dw, sound))
+        } else {
+            Some(active_item_idx)
+        };
+
+        let Some(audio_index) = resolved_audio_index else {
+            ui.colored_label(
+                egui::Color32::LIGHT_RED,
+                "No playable AUDO entry found for this sound. Check audioFile and AUDO data.",
+            );
+            return;
+        };
+
         ui.horizontal(|ui| {
             if ui.button("Play").clicked() {
-                if let Err(err) = self.audio_player.load_from_dw(&self.dw, active_item_idx) {
+                if let Err(err) = self.audio_player.load_from_dw(&self.dw, audio_index) {
                     ui.ctx().data_mut(|d| {
-                        d.insert_temp(
-                            egui::Id::new("audio_error"),
-                            err,
-                        );
+                        d.insert_temp(egui::Id::new("audio_error"), err);
                     });
                 } else if let Err(err) = self.audio_player.play() {
                     ui.ctx().data_mut(|d| {
-                        d.insert_temp(
-                            egui::Id::new("audio_error"),
-                            err,
-                        );
+                        d.insert_temp(egui::Id::new("audio_error"), err);
                     });
                 }
             }
@@ -505,6 +533,7 @@ impl App {
             "Ready"
         };
         ui.label(format!("Status: {status}"));
+        ui.label(format!("Loaded AUDO index: {audio_index}"));
         ui.label(format!("Loaded bytes: {}", self.audio_player.bytes_len()));
 
         if let Some(err) = ui.ctx().data_mut(|d| d.get_temp::<String>(egui::Id::new("audio_error"))) {
@@ -920,8 +949,8 @@ impl eframe::App for App {
                                         self.render_texture_preview(ui, &active_chunk_name, active_item_idx, None);
                                     }
 
-                                    if active_chunk_name == "AUDO" {
-                                        self.render_audio_player_ui(ui, active_item_idx);
+                                    if active_chunk_name == "SOND" || active_chunk_name == "AUDO" {
+                                        self.render_audio_player_ui(ui, active_item_idx, &active_chunk_name);
                                     }
                                 });
                             });
