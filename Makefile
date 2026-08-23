@@ -2,7 +2,7 @@ CC = gcc
 AR = /usr/bin/ar
 RANLIB = /usr/bin/ranlib
 CPPFLAGS = -Isrc -Iinclude
-CFLAGS = -Wall -Wextra -std=c11
+CFLAGS = -Wall -Wextra -std=c11 -pthread
 LDLIBS = -lbz2
 
 PREFIX ?= /usr/local

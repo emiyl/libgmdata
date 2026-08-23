@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <pthread.h>
 
 static void DataWin_reset(DataWin *dw) {
     if (dw == NULL) {
@@ -144,6 +145,80 @@ static void DataWin_emitProgress(
     options->progressCallback(chunkName, chunkIndex, totalChunks, dw, options->progressCallbackUserData);
 }
 
+typedef struct {
+    const char *name;
+    int (*parser)(DataWin *dw);
+    size_t field_offset;
+    size_t field_size;
+    DataWin value;
+    int status;
+} DataWinChunkParseTask;
+
+static void *DataWin_chunkParseTask_worker(void *arg) {
+    DataWinChunkParseTask *task = (DataWinChunkParseTask *)arg;
+    if (task == NULL) {
+        return NULL;
+    }
+
+    task->status = task->parser(&task->value);
+    return NULL;
+}
+
+static int DataWin_parseChunkTasksParallel(
+    DataWin *dw,
+    const DataWinChunkParseTask *tasks,
+    size_t taskCount
+) {
+    if (dw == NULL || tasks == NULL || taskCount == 0U) {
+        return 0;
+    }
+
+    if (taskCount == 1U) {
+        return tasks[0].parser(dw);
+    }
+
+    pthread_t *threads = (pthread_t *)malloc(taskCount * sizeof(*threads));
+    DataWinChunkParseTask *runtime = (DataWinChunkParseTask *)malloc(taskCount * sizeof(*runtime));
+    if (threads == NULL || runtime == NULL) {
+        free(threads);
+        free(runtime);
+        return -1;
+    }
+
+    for (size_t i = 0; i < taskCount; ++i) {
+        runtime[i] = tasks[i];
+        runtime[i].value = *dw;
+        runtime[i].status = 0;
+        if (pthread_create(&threads[i], NULL, DataWin_chunkParseTask_worker, &runtime[i]) != 0) {
+            for (size_t j = 0; j < i; ++j) {
+                pthread_join(threads[j], NULL);
+            }
+            free(threads);
+            free(runtime);
+            return -1;
+        }
+    }
+
+    for (size_t i = 0; i < taskCount; ++i) {
+        pthread_join(threads[i], NULL);
+    }
+
+    for (size_t i = 0; i < taskCount; ++i) {
+        if (runtime[i].status != 0) {
+            free(threads);
+            free(runtime);
+            return -1;
+        }
+        memcpy((char *)dw + runtime[i].field_offset,
+               (char *)&runtime[i].value + runtime[i].field_offset,
+               runtime[i].field_size);
+    }
+
+    free(threads);
+    free(runtime);
+    return 0;
+}
+
 int DataWin_loadFile(DataWin *dw, const char *path) {
     if (dw == NULL || path == NULL) {
         return -1;
@@ -207,6 +282,14 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
     }
     DataWin_applyParserOptions(dw, &effective);
 
+    if (DataWin_detectVersionFromFile(dw->file_data, dw->file_size, &dw->detectedFormat) == 0) {
+        logInfo("[DataWin_parseWithOptions] Detected format: %u.%u.%u.%u\n",
+                dw->detectedFormat.major,
+                dw->detectedFormat.minor,
+                dw->detectedFormat.release,
+                dw->detectedFormat.build);
+    }
+
     if (parse_form_chunks(dw) != 0) {
         return -1;
     }
@@ -240,48 +323,76 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
         parsedChunkCount++;
     }
 
-    #define parse(option, chunk) do { \
+    #define DATAWIN_TASK(chunkName, chunkMember) \
+        (DataWinChunkParseTask){ #chunkName, chunkName##_parse, offsetof(DataWin, chunkMember), sizeof(((DataWin *)0)->chunkMember), NULL, 0 }
+
+    #define DATAWIN_COMMON_TASK_CAPACITY 48U
+    DataWinChunkParseTask commonTasks[DATAWIN_COMMON_TASK_CAPACITY] = {{0}};
+    size_t commonTaskCount = 0;
+
+    #define add_common_task(option, chunkName, chunkMember) do { \
         if (effective.parse##option) { \
-            DataWin_emitProgress(dw, &effective, #chunk, parsedChunkCount, totalChunks); \
-            parsedChunkCount++; \
-            assert(chunk##_parse(dw) == 0); \
+            assert(commonTaskCount < DATAWIN_COMMON_TASK_CAPACITY); \
+            commonTasks[commonTaskCount++] = DATAWIN_TASK(chunkName, chunkMember); \
         } \
     } while (0)
-    parse(Optn, OPTN);
-    parse(Lang, LANG);
-    parse(Extn, EXTN);
-    parse(Sond, SOND);
-    parse(Agrp, AGRP);
-    parse(Sprt, SPRT);
-    parse(Bgnd, BGND);
-    parse(Font, FONT);
-    parse(Tpag, TPAG);
-    parse(Path, PATH);
-    parse(Scpt, SCPT);
-    parse(Glob, GLOB);
-    parse(Code, CODE);
-    parse(Vari, VARI);
-    parse(Func, FUNC);
-    parse(Shdr, SHDR);
-    parse(Tmln, TMLN);
-    parse(Objt, OBJT);
-    parse(Room, ROOM);
-    parse(Strg, STRG);
-    parse(Tgin, TGIN);
-    parse(Txtr, TXTR);
-    parse(Audo, AUDO);
-    parse(Acrv, ACRV);
-    parse(Feds, FEDS);
-    parse(Feat, FEAT);
-    parse(Seqn, SEQN);
-    parse(Tags, TAGS);
-    parse(Embi, EMBI);
-    parse(Psem, PSEM);
-    parse(Psys, PSYS);
-    parse(Gmen, GMEN);
-    parse(Dafl, DAFL);
-    parse(Uilr, UILR);
-    parse(Stat, STAT);
+
+    add_common_task(Optn, OPTN, optn);
+    add_common_task(Lang, LANG, lang);
+    add_common_task(Extn, EXTN, extn);
+    add_common_task(Sond, SOND, sond);
+    add_common_task(Agrp, AGRP, agrp);
+    add_common_task(Sprt, SPRT, sprt);
+    add_common_task(Bgnd, BGND, bgnd);
+    add_common_task(Font, FONT, font);
+    add_common_task(Tpag, TPAG, tpag);
+    add_common_task(Path, PATH, path);
+    add_common_task(Scpt, SCPT, scpt);
+    add_common_task(Glob, GLOB, glob);
+    add_common_task(Code, CODE, code);
+    add_common_task(Vari, VARI, vari);
+    add_common_task(Func, FUNC, func);
+    add_common_task(Shdr, SHDR, shdr);
+    add_common_task(Tmln, TMLN, tmln);
+    add_common_task(Objt, OBJT, objt);
+    add_common_task(Room, ROOM, room);
+    add_common_task(Strg, STRG, strg);
+    add_common_task(Tgin, TGIN, tgin);
+    add_common_task(Txtr, TXTR, txtr);
+    add_common_task(Audo, AUDO, audo);
+    add_common_task(Acrv, ACRV, acrv);
+    add_common_task(Feds, FEDS, feds);
+    add_common_task(Feat, FEAT, feat);
+    add_common_task(Seqn, SEQN, seqn);
+    add_common_task(Tags, TAGS, tags);
+    add_common_task(Embi, EMBI, embi);
+    add_common_task(Gmen, GMEN, gmen);
+    add_common_task(Dafl, DAFL, dafl);
+    add_common_task(Uilr, UILR, uilr);
+    add_common_task(Stat, STAT, stat);
+
+    if (commonTaskCount > 0U) {
+        if (DataWin_parseChunkTasksParallel(dw, commonTasks, commonTaskCount) != 0) {
+            return -1;
+        }
+
+        for (size_t i = 0; i < commonTaskCount; ++i) {
+            DataWin_emitProgress(dw, &effective, commonTasks[i].name, parsedChunkCount, totalChunks);
+            parsedChunkCount++;
+        }
+    }
+
+    if (effective.parsePsem) {
+        DataWin_emitProgress(dw, &effective, "PSEM", parsedChunkCount, totalChunks);
+        parsedChunkCount++;
+        assert(PSEM_parse(dw) == 0);
+    }
+
+    if (effective.parsePsys) {
+        DataWin_emitProgress(dw, &effective, "PSYS", parsedChunkCount, totalChunks);
+        parsedChunkCount++;
+        assert(PSYS_parse(dw) == 0);
+    }
 
     if (effective.progressCallback != NULL && totalChunks > 0 && parsedChunkCount < totalChunks) {
         DataWin_emitProgress(dw, &effective, "DONE", totalChunks - 1, totalChunks);
