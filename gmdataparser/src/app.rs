@@ -174,6 +174,7 @@ fn load_data_win(
             parseSeqn: true,
             parseTags: true,
             parseUilr: true,
+            parseStat: true,
             skipLoadingPreciseMasksForNonPreciseSprites: false,
             lazyLoadRooms: false,
             lazyLoadTextures: false,
@@ -645,6 +646,7 @@ impl eframe::App for App {
                             "PSYS" => "Particle Systems",
                             "TXTR" => "Textures",
                             "AUDO" => "Audio",
+                            "STAT" => "Event Manifests",
                             name => name,
                         };
 
