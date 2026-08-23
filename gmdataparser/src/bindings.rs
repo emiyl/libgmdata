@@ -2334,9 +2334,513 @@ const _: () = {
 };
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct FeatChunk {
+    pub count: u32,
+    pub strings: *mut *mut ::std::os::raw::c_char,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of FeatChunk"][::std::mem::size_of::<FeatChunk>() - 16usize];
+    ["Alignment of FeatChunk"][::std::mem::align_of::<FeatChunk>() - 8usize];
+    ["Offset of field: FeatChunk::count"][::std::mem::offset_of!(FeatChunk, count) - 0usize];
+    ["Offset of field: FeatChunk::strings"][::std::mem::offset_of!(FeatChunk, strings) - 8usize];
+};
+pub const SequencePlaybackType_SEQUENCE_PLAYBACK_ONESHOT: SequencePlaybackType = 0;
+pub const SequencePlaybackType_SEQUENCE_PLAYBACK_LOOP: SequencePlaybackType = 1;
+pub const SequencePlaybackType_SEQUENCE_PLAYBACK_PINGPONG: SequencePlaybackType = 2;
+pub type SequencePlaybackType = ::std::os::raw::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SequenceChannel {
+    pub type_: u32,
+    pub index: u32,
+    pub value_count: u32,
+    pub values: *mut f32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of SequenceChannel"][::std::mem::size_of::<SequenceChannel>() - 24usize];
+    ["Alignment of SequenceChannel"][::std::mem::align_of::<SequenceChannel>() - 8usize];
+    ["Offset of field: SequenceChannel::type_"]
+        [::std::mem::offset_of!(SequenceChannel, type_) - 0usize];
+    ["Offset of field: SequenceChannel::index"]
+        [::std::mem::offset_of!(SequenceChannel, index) - 4usize];
+    ["Offset of field: SequenceChannel::value_count"]
+        [::std::mem::offset_of!(SequenceChannel, value_count) - 8usize];
+    ["Offset of field: SequenceChannel::values"]
+        [::std::mem::offset_of!(SequenceChannel, values) - 16usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SequenceTrack {
+    pub track_type: u32,
+    pub channel_count: u32,
+    pub channels: *mut SequenceChannel,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of SequenceTrack"][::std::mem::size_of::<SequenceTrack>() - 16usize];
+    ["Alignment of SequenceTrack"][::std::mem::align_of::<SequenceTrack>() - 8usize];
+    ["Offset of field: SequenceTrack::track_type"]
+        [::std::mem::offset_of!(SequenceTrack, track_type) - 0usize];
+    ["Offset of field: SequenceTrack::channel_count"]
+        [::std::mem::offset_of!(SequenceTrack, channel_count) - 4usize];
+    ["Offset of field: SequenceTrack::channels"]
+        [::std::mem::offset_of!(SequenceTrack, channels) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SequenceKeyframe {
+    pub key: f32,
+    pub length: f32,
+    pub stretch: bool,
+    pub disabled: bool,
+    pub channel_count: u32,
+    pub channels: *mut SequenceChannel,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of SequenceKeyframe"][::std::mem::size_of::<SequenceKeyframe>() - 24usize];
+    ["Alignment of SequenceKeyframe"][::std::mem::align_of::<SequenceKeyframe>() - 8usize];
+    ["Offset of field: SequenceKeyframe::key"]
+        [::std::mem::offset_of!(SequenceKeyframe, key) - 0usize];
+    ["Offset of field: SequenceKeyframe::length"]
+        [::std::mem::offset_of!(SequenceKeyframe, length) - 4usize];
+    ["Offset of field: SequenceKeyframe::stretch"]
+        [::std::mem::offset_of!(SequenceKeyframe, stretch) - 8usize];
+    ["Offset of field: SequenceKeyframe::disabled"]
+        [::std::mem::offset_of!(SequenceKeyframe, disabled) - 9usize];
+    ["Offset of field: SequenceKeyframe::channel_count"]
+        [::std::mem::offset_of!(SequenceKeyframe, channel_count) - 12usize];
+    ["Offset of field: SequenceKeyframe::channels"]
+        [::std::mem::offset_of!(SequenceKeyframe, channels) - 16usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SequenceFunctionIdEntry {
+    pub function_id: u32,
+    pub value: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of SequenceFunctionIdEntry"][::std::mem::size_of::<SequenceFunctionIdEntry>() - 8usize];
+    ["Alignment of SequenceFunctionIdEntry"]
+        [::std::mem::align_of::<SequenceFunctionIdEntry>() - 4usize];
+    ["Offset of field: SequenceFunctionIdEntry::function_id"]
+        [::std::mem::offset_of!(SequenceFunctionIdEntry, function_id) - 0usize];
+    ["Offset of field: SequenceFunctionIdEntry::value"]
+        [::std::mem::offset_of!(SequenceFunctionIdEntry, value) - 4usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct Sequence {
+    pub name: *mut ::std::os::raw::c_char,
+    pub playback: u32,
+    pub playback_speed: f32,
+    pub playback_speed_type: u32,
+    pub length: f32,
+    pub origin_x: i32,
+    pub origin_y: i32,
+    pub volume: f32,
+    pub width: f32,
+    pub height: f32,
+    pub broadcast_message_count: u32,
+    pub broadcast_messages: *mut SequenceKeyframe,
+    pub track_count: u32,
+    pub tracks: *mut SequenceTrack,
+    pub function_id_count: u32,
+    pub function_ids: *mut SequenceFunctionIdEntry,
+    pub moment_count: u32,
+    pub moments: *mut SequenceKeyframe,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of Sequence"][::std::mem::size_of::<Sequence>() - 104usize];
+    ["Alignment of Sequence"][::std::mem::align_of::<Sequence>() - 8usize];
+    ["Offset of field: Sequence::name"][::std::mem::offset_of!(Sequence, name) - 0usize];
+    ["Offset of field: Sequence::playback"][::std::mem::offset_of!(Sequence, playback) - 8usize];
+    ["Offset of field: Sequence::playback_speed"]
+        [::std::mem::offset_of!(Sequence, playback_speed) - 12usize];
+    ["Offset of field: Sequence::playback_speed_type"]
+        [::std::mem::offset_of!(Sequence, playback_speed_type) - 16usize];
+    ["Offset of field: Sequence::length"][::std::mem::offset_of!(Sequence, length) - 20usize];
+    ["Offset of field: Sequence::origin_x"][::std::mem::offset_of!(Sequence, origin_x) - 24usize];
+    ["Offset of field: Sequence::origin_y"][::std::mem::offset_of!(Sequence, origin_y) - 28usize];
+    ["Offset of field: Sequence::volume"][::std::mem::offset_of!(Sequence, volume) - 32usize];
+    ["Offset of field: Sequence::width"][::std::mem::offset_of!(Sequence, width) - 36usize];
+    ["Offset of field: Sequence::height"][::std::mem::offset_of!(Sequence, height) - 40usize];
+    ["Offset of field: Sequence::broadcast_message_count"]
+        [::std::mem::offset_of!(Sequence, broadcast_message_count) - 44usize];
+    ["Offset of field: Sequence::broadcast_messages"]
+        [::std::mem::offset_of!(Sequence, broadcast_messages) - 48usize];
+    ["Offset of field: Sequence::track_count"]
+        [::std::mem::offset_of!(Sequence, track_count) - 56usize];
+    ["Offset of field: Sequence::tracks"][::std::mem::offset_of!(Sequence, tracks) - 64usize];
+    ["Offset of field: Sequence::function_id_count"]
+        [::std::mem::offset_of!(Sequence, function_id_count) - 72usize];
+    ["Offset of field: Sequence::function_ids"]
+        [::std::mem::offset_of!(Sequence, function_ids) - 80usize];
+    ["Offset of field: Sequence::moment_count"]
+        [::std::mem::offset_of!(Sequence, moment_count) - 88usize];
+    ["Offset of field: Sequence::moments"][::std::mem::offset_of!(Sequence, moments) - 96usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SeqnChunk {
+    pub count: u32,
+    pub items: *mut Sequence,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of SeqnChunk"][::std::mem::size_of::<SeqnChunk>() - 16usize];
+    ["Alignment of SeqnChunk"][::std::mem::align_of::<SeqnChunk>() - 8usize];
+    ["Offset of field: SeqnChunk::count"][::std::mem::offset_of!(SeqnChunk, count) - 0usize];
+    ["Offset of field: SeqnChunk::items"][::std::mem::offset_of!(SeqnChunk, items) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct AssetTagEntry {
+    pub id: u32,
+    pub tag_count: u32,
+    pub tags: *mut *mut ::std::os::raw::c_char,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of AssetTagEntry"][::std::mem::size_of::<AssetTagEntry>() - 16usize];
+    ["Alignment of AssetTagEntry"][::std::mem::align_of::<AssetTagEntry>() - 8usize];
+    ["Offset of field: AssetTagEntry::id"][::std::mem::offset_of!(AssetTagEntry, id) - 0usize];
+    ["Offset of field: AssetTagEntry::tag_count"]
+        [::std::mem::offset_of!(AssetTagEntry, tag_count) - 4usize];
+    ["Offset of field: AssetTagEntry::tags"][::std::mem::offset_of!(AssetTagEntry, tags) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct TagsChunk {
+    pub count: u32,
+    pub strings: *mut *mut ::std::os::raw::c_char,
+    pub asset_tag_count: u32,
+    pub asset_tags: *mut AssetTagEntry,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of TagsChunk"][::std::mem::size_of::<TagsChunk>() - 32usize];
+    ["Alignment of TagsChunk"][::std::mem::align_of::<TagsChunk>() - 8usize];
+    ["Offset of field: TagsChunk::count"][::std::mem::offset_of!(TagsChunk, count) - 0usize];
+    ["Offset of field: TagsChunk::strings"][::std::mem::offset_of!(TagsChunk, strings) - 8usize];
+    ["Offset of field: TagsChunk::asset_tag_count"]
+        [::std::mem::offset_of!(TagsChunk, asset_tag_count) - 16usize];
+    ["Offset of field: TagsChunk::asset_tags"]
+        [::std::mem::offset_of!(TagsChunk, asset_tags) - 24usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct EmbiItem {
+    pub name: *mut ::std::os::raw::c_char,
+    pub texture_page_entry_id: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of EmbiItem"][::std::mem::size_of::<EmbiItem>() - 16usize];
+    ["Alignment of EmbiItem"][::std::mem::align_of::<EmbiItem>() - 8usize];
+    ["Offset of field: EmbiItem::name"][::std::mem::offset_of!(EmbiItem, name) - 0usize];
+    ["Offset of field: EmbiItem::texture_page_entry_id"]
+        [::std::mem::offset_of!(EmbiItem, texture_page_entry_id) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct EmbiChunk {
+    pub count: u32,
+    pub items: *mut EmbiItem,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of EmbiChunk"][::std::mem::size_of::<EmbiChunk>() - 16usize];
+    ["Alignment of EmbiChunk"][::std::mem::align_of::<EmbiChunk>() - 8usize];
+    ["Offset of field: EmbiChunk::count"][::std::mem::offset_of!(EmbiChunk, count) - 0usize];
+    ["Offset of field: EmbiChunk::items"][::std::mem::offset_of!(EmbiChunk, items) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ParticleEmitter {
+    pub name: *mut ::std::os::raw::c_char,
+    pub enabled: bool,
+    pub mode: i32,
+    pub emit_count: i32,
+    pub emit_relative: bool,
+    pub delay_min: f32,
+    pub delay_max: f32,
+    pub delay_unit: i32,
+    pub interval_min: f32,
+    pub interval_max: f32,
+    pub interval_unit: i32,
+    pub distribution: i32,
+    pub shape: i32,
+    pub region_x: f32,
+    pub region_y: f32,
+    pub region_width: f32,
+    pub region_height: f32,
+    pub rotation: f32,
+    pub sprite_id: u32,
+    pub texture_enum: i32,
+    pub frame_index: f32,
+    pub animate: bool,
+    pub stretch: bool,
+    pub is_random: bool,
+    pub start_color: u32,
+    pub mid_color: u32,
+    pub end_color: u32,
+    pub additive_blend: bool,
+    pub lifetime_min: f32,
+    pub lifetime_max: f32,
+    pub scale_x: f32,
+    pub scale_y: f32,
+    pub size_min_x: f32,
+    pub size_max_x: f32,
+    pub size_min_y: f32,
+    pub size_max_y: f32,
+    pub size_increase_x: f32,
+    pub size_increase_y: f32,
+    pub size_wiggle_x: f32,
+    pub size_wiggle_y: f32,
+    pub speed_min: f32,
+    pub speed_max: f32,
+    pub speed_increase: f32,
+    pub speed_wiggle: f32,
+    pub gravity_force: f32,
+    pub gravity_direction: f32,
+    pub direction_min: f32,
+    pub direction_max: f32,
+    pub direction_increase: f32,
+    pub direction_wiggle: f32,
+    pub orientation_min: f32,
+    pub orientation_max: f32,
+    pub orientation_increase: f32,
+    pub orientation_wiggle: f32,
+    pub orientation_relative: bool,
+    pub spawn_on_death_id: u32,
+    pub spawn_on_death_count: i32,
+    pub spawn_on_update_id: u32,
+    pub spawn_on_update_count: i32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of ParticleEmitter"][::std::mem::size_of::<ParticleEmitter>() - 232usize];
+    ["Alignment of ParticleEmitter"][::std::mem::align_of::<ParticleEmitter>() - 8usize];
+    ["Offset of field: ParticleEmitter::name"]
+        [::std::mem::offset_of!(ParticleEmitter, name) - 0usize];
+    ["Offset of field: ParticleEmitter::enabled"]
+        [::std::mem::offset_of!(ParticleEmitter, enabled) - 8usize];
+    ["Offset of field: ParticleEmitter::mode"]
+        [::std::mem::offset_of!(ParticleEmitter, mode) - 12usize];
+    ["Offset of field: ParticleEmitter::emit_count"]
+        [::std::mem::offset_of!(ParticleEmitter, emit_count) - 16usize];
+    ["Offset of field: ParticleEmitter::emit_relative"]
+        [::std::mem::offset_of!(ParticleEmitter, emit_relative) - 20usize];
+    ["Offset of field: ParticleEmitter::delay_min"]
+        [::std::mem::offset_of!(ParticleEmitter, delay_min) - 24usize];
+    ["Offset of field: ParticleEmitter::delay_max"]
+        [::std::mem::offset_of!(ParticleEmitter, delay_max) - 28usize];
+    ["Offset of field: ParticleEmitter::delay_unit"]
+        [::std::mem::offset_of!(ParticleEmitter, delay_unit) - 32usize];
+    ["Offset of field: ParticleEmitter::interval_min"]
+        [::std::mem::offset_of!(ParticleEmitter, interval_min) - 36usize];
+    ["Offset of field: ParticleEmitter::interval_max"]
+        [::std::mem::offset_of!(ParticleEmitter, interval_max) - 40usize];
+    ["Offset of field: ParticleEmitter::interval_unit"]
+        [::std::mem::offset_of!(ParticleEmitter, interval_unit) - 44usize];
+    ["Offset of field: ParticleEmitter::distribution"]
+        [::std::mem::offset_of!(ParticleEmitter, distribution) - 48usize];
+    ["Offset of field: ParticleEmitter::shape"]
+        [::std::mem::offset_of!(ParticleEmitter, shape) - 52usize];
+    ["Offset of field: ParticleEmitter::region_x"]
+        [::std::mem::offset_of!(ParticleEmitter, region_x) - 56usize];
+    ["Offset of field: ParticleEmitter::region_y"]
+        [::std::mem::offset_of!(ParticleEmitter, region_y) - 60usize];
+    ["Offset of field: ParticleEmitter::region_width"]
+        [::std::mem::offset_of!(ParticleEmitter, region_width) - 64usize];
+    ["Offset of field: ParticleEmitter::region_height"]
+        [::std::mem::offset_of!(ParticleEmitter, region_height) - 68usize];
+    ["Offset of field: ParticleEmitter::rotation"]
+        [::std::mem::offset_of!(ParticleEmitter, rotation) - 72usize];
+    ["Offset of field: ParticleEmitter::sprite_id"]
+        [::std::mem::offset_of!(ParticleEmitter, sprite_id) - 76usize];
+    ["Offset of field: ParticleEmitter::texture_enum"]
+        [::std::mem::offset_of!(ParticleEmitter, texture_enum) - 80usize];
+    ["Offset of field: ParticleEmitter::frame_index"]
+        [::std::mem::offset_of!(ParticleEmitter, frame_index) - 84usize];
+    ["Offset of field: ParticleEmitter::animate"]
+        [::std::mem::offset_of!(ParticleEmitter, animate) - 88usize];
+    ["Offset of field: ParticleEmitter::stretch"]
+        [::std::mem::offset_of!(ParticleEmitter, stretch) - 89usize];
+    ["Offset of field: ParticleEmitter::is_random"]
+        [::std::mem::offset_of!(ParticleEmitter, is_random) - 90usize];
+    ["Offset of field: ParticleEmitter::start_color"]
+        [::std::mem::offset_of!(ParticleEmitter, start_color) - 92usize];
+    ["Offset of field: ParticleEmitter::mid_color"]
+        [::std::mem::offset_of!(ParticleEmitter, mid_color) - 96usize];
+    ["Offset of field: ParticleEmitter::end_color"]
+        [::std::mem::offset_of!(ParticleEmitter, end_color) - 100usize];
+    ["Offset of field: ParticleEmitter::additive_blend"]
+        [::std::mem::offset_of!(ParticleEmitter, additive_blend) - 104usize];
+    ["Offset of field: ParticleEmitter::lifetime_min"]
+        [::std::mem::offset_of!(ParticleEmitter, lifetime_min) - 108usize];
+    ["Offset of field: ParticleEmitter::lifetime_max"]
+        [::std::mem::offset_of!(ParticleEmitter, lifetime_max) - 112usize];
+    ["Offset of field: ParticleEmitter::scale_x"]
+        [::std::mem::offset_of!(ParticleEmitter, scale_x) - 116usize];
+    ["Offset of field: ParticleEmitter::scale_y"]
+        [::std::mem::offset_of!(ParticleEmitter, scale_y) - 120usize];
+    ["Offset of field: ParticleEmitter::size_min_x"]
+        [::std::mem::offset_of!(ParticleEmitter, size_min_x) - 124usize];
+    ["Offset of field: ParticleEmitter::size_max_x"]
+        [::std::mem::offset_of!(ParticleEmitter, size_max_x) - 128usize];
+    ["Offset of field: ParticleEmitter::size_min_y"]
+        [::std::mem::offset_of!(ParticleEmitter, size_min_y) - 132usize];
+    ["Offset of field: ParticleEmitter::size_max_y"]
+        [::std::mem::offset_of!(ParticleEmitter, size_max_y) - 136usize];
+    ["Offset of field: ParticleEmitter::size_increase_x"]
+        [::std::mem::offset_of!(ParticleEmitter, size_increase_x) - 140usize];
+    ["Offset of field: ParticleEmitter::size_increase_y"]
+        [::std::mem::offset_of!(ParticleEmitter, size_increase_y) - 144usize];
+    ["Offset of field: ParticleEmitter::size_wiggle_x"]
+        [::std::mem::offset_of!(ParticleEmitter, size_wiggle_x) - 148usize];
+    ["Offset of field: ParticleEmitter::size_wiggle_y"]
+        [::std::mem::offset_of!(ParticleEmitter, size_wiggle_y) - 152usize];
+    ["Offset of field: ParticleEmitter::speed_min"]
+        [::std::mem::offset_of!(ParticleEmitter, speed_min) - 156usize];
+    ["Offset of field: ParticleEmitter::speed_max"]
+        [::std::mem::offset_of!(ParticleEmitter, speed_max) - 160usize];
+    ["Offset of field: ParticleEmitter::speed_increase"]
+        [::std::mem::offset_of!(ParticleEmitter, speed_increase) - 164usize];
+    ["Offset of field: ParticleEmitter::speed_wiggle"]
+        [::std::mem::offset_of!(ParticleEmitter, speed_wiggle) - 168usize];
+    ["Offset of field: ParticleEmitter::gravity_force"]
+        [::std::mem::offset_of!(ParticleEmitter, gravity_force) - 172usize];
+    ["Offset of field: ParticleEmitter::gravity_direction"]
+        [::std::mem::offset_of!(ParticleEmitter, gravity_direction) - 176usize];
+    ["Offset of field: ParticleEmitter::direction_min"]
+        [::std::mem::offset_of!(ParticleEmitter, direction_min) - 180usize];
+    ["Offset of field: ParticleEmitter::direction_max"]
+        [::std::mem::offset_of!(ParticleEmitter, direction_max) - 184usize];
+    ["Offset of field: ParticleEmitter::direction_increase"]
+        [::std::mem::offset_of!(ParticleEmitter, direction_increase) - 188usize];
+    ["Offset of field: ParticleEmitter::direction_wiggle"]
+        [::std::mem::offset_of!(ParticleEmitter, direction_wiggle) - 192usize];
+    ["Offset of field: ParticleEmitter::orientation_min"]
+        [::std::mem::offset_of!(ParticleEmitter, orientation_min) - 196usize];
+    ["Offset of field: ParticleEmitter::orientation_max"]
+        [::std::mem::offset_of!(ParticleEmitter, orientation_max) - 200usize];
+    ["Offset of field: ParticleEmitter::orientation_increase"]
+        [::std::mem::offset_of!(ParticleEmitter, orientation_increase) - 204usize];
+    ["Offset of field: ParticleEmitter::orientation_wiggle"]
+        [::std::mem::offset_of!(ParticleEmitter, orientation_wiggle) - 208usize];
+    ["Offset of field: ParticleEmitter::orientation_relative"]
+        [::std::mem::offset_of!(ParticleEmitter, orientation_relative) - 212usize];
+    ["Offset of field: ParticleEmitter::spawn_on_death_id"]
+        [::std::mem::offset_of!(ParticleEmitter, spawn_on_death_id) - 216usize];
+    ["Offset of field: ParticleEmitter::spawn_on_death_count"]
+        [::std::mem::offset_of!(ParticleEmitter, spawn_on_death_count) - 220usize];
+    ["Offset of field: ParticleEmitter::spawn_on_update_id"]
+        [::std::mem::offset_of!(ParticleEmitter, spawn_on_update_id) - 224usize];
+    ["Offset of field: ParticleEmitter::spawn_on_update_count"]
+        [::std::mem::offset_of!(ParticleEmitter, spawn_on_update_count) - 228usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct PsemChunk {
+    pub count: u32,
+    pub items: *mut ParticleEmitter,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of PsemChunk"][::std::mem::size_of::<PsemChunk>() - 16usize];
+    ["Alignment of PsemChunk"][::std::mem::align_of::<PsemChunk>() - 8usize];
+    ["Offset of field: PsemChunk::count"][::std::mem::offset_of!(PsemChunk, count) - 0usize];
+    ["Offset of field: PsemChunk::items"][::std::mem::offset_of!(PsemChunk, items) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ParticleSystem {
+    pub name: *mut ::std::os::raw::c_char,
+    pub origin_x: i32,
+    pub origin_y: i32,
+    pub draw_order: i32,
+    pub global_space_particles: bool,
+    pub emitter_count: u32,
+    pub emitters: *mut ParticleEmitter,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of ParticleSystem"][::std::mem::size_of::<ParticleSystem>() - 40usize];
+    ["Alignment of ParticleSystem"][::std::mem::align_of::<ParticleSystem>() - 8usize];
+    ["Offset of field: ParticleSystem::name"]
+        [::std::mem::offset_of!(ParticleSystem, name) - 0usize];
+    ["Offset of field: ParticleSystem::origin_x"]
+        [::std::mem::offset_of!(ParticleSystem, origin_x) - 8usize];
+    ["Offset of field: ParticleSystem::origin_y"]
+        [::std::mem::offset_of!(ParticleSystem, origin_y) - 12usize];
+    ["Offset of field: ParticleSystem::draw_order"]
+        [::std::mem::offset_of!(ParticleSystem, draw_order) - 16usize];
+    ["Offset of field: ParticleSystem::global_space_particles"]
+        [::std::mem::offset_of!(ParticleSystem, global_space_particles) - 20usize];
+    ["Offset of field: ParticleSystem::emitter_count"]
+        [::std::mem::offset_of!(ParticleSystem, emitter_count) - 24usize];
+    ["Offset of field: ParticleSystem::emitters"]
+        [::std::mem::offset_of!(ParticleSystem, emitters) - 32usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct PsysChunk {
+    pub count: u32,
+    pub items: *mut ParticleSystem,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of PsysChunk"][::std::mem::size_of::<PsysChunk>() - 16usize];
+    ["Alignment of PsysChunk"][::std::mem::align_of::<PsysChunk>() - 8usize];
+    ["Offset of field: PsysChunk::count"][::std::mem::offset_of!(PsysChunk, count) - 0usize];
+    ["Offset of field: PsysChunk::items"][::std::mem::offset_of!(PsysChunk, items) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct GmenChunk {
+    pub count: u32,
+    pub code_ids: *mut u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of GmenChunk"][::std::mem::size_of::<GmenChunk>() - 16usize];
+    ["Alignment of GmenChunk"][::std::mem::align_of::<GmenChunk>() - 8usize];
+    ["Offset of field: GmenChunk::count"][::std::mem::offset_of!(GmenChunk, count) - 0usize];
+    ["Offset of field: GmenChunk::code_ids"][::std::mem::offset_of!(GmenChunk, code_ids) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct DaflChunk {
+    pub count: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of DaflChunk"][::std::mem::size_of::<DaflChunk>() - 4usize];
+    ["Alignment of DaflChunk"][::std::mem::align_of::<DaflChunk>() - 4usize];
+    ["Offset of field: DaflChunk::count"][::std::mem::offset_of!(DaflChunk, count) - 0usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct UilrChunk {
+    pub count: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of UilrChunk"][::std::mem::size_of::<UilrChunk>() - 4usize];
+    ["Alignment of UilrChunk"][::std::mem::align_of::<UilrChunk>() - 4usize];
+    ["Offset of field: UilrChunk::count"][::std::mem::offset_of!(UilrChunk, count) - 0usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct StrgChunk {
     pub count: u32,
-    pub strings: *mut *const ::std::os::raw::c_char,
+    pub strings: *mut *mut ::std::os::raw::c_char,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
@@ -2570,6 +3074,15 @@ pub struct DataWin {
     pub room: RoomChunk,
     pub acrv: AcrvChunk,
     pub feds: FedsChunk,
+    pub feat: FeatChunk,
+    pub seqn: SeqnChunk,
+    pub tags: TagsChunk,
+    pub embi: EmbiChunk,
+    pub psem: PsemChunk,
+    pub psys: PsysChunk,
+    pub gmen: GmenChunk,
+    pub dafl: DaflChunk,
+    pub uilr: UilrChunk,
     pub tgin: TginChunk,
     pub strg: StrgChunk,
     pub txtr: TxtrChunk,
@@ -2583,7 +3096,7 @@ pub struct DataWin {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 808usize];
+    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 944usize];
     ["Alignment of DataWin"][::std::mem::align_of::<DataWin>() - 8usize];
     ["Offset of field: DataWin::file_data"][::std::mem::offset_of!(DataWin, file_data) - 0usize];
     ["Offset of field: DataWin::file_size"][::std::mem::offset_of!(DataWin, file_size) - 8usize];
@@ -2611,22 +3124,31 @@ const _: () = {
     ["Offset of field: DataWin::room"][::std::mem::offset_of!(DataWin, room) - 648usize];
     ["Offset of field: DataWin::acrv"][::std::mem::offset_of!(DataWin, acrv) - 664usize];
     ["Offset of field: DataWin::feds"][::std::mem::offset_of!(DataWin, feds) - 696usize];
-    ["Offset of field: DataWin::tgin"][::std::mem::offset_of!(DataWin, tgin) - 712usize];
-    ["Offset of field: DataWin::strg"][::std::mem::offset_of!(DataWin, strg) - 728usize];
-    ["Offset of field: DataWin::txtr"][::std::mem::offset_of!(DataWin, txtr) - 744usize];
-    ["Offset of field: DataWin::audo"][::std::mem::offset_of!(DataWin, audo) - 760usize];
+    ["Offset of field: DataWin::feat"][::std::mem::offset_of!(DataWin, feat) - 712usize];
+    ["Offset of field: DataWin::seqn"][::std::mem::offset_of!(DataWin, seqn) - 728usize];
+    ["Offset of field: DataWin::tags"][::std::mem::offset_of!(DataWin, tags) - 744usize];
+    ["Offset of field: DataWin::embi"][::std::mem::offset_of!(DataWin, embi) - 776usize];
+    ["Offset of field: DataWin::psem"][::std::mem::offset_of!(DataWin, psem) - 792usize];
+    ["Offset of field: DataWin::psys"][::std::mem::offset_of!(DataWin, psys) - 808usize];
+    ["Offset of field: DataWin::gmen"][::std::mem::offset_of!(DataWin, gmen) - 824usize];
+    ["Offset of field: DataWin::dafl"][::std::mem::offset_of!(DataWin, dafl) - 840usize];
+    ["Offset of field: DataWin::uilr"][::std::mem::offset_of!(DataWin, uilr) - 844usize];
+    ["Offset of field: DataWin::tgin"][::std::mem::offset_of!(DataWin, tgin) - 848usize];
+    ["Offset of field: DataWin::strg"][::std::mem::offset_of!(DataWin, strg) - 864usize];
+    ["Offset of field: DataWin::txtr"][::std::mem::offset_of!(DataWin, txtr) - 880usize];
+    ["Offset of field: DataWin::audo"][::std::mem::offset_of!(DataWin, audo) - 896usize];
     ["Offset of field: DataWin::detectedFormat"]
-        [::std::mem::offset_of!(DataWin, detectedFormat) - 776usize];
+        [::std::mem::offset_of!(DataWin, detectedFormat) - 912usize];
     ["Offset of field: DataWin::mappedFile"]
-        [::std::mem::offset_of!(DataWin, mappedFile) - 792usize];
+        [::std::mem::offset_of!(DataWin, mappedFile) - 928usize];
     ["Offset of field: DataWin::lazyLoadRooms"]
-        [::std::mem::offset_of!(DataWin, lazyLoadRooms) - 800usize];
+        [::std::mem::offset_of!(DataWin, lazyLoadRooms) - 936usize];
     ["Offset of field: DataWin::lazyLoadTextures"]
-        [::std::mem::offset_of!(DataWin, lazyLoadTextures) - 801usize];
+        [::std::mem::offset_of!(DataWin, lazyLoadTextures) - 937usize];
     ["Offset of field: DataWin::lazyLoadAudio"]
-        [::std::mem::offset_of!(DataWin, lazyLoadAudio) - 802usize];
+        [::std::mem::offset_of!(DataWin, lazyLoadAudio) - 938usize];
     ["Offset of field: DataWin::initialized"]
-        [::std::mem::offset_of!(DataWin, initialized) - 803usize];
+        [::std::mem::offset_of!(DataWin, initialized) - 939usize];
 };
 unsafe extern "C" {
     pub fn TextureDecode_decodeToRgba(
@@ -2685,6 +3207,15 @@ pub struct DataWinParserOptions {
     pub parseAudo: bool,
     pub parseAcrv: bool,
     pub parseFeds: bool,
+    pub parseFeat: bool,
+    pub parseSeqn: bool,
+    pub parseTags: bool,
+    pub parseEmbi: bool,
+    pub parsePsem: bool,
+    pub parsePsys: bool,
+    pub parseGmen: bool,
+    pub parseDafl: bool,
+    pub parseUilr: bool,
     pub skipLoadingPreciseMasksForNonPreciseSprites: bool,
     pub lazyLoadRooms: bool,
     pub lazyLoadTextures: bool,
@@ -2704,7 +3235,7 @@ pub struct DataWinParserOptions {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of DataWinParserOptions"][::std::mem::size_of::<DataWinParserOptions>() - 64usize];
+    ["Size of DataWinParserOptions"][::std::mem::size_of::<DataWinParserOptions>() - 72usize];
     ["Alignment of DataWinParserOptions"][::std::mem::align_of::<DataWinParserOptions>() - 8usize];
     ["Offset of field: DataWinParserOptions::parseGen8"]
         [::std::mem::offset_of!(DataWinParserOptions, parseGen8) - 0usize];
@@ -2758,25 +3289,43 @@ const _: () = {
         [::std::mem::offset_of!(DataWinParserOptions, parseAcrv) - 24usize];
     ["Offset of field: DataWinParserOptions::parseFeds"]
         [::std::mem::offset_of!(DataWinParserOptions, parseFeds) - 25usize];
+    ["Offset of field: DataWinParserOptions::parseFeat"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseFeat) - 26usize];
+    ["Offset of field: DataWinParserOptions::parseSeqn"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseSeqn) - 27usize];
+    ["Offset of field: DataWinParserOptions::parseTags"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseTags) - 28usize];
+    ["Offset of field: DataWinParserOptions::parseEmbi"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseEmbi) - 29usize];
+    ["Offset of field: DataWinParserOptions::parsePsem"]
+        [::std::mem::offset_of!(DataWinParserOptions, parsePsem) - 30usize];
+    ["Offset of field: DataWinParserOptions::parsePsys"]
+        [::std::mem::offset_of!(DataWinParserOptions, parsePsys) - 31usize];
+    ["Offset of field: DataWinParserOptions::parseGmen"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseGmen) - 32usize];
+    ["Offset of field: DataWinParserOptions::parseDafl"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseDafl) - 33usize];
+    ["Offset of field: DataWinParserOptions::parseUilr"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseUilr) - 34usize];
     ["Offset of field: DataWinParserOptions::skipLoadingPreciseMasksForNonPreciseSprites"][::std::mem::offset_of!(
         DataWinParserOptions,
         skipLoadingPreciseMasksForNonPreciseSprites
     )
-        - 26usize];
+        - 35usize];
     ["Offset of field: DataWinParserOptions::lazyLoadRooms"]
-        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadRooms) - 27usize];
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadRooms) - 36usize];
     ["Offset of field: DataWinParserOptions::lazyLoadTextures"]
-        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadTextures) - 28usize];
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadTextures) - 37usize];
     ["Offset of field: DataWinParserOptions::lazyLoadAudio"]
-        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadAudio) - 29usize];
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadAudio) - 38usize];
     ["Offset of field: DataWinParserOptions::eagerlyLoadedRooms"]
-        [::std::mem::offset_of!(DataWinParserOptions, eagerlyLoadedRooms) - 32usize];
+        [::std::mem::offset_of!(DataWinParserOptions, eagerlyLoadedRooms) - 40usize];
     ["Offset of field: DataWinParserOptions::loadType"]
-        [::std::mem::offset_of!(DataWinParserOptions, loadType) - 40usize];
+        [::std::mem::offset_of!(DataWinParserOptions, loadType) - 48usize];
     ["Offset of field: DataWinParserOptions::progressCallback"]
-        [::std::mem::offset_of!(DataWinParserOptions, progressCallback) - 48usize];
+        [::std::mem::offset_of!(DataWinParserOptions, progressCallback) - 56usize];
     ["Offset of field: DataWinParserOptions::progressCallbackUserData"]
-        [::std::mem::offset_of!(DataWinParserOptions, progressCallbackUserData) - 56usize];
+        [::std::mem::offset_of!(DataWinParserOptions, progressCallbackUserData) - 64usize];
 };
 unsafe extern "C" {
     pub fn DataWin_initParserOptions(options: *mut DataWinParserOptions);
