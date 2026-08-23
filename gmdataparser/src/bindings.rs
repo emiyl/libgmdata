@@ -3456,4 +3456,11 @@ unsafe extern "C" {
         build: u32,
     );
 }
+unsafe extern "C" {
+    pub fn DataWin_detectVersionFromFile(
+        file_data: *const u8,
+        file_size: usize,
+        out: *mut DetectedFormat,
+    ) -> ::std::os::raw::c_int;
+}
 pub type __builtin_va_list = *mut ::std::os::raw::c_char;

@@ -2,6 +2,7 @@
 #define READER_H
 
 #include "gmdata.h"
+#include "log.h"
 
 void Reader_init(Reader *reader, const uint8_t *data, size_t size, size_t offset, const char* name);
 size_t Reader_remaining(const Reader *reader);
@@ -62,5 +63,29 @@ const uint8_t *Reader_ptr_at(const Reader *reader, size_t offset);
 
 uint16_t read_u16_le_at(const uint8_t *buffer, size_t size, size_t offset);
 uint32_t read_u32_le_at(const uint8_t *buffer, size_t size, size_t offset);
+
+#define read(out, type) \
+    if (Reader_read##type(reader, out) != 0) { \
+        logWarn("[read] Failed to read " #type " at offset %zu\n", reader->cursor); \
+        return -1; \
+    }
+
+#define readString(out, dw) \
+    if (Reader_readString(reader, dw, out) != 0) { \
+        logWarn("[readString] Failed to read string at offset %zu\n", reader->cursor); \
+        return -1; \
+    }\
+
+#define seek(offset) \
+    if (Reader_seek(reader, offset) != 0) { \
+        logWarn("[seek] Failed to seek to offset %zu\n", offset); \
+        return -1; \
+    }
+
+#define skip(count) \
+    if (Reader_skip(reader, count) != 0) { \
+        logWarn("[skip] Failed to skip %d bytes at offset %zu\n", count, reader->cursor); \
+        return -1; \
+    }
 
 #endif
