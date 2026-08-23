@@ -2305,6 +2305,35 @@ const _: () = {
 };
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct FilterEffect {
+    pub present: bool,
+    pub name: *const ::std::os::raw::c_char,
+    pub value: *const ::std::os::raw::c_char,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of FilterEffect"][::std::mem::size_of::<FilterEffect>() - 24usize];
+    ["Alignment of FilterEffect"][::std::mem::align_of::<FilterEffect>() - 8usize];
+    ["Offset of field: FilterEffect::present"]
+        [::std::mem::offset_of!(FilterEffect, present) - 0usize];
+    ["Offset of field: FilterEffect::name"][::std::mem::offset_of!(FilterEffect, name) - 8usize];
+    ["Offset of field: FilterEffect::value"][::std::mem::offset_of!(FilterEffect, value) - 16usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct FedsChunk {
+    pub count: u32,
+    pub effects: *mut FilterEffect,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of FedsChunk"][::std::mem::size_of::<FedsChunk>() - 16usize];
+    ["Alignment of FedsChunk"][::std::mem::align_of::<FedsChunk>() - 8usize];
+    ["Offset of field: FedsChunk::count"][::std::mem::offset_of!(FedsChunk, count) - 0usize];
+    ["Offset of field: FedsChunk::effects"][::std::mem::offset_of!(FedsChunk, effects) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct StrgChunk {
     pub count: u32,
     pub strings: *mut *const ::std::os::raw::c_char,
@@ -2540,6 +2569,7 @@ pub struct DataWin {
     pub objt: ObjtChunk,
     pub room: RoomChunk,
     pub acrv: AcrvChunk,
+    pub feds: FedsChunk,
     pub tgin: TginChunk,
     pub strg: StrgChunk,
     pub txtr: TxtrChunk,
@@ -2553,7 +2583,7 @@ pub struct DataWin {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 792usize];
+    ["Size of DataWin"][::std::mem::size_of::<DataWin>() - 808usize];
     ["Alignment of DataWin"][::std::mem::align_of::<DataWin>() - 8usize];
     ["Offset of field: DataWin::file_data"][::std::mem::offset_of!(DataWin, file_data) - 0usize];
     ["Offset of field: DataWin::file_size"][::std::mem::offset_of!(DataWin, file_size) - 8usize];
@@ -2580,22 +2610,23 @@ const _: () = {
     ["Offset of field: DataWin::objt"][::std::mem::offset_of!(DataWin, objt) - 632usize];
     ["Offset of field: DataWin::room"][::std::mem::offset_of!(DataWin, room) - 648usize];
     ["Offset of field: DataWin::acrv"][::std::mem::offset_of!(DataWin, acrv) - 664usize];
-    ["Offset of field: DataWin::tgin"][::std::mem::offset_of!(DataWin, tgin) - 696usize];
-    ["Offset of field: DataWin::strg"][::std::mem::offset_of!(DataWin, strg) - 712usize];
-    ["Offset of field: DataWin::txtr"][::std::mem::offset_of!(DataWin, txtr) - 728usize];
-    ["Offset of field: DataWin::audo"][::std::mem::offset_of!(DataWin, audo) - 744usize];
+    ["Offset of field: DataWin::feds"][::std::mem::offset_of!(DataWin, feds) - 696usize];
+    ["Offset of field: DataWin::tgin"][::std::mem::offset_of!(DataWin, tgin) - 712usize];
+    ["Offset of field: DataWin::strg"][::std::mem::offset_of!(DataWin, strg) - 728usize];
+    ["Offset of field: DataWin::txtr"][::std::mem::offset_of!(DataWin, txtr) - 744usize];
+    ["Offset of field: DataWin::audo"][::std::mem::offset_of!(DataWin, audo) - 760usize];
     ["Offset of field: DataWin::detectedFormat"]
-        [::std::mem::offset_of!(DataWin, detectedFormat) - 760usize];
+        [::std::mem::offset_of!(DataWin, detectedFormat) - 776usize];
     ["Offset of field: DataWin::mappedFile"]
-        [::std::mem::offset_of!(DataWin, mappedFile) - 776usize];
+        [::std::mem::offset_of!(DataWin, mappedFile) - 792usize];
     ["Offset of field: DataWin::lazyLoadRooms"]
-        [::std::mem::offset_of!(DataWin, lazyLoadRooms) - 784usize];
+        [::std::mem::offset_of!(DataWin, lazyLoadRooms) - 800usize];
     ["Offset of field: DataWin::lazyLoadTextures"]
-        [::std::mem::offset_of!(DataWin, lazyLoadTextures) - 785usize];
+        [::std::mem::offset_of!(DataWin, lazyLoadTextures) - 801usize];
     ["Offset of field: DataWin::lazyLoadAudio"]
-        [::std::mem::offset_of!(DataWin, lazyLoadAudio) - 786usize];
+        [::std::mem::offset_of!(DataWin, lazyLoadAudio) - 802usize];
     ["Offset of field: DataWin::initialized"]
-        [::std::mem::offset_of!(DataWin, initialized) - 787usize];
+        [::std::mem::offset_of!(DataWin, initialized) - 803usize];
 };
 unsafe extern "C" {
     pub fn TextureDecode_decodeToRgba(
@@ -2653,6 +2684,7 @@ pub struct DataWinParserOptions {
     pub parseTxtr: bool,
     pub parseAudo: bool,
     pub parseAcrv: bool,
+    pub parseFeds: bool,
     pub skipLoadingPreciseMasksForNonPreciseSprites: bool,
     pub lazyLoadRooms: bool,
     pub lazyLoadTextures: bool,
@@ -2724,17 +2756,19 @@ const _: () = {
         [::std::mem::offset_of!(DataWinParserOptions, parseAudo) - 23usize];
     ["Offset of field: DataWinParserOptions::parseAcrv"]
         [::std::mem::offset_of!(DataWinParserOptions, parseAcrv) - 24usize];
+    ["Offset of field: DataWinParserOptions::parseFeds"]
+        [::std::mem::offset_of!(DataWinParserOptions, parseFeds) - 25usize];
     ["Offset of field: DataWinParserOptions::skipLoadingPreciseMasksForNonPreciseSprites"][::std::mem::offset_of!(
         DataWinParserOptions,
         skipLoadingPreciseMasksForNonPreciseSprites
     )
-        - 25usize];
+        - 26usize];
     ["Offset of field: DataWinParserOptions::lazyLoadRooms"]
-        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadRooms) - 26usize];
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadRooms) - 27usize];
     ["Offset of field: DataWinParserOptions::lazyLoadTextures"]
-        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadTextures) - 27usize];
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadTextures) - 28usize];
     ["Offset of field: DataWinParserOptions::lazyLoadAudio"]
-        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadAudio) - 28usize];
+        [::std::mem::offset_of!(DataWinParserOptions, lazyLoadAudio) - 29usize];
     ["Offset of field: DataWinParserOptions::eagerlyLoadedRooms"]
         [::std::mem::offset_of!(DataWinParserOptions, eagerlyLoadedRooms) - 32usize];
     ["Offset of field: DataWinParserOptions::loadType"]

@@ -23,6 +23,7 @@ void TMLN_Print(const TmlnChunk *t);
 void TPAG_Print(const TpagChunk *t);
 void OBJT_Print(const ObjtChunk *o);
 void ROOM_Print(const RoomChunk *r);
+void FEDS_Print(const FedsChunk *f);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -55,6 +56,7 @@ int main(int argc, char **argv) {
     bool printTpag = false;
     bool printObjt = false;
     bool printRoom = false;
+    bool printFeds = false;
 
     for (int i = 1; i < argc; i++) {
         const char *arg = argv[i];
@@ -86,6 +88,7 @@ int main(int argc, char **argv) {
                 printTpag = true;
                 printObjt = true;
                 printRoom = true;
+                printFeds = true;
             } else if (strcmp(name, "gen8") == 0) {
                 printGen8 = true;
             } else if (strcmp(name, "optn") == 0) {
@@ -122,6 +125,8 @@ int main(int argc, char **argv) {
                 printObjt = true;
             } else if (strcmp(name, "room") == 0) {
                 printRoom = true;
+            } else if (strcmp(name, "feds") == 0) {
+                printFeds = true;
             } else {
                 fprintf(stderr, "unknown print target: %s\n", name);
                 return 1;
@@ -183,6 +188,7 @@ int main(int argc, char **argv) {
     if (printTpag) TPAG_Print(&dw.tpag);
     if (printObjt) OBJT_Print(&dw.objt);
     if (printRoom) ROOM_Print(&dw.room);
+    if (printFeds) FEDS_Print(&dw.feds);
 
     DataWin_free(&dw);
     return 0;
@@ -1241,6 +1247,18 @@ void ROOM_Print(const RoomChunk *r) {
                        layer->visible ? "true" : "false");
             }
         }
+    }
+}
+
+void FEDS_Print(const FedsChunk *f) {
+    printf("FEDS:\n");
+    printf("  count: %" PRIu32 "\n", f->count);
+    for (uint32_t i = 0; i < f->count; ++i) {
+        const FilterEffect *effect = &f->effects[i];
+        printf("  [%" PRIu32 "] name=%s value=%s\n",
+            i,
+            effect->name ? effect->name : "(null)",
+            effect->value ? effect->value : "(null)");
     }
 }
 

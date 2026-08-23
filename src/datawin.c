@@ -39,6 +39,7 @@ static void DataWin_reset(DataWin *dw) {
     memset(&dw->objt, 0, sizeof(dw->objt));
     memset(&dw->room, 0, sizeof(dw->room));
     memset(&dw->acrv, 0, sizeof(dw->acrv));
+    memset(&dw->feds, 0, sizeof(dw->feds));
     memset(&dw->tgin, 0, sizeof(dw->tgin));
     memset(&dw->strg, 0, sizeof(dw->strg));
     memset(&dw->txtr, 0, sizeof(dw->txtr));
@@ -84,6 +85,7 @@ void DataWin_initParserOptions(DataWinParserOptions *options) {
     options->parseTxtr = true;
     options->parseAudo = true;
     options->parseAcrv = true;
+    options->parseFeds = true;
     options->loadType = DATAWINLOADTYPE_LOAD_PER_CHUNK;
 }
 
@@ -249,6 +251,7 @@ int DataWin_parseWithOptions(DataWin *dw, const DataWinParserOptions *options) {
     parse(Txtr, TXTR);
     parse(Audo, AUDO);
     parse(Acrv, ACRV);
+    parse(Feds, FEDS);
 
     if (effective.progressCallback != NULL && totalChunks > 0 && parsedChunkCount < totalChunks) {
         DataWin_emitProgress(dw, &effective, "DONE", totalChunks - 1, totalChunks);
@@ -359,6 +362,10 @@ int DataWin_free(DataWin *dw) {
     }
     if (ACRV_free(&dw->acrv)) {
         logWarn("[DataWin_free] Failed to free ACRV chunk\n");
+        result = -1;
+    }
+    if (FEDS_free(&dw->feds)) {
+        logWarn("[DataWin_free] Failed to free FEDS chunk\n");
         result = -1;
     }
     if (TGIN_free(&dw->tgin)) {

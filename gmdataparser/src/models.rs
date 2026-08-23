@@ -567,6 +567,25 @@ pub fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
                 });
             }
         }
+        "FEDS" => {
+            let count = dw.feds.count as usize;
+            if count == 0 || dw.feds.effects.is_null() {
+                return items;
+            }
+            let Some(effects) = checked_ptr_slice(dw.feds.effects, count) else {
+                return items;
+            };
+            for (idx, effect) in effects.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "present", effect.present);
+                push_field(&mut fields, "name", cstr_or_null(effect.name));
+                push_field(&mut fields, "value", cstr_or_null(effect.value));
+                items.push(ChunkItem {
+                    name: item_label(&cstr_or_null(effect.name), idx),
+                    fields,
+                });
+            }
+        }
         "STRG" => {
             let count = dw.strg.count as usize;
             if count == 0 || dw.strg.strings.is_null() {
@@ -580,6 +599,37 @@ pub fn build_pointer_table_items(name: &str, dw: &DataWin) -> Vec<ChunkItem> {
                 push_field(&mut fields, "value", cstr_or_null(*string));
                 items.push(ChunkItem {
                     name: format!("String {}", idx),
+                    fields,
+                });
+            }
+        }
+        "TGIN" => {
+            let count = dw.tgin.count as usize;
+            if count == 0 || dw.tgin.groups.is_null() {
+                return items;
+            }
+            let Some(groups) = checked_ptr_slice(dw.tgin.groups, count) else {
+                return items;
+            };
+            for (idx, group) in groups.iter().enumerate() {
+                let mut fields = Vec::new();
+                push_field(&mut fields, "present", group.present);
+                push_field(&mut fields, "name", cstr_or_null(group.name));
+                push_field(&mut fields, "directory", cstr_or_null(group.directory));
+                push_field(&mut fields, "extension", cstr_or_null(group.extension));
+                push_field(&mut fields, "loadType", group.loadType);
+                push_field(&mut fields, "texturePageCount", group.texturePageCount);
+                push_field(&mut fields, "spriteCount", group.spriteCount);
+                push_field(&mut fields, "spineSpriteCount", group.spineSpriteCount);
+                push_field(&mut fields, "fontCount", group.fontCount);
+                push_field(&mut fields, "tileSetCount", group.tileSetCount);
+                add_count_field(&mut fields, "texturePages", group.texturePages as *mut std::ffi::c_void, group.texturePageCount as usize);
+                add_count_field(&mut fields, "sprites", group.sprites as *mut std::ffi::c_void, group.spriteCount as usize);
+                add_count_field(&mut fields, "spineSprites", group.spineSprites as *mut std::ffi::c_void, group.spineSpriteCount as usize);
+                add_count_field(&mut fields, "fonts", group.fonts as *mut std::ffi::c_void, group.fontCount as usize);
+                add_count_field(&mut fields, "tilesets", group.tilesets as *mut std::ffi::c_void, group.tileSetCount as usize);
+                items.push(ChunkItem {
+                    name: item_label(&cstr_or_null(group.name), idx),
                     fields,
                 });
             }
@@ -796,10 +846,20 @@ pub fn build_chunk_fields(name: &str, dw: &DataWin) -> Vec<ChunkField> {
             push_field(&mut fields, "allChannelsCount", a.allChannelsCount);
             add_count_field(&mut fields, "allChannels", a.allChannels as *mut std::ffi::c_void, a.allChannelsCount as usize);
         }
+        "FEDS" => {
+            let f = &dw.feds;
+            push_field(&mut fields, "count", f.count);
+            add_count_field(&mut fields, "effects", f.effects as *mut std::ffi::c_void, f.count as usize);
+        }
         "STRG" => {
             let s = &dw.strg;
             push_field(&mut fields, "count", s.count);
             add_count_field(&mut fields, "strings", s.strings as *mut std::ffi::c_void, s.count as usize);
+        }
+        "TGIN" => {
+            let t = &dw.tgin;
+            push_field(&mut fields, "count", t.count);
+            add_count_field(&mut fields, "groups", t.groups as *mut std::ffi::c_void, t.count as usize);
         }
         "TXTR" => {
             let t = &dw.txtr;

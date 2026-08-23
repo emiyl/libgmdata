@@ -72,6 +72,9 @@ int TGIN_free(TginChunk *t);
 int ACRV_parse(DataWin *dw);
 int ACRV_free(AcrvChunk *a);
 
+int FEDS_parse(DataWin *dw);
+int FEDS_free(FedsChunk *f);
+
 int TXTR_parse(DataWin *dw);
 int TXTR_free(TxtrChunk *t);
 

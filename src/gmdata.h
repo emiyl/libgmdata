@@ -783,6 +783,17 @@ typedef struct {
 } AcrvChunk;
 
 typedef struct {
+    bool present;
+    const char* name;
+    const char* value;
+} FilterEffect;
+
+typedef struct {
+    uint32_t count;
+    FilterEffect* effects;
+} FedsChunk;
+
+typedef struct {
     uint32_t count;
     const char** strings;
 } StrgChunk;
@@ -886,6 +897,7 @@ typedef struct {
     ObjtChunk objt;
     RoomChunk room;
     AcrvChunk acrv;
+    FedsChunk feds;
     TginChunk tgin;
     StrgChunk strg;
     TxtrChunk txtr;
@@ -939,6 +951,7 @@ typedef struct {
     bool parseTxtr;
     bool parseAudo;
     bool parseAcrv;
+    bool parseFeds;
     bool skipLoadingPreciseMasksForNonPreciseSprites;
     bool lazyLoadRooms;
     bool lazyLoadTextures;
