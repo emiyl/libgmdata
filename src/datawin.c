@@ -457,6 +457,14 @@ int DataWin_free(DataWin *dw) {
 
 bool DataWin_isVersionAtLeast(const DataWin* dw, uint32_t major, uint32_t minor, uint32_t release, uint32_t build) {
     const DetectedFormat* f = &dw->detectedFormat;
+
+    const bool current_is_unset =
+        f->major == 0 && f->minor == 0 && f->release == 0 && f->build == 0;
+
+    if (current_is_unset) {
+        return major == 0 && minor == 0 && release == 0 && build == 0;
+    }
+
     if (f->major != major) return f->major > major;
     if (f->minor != minor) return f->minor > minor;
     if (f->release != release) return f->release > release;
