@@ -10,7 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+
+#ifdef MULTITHREAD
 #include <pthread.h>
+#endif
 
 static void DataWin_reset(DataWin *dw) {
     if (dw == NULL) {
@@ -154,6 +157,7 @@ typedef struct {
     int status;
 } DataWinChunkParseTask;
 
+#ifdef MULTITHREAD
 static void *DataWin_chunkParseTask_worker(void *arg) {
     DataWinChunkParseTask *task = (DataWinChunkParseTask *)arg;
     if (task == NULL) {
@@ -218,6 +222,25 @@ static int DataWin_parseChunkTasksParallel(
     free(runtime);
     return 0;
 }
+#else
+static int DataWin_parseChunkTasksParallel(
+    DataWin *dw,
+    const DataWinChunkParseTask *tasks,
+    size_t taskCount
+) {
+    if (dw == NULL || tasks == NULL || taskCount == 0U) {
+        return 0;
+    }
+
+    for (size_t i = 0; i < taskCount; ++i) {
+        if (tasks[i].parser(dw) != 0) {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+#endif
 
 int DataWin_loadFile(DataWin *dw, const char *path) {
     if (dw == NULL || path == NULL) {
