@@ -22,35 +22,6 @@ int SOND_parse(DataWin *dw) {
         free(ptrs);
         return 0;
     }
-
-    if ( // Data version is between 2023.2.0.0 and 2024.6.0.0 (exclusive)
-        DataWin_isVersionAtLeast(dw, 2023, 2, 0, 0) &&
-        !DataWin_isVersionAtLeast(dw, 2024, 6, 0, 0)
-    ) {
-        uint32_t soundPtrs[2];
-        uint32_t soundCount = 0;
-        repeat(s->count, i) {
-            if (ptrs[i] == 0) continue;
-            soundPtrs[soundCount++] = ptrs[i];
-            if (soundCount >= 2) break;
-        }
-
-        if (soundCount > 1) {
-            if (soundPtrs[0] + (4 * 9) == soundPtrs[1] - 4) {
-                DataWin_bumpVersionTo(dw, 2024, 6, 0, 0);
-            }
-        } else if (soundCount == 1) {
-            size_t savedPos = reader.cursor;
-            size_t probe = (size_t) (soundPtrs[0] + (4 * 9));
-            assert((probe % 16) != 4);
-            Reader_seek(&reader, probe);
-            uint32_t nextPtr;
-            if ((Reader_readUInt32(&reader, &nextPtr) == 0) && nextPtr == 0) {
-                DataWin_bumpVersionTo(dw, 2024, 6, 0, 0);
-            }
-            Reader_seek(&reader, savedPos);
-        }
-    }
     
     Reader_parsePointerTable(
         &reader, dw,

@@ -30,49 +30,6 @@ int OBJT_parse(DataWin *dw) {
     }
 
     logDebug("[OBJT_parse] Parsing %u game objects...\n", b->count);
-
-    // Detect GMS 2022.5+ by probing the first game object's event list structure.
-    if (DataWin_isVersionAtLeast(dw, 2, 3, 0, 0) && !DataWin_isVersionAtLeast(dw, 2022, 5, 0, 0)) {
-        uint32_t probePtr = 0;
-        repeat(b->count, i) {
-            if (ptrs[i] != 0) {
-                probePtr = ptrs[i];
-                break;
-            }
-        }
-        if (probePtr != 0) {
-            // Skip the 16 fixed uint32 header fields (name..angularDamping) to reach physicsVertexCount.
-            Reader_seek(reader, probePtr + 16 * 4);
-            
-            int32_t vertexCount;
-            read(&vertexCount, Int32);
-
-            if (vertexCount >= 0) {
-                // Skip friction + awake + kinematic (12 bytes) and physics vertices (8 bytes each).
-                uint32_t skipCount = 12 + vertexCount * 8;
-                uint32_t newLocation = reader->cursor + skipCount;
-                bool isOldFormat = false;
-                if (newLocation < reader->size) {
-                    Reader_skip(reader, skipCount);
-                    uint32_t eventTypeCount;
-                    read(&eventTypeCount, UInt32);
-                    read(&eventTypeCount, UInt32);
-                    if (eventTypeCount == OBJT_EVENT_TYPE_COUNT) {
-                        uint32_t firstSubEventPtr;
-                        read(&firstSubEventPtr, UInt32);
-                        uint32_t currentAbsPos = reader->cursor;
-                        // The remaining 14 outer-list pointers sit between here and the first sub-event list.
-                        if (firstSubEventPtr == currentAbsPos + 14 * 4) {
-                            isOldFormat = true;
-                        }
-                    }
-                }
-                if (!isOldFormat) {
-                    DataWin_bumpVersionTo(dw, 2022, 5, 0, 0);
-                }
-            }
-        }
-    }
     
     int result = Reader_parsePointerTable(
         reader, dw,

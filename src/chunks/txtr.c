@@ -83,11 +83,9 @@ int TXTR_parse(DataWin *dw) {
     if (t->count >= 2 && args.hasGeneratedMips && !args.has2022_9 && ptrs[0] != 0 && ptrs[1] != 0) {
         uint32_t diff = ptrs[1] - ptrs[0];
         if (diff == 28) {
-            DataWin_bumpVersionTo(dw, 2022, 9, 0, 0);
             args.has2022_3 = true;
             args.has2022_9 = true;
         } else if (diff == 16 && !args.has2022_3) {
-            DataWin_bumpVersionTo(dw, 2022, 3, 0, 0);
             args.has2022_3 = true;
         }
     }

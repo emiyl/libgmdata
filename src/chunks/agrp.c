@@ -23,41 +23,6 @@ int AGRP_parse(DataWin *dw) {
         free(ptrs);
         return 0; // Success
     }
-
-    // GM 2024.14+ added a "path" parameter for each AudioGroup
-    // To detect it, we'll check if the difference between two pointers is 8 (two int32)
-    // We CAN'T figure out if there aren't at least two AudioGroups, but for any meaningful purposes any game that has external AudioGroups WILL have
-    // at least two entries, one for the default AudioGroup and another for the external AudioGroup
-    if (DataWin_isVersionAtLeast(dw, 2024, 13, 0, 0)) {
-        if (a->count >= 2) {
-            uint32_t diff = ptrs[1] - ptrs[0];
-
-            if (diff >= 8) {
-                DataWin_bumpVersionTo(dw, 2024, 14, 0, 0);
-            }
-        } else if (a->count == 1) {
-            // If there's only one entry, we CAN'T figure out easily based on the pointer diffs
-            // But here's the trick: We can read it twice, if the path is null for the FIRST audiogroup, then it is NOT 2024.14
-            if (ptrs[0] == 0) {
-                // Somehow in a empty GameMaker 2026.0.0.23 game the pointer can be 0 even though it has one audio group...?
-                // If that's the case, we'll just bail out
-                free(ptrs);
-                a->audioGroups = NULL;
-                a->count = 0;
-                return 0;
-            }
-
-            Reader_seek(&reader, ptrs[0]);
-            const char* name;
-            const char* path;
-            Reader_readString(&reader, dw, &name);
-            Reader_readString(&reader, dw, &path);
-
-            if (strcmp(name, "audiogroup_default") == 0 && path != NULL) {
-                DataWin_bumpVersionTo(dw, 2024, 14, 0, 0);
-            }
-        }
-    }
     
     int result = Reader_parsePointerTable(
         &reader, dw,

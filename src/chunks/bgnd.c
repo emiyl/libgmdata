@@ -22,45 +22,6 @@ int BGND_parse(DataWin *dw) {
         free(ptrs);
         return 0;
     }
-
-    // GM 2024.14.1 added tile separation parameters for each background
-    // To detect it, we'll check if the background's end position is at the chunks end position (if there's only one background) or the start of the next background
-    // If it isn't at either of those, then that means it is 2024.14.1+
-    if (DataWin_isVersionAtLeast(dw, 2024, 13, 0, 0) && !DataWin_isVersionAtLeast(dw, 2024, 14, 1, 0)) {
-        repeat(b->count, i) {
-            if (ptrs[i] == 0) continue;
-
-            // ptrs[] entries are already relative to the start of the BGND chunk payload,
-            // not absolute file offsets. Mix them with chunk.offset and you end up with
-            // bogus addresses that exceed the file buffer during the version probe.
-            Reader_seek(&reader, ptrs[i] + (11 * 4));
-            uint32_t itemsPerTileCount, tileCount;
-            Reader_readUInt32(&reader, &itemsPerTileCount);
-            Reader_readUInt32(&reader, &tileCount);
-
-            // Get what might be the end position to compare it with the actual end position
-            size_t tpos = ptrs[i] + (16 * 4) + (itemsPerTileCount * tileCount * 4);
-            if (b->count >= 2 && i < b->count - 1) {
-                // Next thing at end position is a background: use chunk-local offsets here,
-                // because all pointer-table entries are relative to the BGND payload start.
-                if ((tpos % 8) != 0) tpos += 8 - (tpos % 8);
-
-                if (tpos != ptrs[i + 1]) {
-                    DataWin_bumpVersionTo(dw, 2024, 14, 1, 0);
-                    break;
-                }
-            }
-            else {
-                // Next thing at end position is the end of the chunk payload, not the absolute file end.
-                if ((tpos % 16) != 0) tpos += 16 - (tpos % 16);
-
-                if (tpos != (size_t)reader.size) {
-                    DataWin_bumpVersionTo(dw, 2024, 14, 1, 0);
-                    break;
-                }
-            }
-        }
-    }
     
     int result = Reader_parsePointerTable(
         &reader, dw,

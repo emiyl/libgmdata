@@ -21,8 +21,8 @@ int FUNC_parse(DataWin *dw) {
     }
 
     const uint8_t *base = dw->file_data + chunk.offset;
-    Reader reader;
-    Reader_init(&reader, base, chunk.length, chunk.offset, "FUNC");
+    Reader re; Reader* reader = &re;
+    Reader_init(reader, base, chunk.length, chunk.offset, "FUNC");
 
     if (dw->gen8.wadVersion <= 14) {
         f->functionCount = chunk.length / 12U;
@@ -35,7 +35,7 @@ int FUNC_parse(DataWin *dw) {
 
         f->functions = (Function *)safeMalloc(f->functionCount * sizeof(Function));
         repeat(f->functionCount, i) {
-            if (Function_parse(&reader, dw, &f->functions[i]) != 0) {
+            if (Function_parse(reader, dw, &f->functions[i]) != 0) {
                 FUNC_free(f);
                 return -1;
             }
@@ -45,43 +45,11 @@ int FUNC_parse(DataWin *dw) {
         return 0;
     }
 
-    size_t funcChunkStart = reader.cursor;
-    size_t funcChunkEnd = funcChunkStart + chunk.length;
-    if (!DataWin_isVersionAtLeast(dw, 2024, 8, 0, 0) && chunk.length != 0) {
-        uint32_t probeCount = 0;
-        if (Reader_readUInt32(&reader, &probeCount) != 0) {
-            return -1;
-        }
-        size_t afterFunctions = reader.cursor + (size_t)probeCount * 12U;
-        bool is2024_8 = false;
-        if (afterFunctions == funcChunkEnd) {
-            is2024_8 = true;
-        } else if (funcChunkEnd > afterFunctions) {
-            Reader_seek(&reader, afterFunctions);
-            int paddingBytesRead = 0;
-            bool onlyPadding = true;
-            while ((reader.cursor & 15U) != 0U) {
-                if (reader.cursor >= funcChunkEnd || Reader_readUInt8(&reader, (uint8_t *)&(uint8_t){0}) != 0) {
-                    onlyPadding = false;
-                    break;
-                }
-                paddingBytesRead++;
-            }
-            if (onlyPadding && reader.cursor == funcChunkEnd && (paddingBytesRead < 4 || dw->code.count > 0)) {
-                is2024_8 = true;
-            }
-        }
-        if (is2024_8) {
-            DataWin_bumpVersionTo(dw, 2024, 8, 0, 0);
-        }
-        Reader_seek(&reader, funcChunkStart);
-    }
-
-    if (Reader_readUInt32(&reader, &f->functionCount) != 0) return -1;
+    read(&f->functionCount, UInt32);
     if (f->functionCount > 0) {
         f->functions = (Function *)safeMalloc(f->functionCount * sizeof(Function));
         repeat(f->functionCount, i) {
-            if (Function_parse(&reader, dw, &f->functions[i]) != 0) {
+            if (Function_parse(reader, dw, &f->functions[i]) != 0) {
                 FUNC_free(f);
                 return -1;
             }
@@ -96,11 +64,11 @@ int FUNC_parse(DataWin *dw) {
         return 0;
     }
 
-    if (Reader_readUInt32(&reader, &f->codeLocalsCount) != 0) return -1;
+    read(&f->codeLocalsCount, UInt32);
     if (f->codeLocalsCount > 0) {
         f->codeLocals = (CodeLocals *)safeMalloc(f->codeLocalsCount * sizeof(CodeLocals));
         repeat(f->codeLocalsCount, i) {
-            if (CodeLocals_parse(&reader, dw, &f->codeLocals[i]) != 0) {
+            if (CodeLocals_parse(reader, dw, &f->codeLocals[i]) != 0) {
                 FUNC_free(f);
                 return -1;
             }
