@@ -39,7 +39,7 @@ int VARI_parse(DataWin *dw) {
             ptrs[i] = (uint32_t)(i * 12U);
         }
 
-        int result = Reader_parsePointerTableParallel(
+        int result = Reader_parsePointerTable(
             reader, dw,
             ptrs, v->variableCount,
             (void **)&v->variables, sizeof(Variable),

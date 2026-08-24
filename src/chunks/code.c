@@ -39,7 +39,7 @@ int CODE_parse(DataWin *dw) {
     }
 
     bool oldFormat = dw->gen8.wadVersion <= 14;
-    if (Reader_parsePointerTableParallel(
+    if (Reader_parsePointerTable(
         &reader, dw,
         codePtrs, codeCount,
         (void **)&c->entries, sizeof(CodeEntry),
