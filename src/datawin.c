@@ -15,49 +15,54 @@
 #include <pthread.h>
 #endif
 
-static void DataWin_reset(DataWin *dw) {
+static int DataWin_reset(DataWin *dw) {
     if (dw == NULL) {
-        return;
+        logError("DataWin_reset: dw is NULL\n");
+        return -1;
     }
 
     string_table_free(&dw->strings);
     chunk_table_free(&dw->chunks);
-    memset(&dw->gen8, 0, sizeof(dw->gen8));
-    memset(&dw->optn, 0, sizeof(dw->optn));
-    memset(&dw->lang, 0, sizeof(dw->lang));
-    memset(&dw->extn, 0, sizeof(dw->extn));
-    memset(&dw->sond, 0, sizeof(dw->sond));
-    memset(&dw->agrp, 0, sizeof(dw->agrp));
-    memset(&dw->sprt, 0, sizeof(dw->sprt));
-    memset(&dw->bgnd, 0, sizeof(dw->bgnd));
-    memset(&dw->tpag, 0, sizeof(dw->tpag));
-    memset(&dw->path, 0, sizeof(dw->path));
-    memset(&dw->scpt, 0, sizeof(dw->scpt));
-    memset(&dw->glob, 0, sizeof(dw->glob));
-    memset(&dw->code, 0, sizeof(dw->code));
-    memset(&dw->vari, 0, sizeof(dw->vari));
-    memset(&dw->func, 0, sizeof(dw->func));
-    memset(&dw->shdr, 0, sizeof(dw->shdr));
-    memset(&dw->font, 0, sizeof(dw->font));
-    memset(&dw->tmln, 0, sizeof(dw->tmln));
-    memset(&dw->objt, 0, sizeof(dw->objt));
-    memset(&dw->room, 0, sizeof(dw->room));
-    memset(&dw->acrv, 0, sizeof(dw->acrv));
-    memset(&dw->feds, 0, sizeof(dw->feds));
-    memset(&dw->feat, 0, sizeof(dw->feat));
-    memset(&dw->seqn, 0, sizeof(dw->seqn));
-    memset(&dw->tags, 0, sizeof(dw->tags));
-    memset(&dw->embi, 0, sizeof(dw->embi));
-    memset(&dw->psem, 0, sizeof(dw->psem));
-    memset(&dw->psys, 0, sizeof(dw->psys));
-    memset(&dw->gmen, 0, sizeof(dw->gmen));
-    memset(&dw->dafl, 0, sizeof(dw->dafl));
-    memset(&dw->uilr, 0, sizeof(dw->uilr));
-    memset(&dw->stat, 0, sizeof(dw->stat));
-    memset(&dw->tgin, 0, sizeof(dw->tgin));
-    memset(&dw->strg, 0, sizeof(dw->strg));
-    memset(&dw->txtr, 0, sizeof(dw->txtr));
-    memset(&dw->audo, 0, sizeof(dw->audo));
+
+    #define reset_chunk(chunk, option) \
+        logInfo("DataWin_reset: resetting chunk " #chunk "\n"); \
+        memset(&dw->chunk, 0, sizeof(dw->chunk));
+    
+    reset_chunk(optn, Optn);
+    reset_chunk(lang, Lang);
+    reset_chunk(extn, Extn);
+    reset_chunk(sond, Sond);
+    reset_chunk(agrp, Agrp);
+    reset_chunk(sprt, Sprt);
+    reset_chunk(bgnd, Bgnd);
+    reset_chunk(tpag, Tpag);
+    reset_chunk(path, Path);
+    reset_chunk(scpt, Scpt);
+    reset_chunk(glob, Glob);
+    reset_chunk(code, Code);
+    reset_chunk(vari, Vari);
+    reset_chunk(func, Func);
+    reset_chunk(shdr, Shdr);
+    reset_chunk(font, Font);
+    reset_chunk(tmln, Tmln);
+    reset_chunk(objt, Objt);
+    reset_chunk(room, Room);
+    reset_chunk(acrv, Acrv);
+    reset_chunk(feds, Feds);
+    reset_chunk(feat, Feat);
+    reset_chunk(seqn, Seqn);
+    reset_chunk(tags, Tags);
+    reset_chunk(embi, Embi);
+    reset_chunk(psem, Psem);
+    reset_chunk(psys, Psys);
+    reset_chunk(gmen, Gmen);
+    reset_chunk(dafl, Dafl);
+    reset_chunk(uilr, Uilr);
+    reset_chunk(stat, Stat);
+    reset_chunk(tgin, Tgin);
+    reset_chunk(strg, Strg);
+    reset_chunk(txtr, Txtr);
+    reset_chunk(audo, Audo);
     memset(&dw->detectedFormat, 0, sizeof(dw->detectedFormat));
     dw->mappedFile = NULL;
     dw->file_data = NULL;
@@ -67,6 +72,8 @@ static void DataWin_reset(DataWin *dw) {
     dw->lazyLoadAudio = false;
     dw->decodeTextures = false;
     dw->initialized = false;
+    
+    return 0;
 }
 
 void DataWin_initParserOptions(DataWinParserOptions *options) {
@@ -291,41 +298,49 @@ static int DataWin_parseChunkTasksParallel(
 
 int DataWin_loadFile(DataWin *dw, const char *path) {
     if (dw == NULL || path == NULL) {
+        logError("DataWin_loadFile: invalid arguments (dw=%p, path=%p)\n", (void *)dw, (void *)path);
         return -1;
     }
 
     if (dw->initialized || dw->file_data != NULL || dw->chunks.count != 0 || dw->strings.count != 0) {
+        logError("DataWin_loadFile: DataWin is already initialized or has data loaded. Please call DataWin_reset() before loading a new file.\n");
         DataWin_free(dw);
     }
 
     FILE *fp = fopen(path, "rb");
     if (fp == NULL) {
+        logError("DataWin_loadFile: failed to open file '%s' for reading\n", path);
         return -1;
     }
 
     if (fseek(fp, 0, SEEK_END) != 0) {
+        logError("DataWin_loadFile: failed to seek to end of file '%s'\n", path);
         fclose(fp);
         return -1;
     }
 
     long size = ftell(fp);
     if (size < 0) {
+        logError("DataWin_loadFile: failed to get file size for '%s'\n", path);
         fclose(fp);
         return -1;
     }
 
     if (fseek(fp, 0, SEEK_SET) != 0) {
+        logError("DataWin_loadFile: failed to seek to start of file '%s'\n", path);
         fclose(fp);
         return -1;
     }
 
     uint8_t *buffer = (uint8_t *)malloc((size_t)size);
     if (buffer == NULL) {
+        logError("DataWin_loadFile: failed to allocate buffer of size %ld for file '%s'\n", size, path);
         fclose(fp);
         return -1;
     }
 
     if (fread(buffer, 1, (size_t)size, fp) != (size_t)size) {
+        logError("DataWin_loadFile: failed to read %ld bytes from file '%s'\n", size, path);
         free(buffer);
         fclose(fp);
         return -1;
