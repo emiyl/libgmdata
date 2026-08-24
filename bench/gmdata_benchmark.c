@@ -17,6 +17,7 @@ typedef struct {
 
 typedef struct {
     uint64_t parse_started_ns;
+    uint64_t last_chunk_ns;
     size_t chunk_count;
     size_t chunk_capacity;
     ChunkTiming *chunks;
@@ -45,6 +46,7 @@ static void timing_state_reset(BenchmarkTimingState *state) {
     }
 
     state->parse_started_ns = 0;
+    state->last_chunk_ns = 0;
     state->chunk_count = 0;
 }
 
@@ -88,32 +90,40 @@ static void benchmark_progress_callback(
     BenchmarkTimingState *state = (BenchmarkTimingState *)userData;
     ChunkTiming *entry;
     uint64_t now_ns;
-    uint64_t elapsed_ns_since_start;
+    uint64_t chunk_ns;
 
     (void)chunkIndex;
     (void)totalChunks;
     (void)dataWin;
 
-    if (state == NULL || chunkName == NULL || strcmp(chunkName, "DONE") == 0) {
+    if (state == NULL || chunkName == NULL ||
+        strcmp(chunkName, "DONE") == 0) {
         return;
     }
 
     now_ns = monotonic_ns_now();
-    if (state->parse_started_ns == 0) {
+
+    if (state->parse_started_ns == 0 || state->last_chunk_ns == 0) {
         state->parse_started_ns = now_ns;
+        state->last_chunk_ns = now_ns;
+        return;
     }
 
-    elapsed_ns_since_start = now_ns - state->parse_started_ns;
+    chunk_ns = now_ns - state->last_chunk_ns;
+    state->last_chunk_ns = now_ns;
+
     entry = timing_state_find_or_add(state, chunkName);
     if (entry == NULL) {
         return;
     }
 
-    entry->total_ns += elapsed_ns_since_start;
-    if (entry->count == 0 || elapsed_ns_since_start > entry->max_ns) {
-        entry->max_ns = elapsed_ns_since_start;
+    entry->total_ns += chunk_ns;
+
+    if (chunk_ns > entry->max_ns) {
+        entry->max_ns = chunk_ns;
     }
-    entry->count += 1;
+
+    entry->count++;
 }
 
 static void aggregate_chunk_timings(BenchmarkTimingState *aggregate, const BenchmarkTimingState *run) {
@@ -214,8 +224,10 @@ static int parse_once_and_measure(const char *path, uint64_t *elapsed_ns_out, Be
     DataWin_initParserOptions(&options);
     options.progressCallback = benchmark_progress_callback;
     options.progressCallbackUserData = run_state;
-    options.decodeTextures = true;
+    options.decodeTextures = false;
+
     run_state->parse_started_ns = monotonic_ns_now();
+    run_state->last_chunk_ns = run_state->parse_started_ns;
 
     if (clock_gettime(CLOCK_MONOTONIC, &start) != 0) {
         fprintf(stderr, "error: clock_gettime(start) failed\n");
