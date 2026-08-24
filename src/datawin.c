@@ -25,7 +25,6 @@ static int DataWin_reset(DataWin *dw) {
     chunk_table_free(&dw->chunks);
 
     #define reset_chunk(chunk, option) \
-        logInfo("DataWin_reset: resetting chunk " #chunk "\n"); \
         memset(&dw->chunk, 0, sizeof(dw->chunk));
     
     reset_chunk(optn, Optn);

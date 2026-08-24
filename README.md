@@ -30,7 +30,7 @@ Public headers are kept under `include/` and are intended for downstream consume
 
 While other projects such as Butterscotch and UndertaleModTool have their own parsers for GameMaker data.win files, this is a library that can be used in other C/C++ projects. Based on the Butterscotch parser, it has several improvements such as wider chunk coverage, better error handling and faster parsing via multithreading.
 
-Through my benchmarks, I measured a **5x speed-up** when parsing DELTARUNE Chapter 5 using the multithreaded parser and texture decoding compared to the single-threaded parser, which is nearly identical to Butterscotch's.
+Through my benchmarks, I measured a **5x speed-up** when parsing DELTARUNE Chapter 5 using the multithreaded parser and texture decoding compared to the single-threaded parser.
 
 ## Chunk coverage
 
