@@ -41,7 +41,6 @@ install: $(LIB_TARGET)
 	install -d "$(INSTALL_LIB_DIR)" "$(INSTALL_INC_DIR)"
 	install -m 644 "$(LIB_TARGET)" "$(INSTALL_LIB_DIR)/libgmdata.a"
 	install -m 644 include/*.h "$(INSTALL_INC_DIR)/"
-	install -m 644 include/types/*.h "$(INSTALL_INC_DIR)/types/"
 
 
 $(LIB_TARGET): $(LIB_OBJS) | prepare_public_headers

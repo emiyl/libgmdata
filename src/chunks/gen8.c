@@ -9,7 +9,6 @@ int GEN8_parse(DataWin *dw) {
     if(get_chunk(dw, "GEN8", &chunk) != 0) return -1;
     if(chunk.offset + chunk.length > dw->file_size) return -1;
 
-    const bool isCompactWad8 = g->wadVersion < 8 && chunk.length <= 108;
     const uint8_t *base = dw->file_data + chunk.offset;
 
     Reader re; Reader *reader = &re;
@@ -19,6 +18,8 @@ int GEN8_parse(DataWin *dw) {
     // isDebuggerDisabled and wadVersion
     read(&g->isDebuggerDisabled, UInt8);
     read(&g->wadVersion, UInt8);
+    
+    const bool isCompactWad8 = g->wadVersion < 8 && chunk.length <= 108;
     Reader_skip(reader, 2); // padding
 
     readString(&g->fileName, dw);
